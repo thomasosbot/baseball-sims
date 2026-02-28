@@ -333,11 +333,82 @@ Custom CSS and Plotly template ("minimal" — white bg, faint gridlines, muted p
 
 ---
 
-## Next: v0.7 Full Rolling Backtest
+## v0.7 — Full 2024 Backtest Results
 
-**Status:** PENDING
+**Date:** 2026-02-28
+**Status:** Complete (2,391 games, 1,000 sims/game)
 
-Run `python scripts/backtest.py --rolling` to generate full 2024 rolling backtest with v0.7 changes (split regression scales, multiplicative PA model). Expected ~67 minutes. This will be the definitive test of whether the wider probability spread translates to better calibration and profitability over 2,400+ games.
+### Prediction Accuracy
+
+| Metric | Full (look-ahead) | Rolling (no look-ahead) | Coin flip |
+|--------|-------------------|------------------------|-----------|
+| **Brier score** | **0.2351** | **0.2451** | 0.2500 |
+| **Log loss** | 0.6626 | 0.6832 | 0.6931 |
+| **Win rate** | 52.3% | 52.3% | 50.0% |
+
+The rolling backtest (honest, no future data) beats coin-flip Brier by 0.005 — the model has real predictive signal but it's modest.
+
+### Calibration (Rolling)
+
+| Bucket | N games | Avg predicted | Actual win % |
+|--------|---------|---------------|-------------|
+| 20%-30% | 53 | 0.266 | 0.340 |
+| 30%-40% | 302 | 0.361 | 0.430 |
+| 40%-50% | 806 | 0.453 | 0.480 |
+| 50%-60% | 870 | 0.547 | 0.560 |
+| 60%-70% | 314 | 0.638 | 0.621 |
+| 70%-80% | 45 | 0.734 | 0.733 |
+| 80%-90% | 1 | 0.802 | 1.000 |
+
+Calibration is good in the 50-80% range. The 20-40% buckets show underdogs winning more than predicted — the model underestimates weak teams slightly.
+
+### Calibration (Full)
+
+| Bucket | N games | Avg predicted | Actual win % |
+|--------|---------|---------------|-------------|
+| 10%-20% | 3 | 0.169 | 0.667 |
+| 20%-30% | 77 | 0.267 | 0.286 |
+| 30%-40% | 365 | 0.359 | 0.348 |
+| 40%-50% | 723 | 0.453 | 0.472 |
+| 50%-60% | 752 | 0.546 | 0.566 |
+| 60%-70% | 394 | 0.640 | 0.683 |
+| 70%-80% | 75 | 0.736 | 0.827 |
+| 80%-90% | 2 | 0.817 | 1.000 |
+
+Full backtest is better calibrated in the low buckets but underestimates favorites in the 60-80% range (actual outcomes exceed predictions).
+
+### Betting Performance
+
+| Metric | Full (look-ahead) | Rolling (honest) |
+|--------|-------------------|-----------------|
+| **Bets placed** | 1,282 | 1,219 |
+| **Bet win rate** | 53.7% | 42.7% |
+| **Avg edge** | 9.1% | 8.8% |
+| **Avg odds** | +20 | +42 |
+| **Total staked** | $372,160 | $334,372 |
+| **ROI** | **+13.3%** | **-5.7%** |
+| **P&L** | +$49,575 | -$19,202 |
+| Home/Away bets | 404/878 | 319/900 |
+| Home win rate | 57% | 41% |
+| Away win rate | 52% | 43% |
+
+### Interpretation
+
+The full backtest (look-ahead) shows +13.3% ROI — but this is inflated because it uses end-of-season player profiles to predict all games, including early-season ones where that data wasn't available.
+
+The rolling backtest (honest, no look-ahead) shows **-5.7% ROI**. The model has real predictive power (Brier 0.2451 < 0.25) but the edge isn't large enough to overcome the vig yet. Key issues:
+
+1. **Underdog bias persists**: 900 away bets vs 319 home bets, with only 42.7% win rate. The model is still finding more "edges" on underdogs than favorites.
+2. **Early-season compression**: Rolling predictions in April/May are compressed because current-year samples are tiny and prior-year data is discounted (even with 0.70 weight).
+3. **Edge sizing**: Average edge of 8.8% should be profitable at +42 average odds, but the edges may be overestimated (the model thinks it disagrees with the market more than it actually does).
+
+### Next Steps (v0.8)
+
+- **Preseason projections** (Steamer/ZiPS) as priors instead of raw prior-year Statcast — should improve early-season predictions
+- **Lineup-order weighting** — top of order gets more PA, currently all 9 cycle equally
+- **Platoon-aware bullpen** — switch to L/R reliever based on batter hand
+- **Tighter edge threshold** — try 5% minimum instead of 3% to reduce overbet count
+- **Home/away calibration** — investigate the rolling model's underperformance on home bets
 
 ---
 
