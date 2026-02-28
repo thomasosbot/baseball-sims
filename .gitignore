@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+data/cache/
+data/raw/
+.obsidian/
+.claude/
+*.pkl
+*.pickle
+.DS_Store
