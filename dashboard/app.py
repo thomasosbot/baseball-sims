@@ -36,7 +36,7 @@ st.sidebar.title("MLB Sim Model")
 
 page = st.sidebar.radio(
     "Navigate",
-    ["Performance", "How It Works", "Predictions", "Betting", "Diagnostics"],
+    ["How It Works", "Performance", "Predictions", "Betting", "Diagnostics"],
     label_visibility="collapsed",
 )
 
