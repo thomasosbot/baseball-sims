@@ -55,7 +55,7 @@ pybaseball 2.2.7 hits a 403 error on FanGraphs' `/leaders-legacy.aspx` endpoint.
 | `markets` | `h2h` (moneyline), `totals` (over/under) |
 | `oddsFormat` | `american` |
 
-**Rate limits:** 500 requests/month on the free tier. The response header `x-requests-remaining` tells you how many are left. As of Feb 2026: ~5,100 requests remaining.
+**Rate limits:** 500 requests/month on the free tier. The response header `x-requests-remaining` tells you how many are left. Check current balance before large fetches.
 
 **Key fields in response:**
 - `home_team`, `away_team`, `commence_time`

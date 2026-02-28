@@ -311,4 +311,34 @@ Full rolling backtest needed to confirm.
 
 ---
 
+## Dashboard (v0.7)
+
+**Date:** 2026-02-28
+**Status:** Deployed
+
+Redesigned the Streamlit dashboard from 2 active pages to 5:
+
+| Page | Purpose |
+|------|---------|
+| **Performance** | Hero KPIs, cumulative P&L equity curve, monthly P&L bars, insights |
+| **How It Works** | Plain-English model explainer with illustrative charts |
+| **Predictions** | Reliability diagram (Wilson CIs), calibration residuals, Brier by month, model vs market, score-diff box plots |
+| **Betting** | ML + totals bet tables, ROI by month/side/odds-range, drawdown, Kelly distribution, team performance |
+| **Diagnostics** | Rolling vs full-season comparison, knowledge growth, profile coverage, predicted vs actual runs |
+
+Custom CSS and Plotly template ("minimal" — white bg, faint gridlines, muted professional palette). All charts from previously unused pages (`backtest_results.py`, `technical.py`) are now placed exactly once.
+
+**Live:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app)
+**GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims)
+
+---
+
+## Next: v0.7 Full Rolling Backtest
+
+**Status:** PENDING
+
+Run `python scripts/backtest.py --rolling` to generate full 2024 rolling backtest with v0.7 changes (split regression scales, multiplicative PA model). Expected ~67 minutes. This will be the definitive test of whether the wider probability spread translates to better calibration and profitability over 2,400+ games.
+
+---
+
 *Future iterations will be appended below with date, config changes, and metric deltas.*

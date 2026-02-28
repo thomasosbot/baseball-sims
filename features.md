@@ -20,7 +20,7 @@ These are the 8 mutually exclusive outcomes of every plate appearance. The simul
 ### How rates are derived
 
 1. **From Statcast** (`src/data/process.py`): aggregate pitch-level `events` column into PA outcomes per player. Gives the most granular data including platoon splits.
-2. **From FanGraphs** (`src/data/process.py:fangraphs_batting_to_rates`): fallback when Statcast data is unavailable. Derives rates from season-level counting stats.
+2. ~~From FanGraphs~~ — no longer used. pybaseball's FanGraphs endpoint is broken (403). All stats derived from Statcast.
 
 ### Platoon splits
 

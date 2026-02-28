@@ -20,7 +20,7 @@ The Odds API        →  closing lines      →  ──────────�
                                               ▼
                                           [Dashboard]
                                           Streamlit + Plotly
-                                          4-page interactive viz
+                                          5-page interactive viz
 ```
 
 ## Modules
@@ -41,7 +41,7 @@ The Odds API        →  closing lines      →  ──────────�
 | `src/betting/kelly.py` | Quarter-Kelly bet sizing with a hard cap (default 5% of bankroll). Used for both moneyline and totals. |
 | `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline and totals bets when historical odds are available. |
 | `src/backtest/metrics.py` | Brier score, log loss, ROI, CLV, calibration tables, bankroll growth tracking. |
-| `dashboard/` | Streamlit app: Overview (hero metrics, cumulative P&L, monthly P&L) and Bet Details (model vs market histogram, ML/totals bet tables). Uses Plotly for interactive charts. Run with `python3 -m streamlit run dashboard/app.py`. |
+| `dashboard/` | Streamlit app with 5 pages: **Performance** (hero KPIs, equity curve, monthly P&L), **How It Works** (plain-English model explainer with illustrative charts), **Predictions** (reliability diagram, calibration residuals, Brier by month, score-diff box plots), **Betting** (ML/totals bet tables, ROI breakdowns, drawdown, Kelly distribution, team performance), **Diagnostics** (rolling vs full comparison, knowledge growth, profile coverage, predicted vs actual runs). Custom Plotly template and CSS. Deployed at [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app). Run locally with `streamlit run dashboard/app.py`. |
 
 ## Key Decisions
 
@@ -67,9 +67,14 @@ The Odds API        →  closing lines      →  ──────────�
 | **Totals from simulation distribution** (v0.4) | `P(over) = count(total > line) / count(total ≠ line)` from the raw `total_runs_dist` array. Pushes (total == line) are excluded. More accurate than fitting a parametric distribution. |
 | **Rolling backtest with prior-year seeding** (v0.4) | `CumulativeStats` tracks running PA counts. Prior-year Statcast seeded at weight=0.5 (500 prior PA → 250 effective). Eliminates look-ahead bias. |
 
+## Deployment
+
+- **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
+- **Live dashboard:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app) (Streamlit Community Cloud, auto-deploys from `main`)
+
 ## Current Limitations (v0.7)
 
-- **Probability spread now matches market** — v0.7 smoke test std=0.108 vs market std=0.110. Full backtest needed to confirm this holds across 2,400+ games.
+- **Full rolling backtest not yet run** — v0.7 smoke test (50 games) shows std=0.108 vs market std=0.110. Full 2,400+ game backtest needed to confirm spread, calibration, and profitability.
 - **Rolling backtest early-season compression** — April/May predictions still somewhat compressed because current-year samples are tiny and prior-year data is discounted (even with 0.70 weight).
 - **No weather or umpire adjustments**.
 - **Odds matching ~76%** — Seoul Series (neutral venue) and some Sunday games miss. Date/team-name matching has edge cases.
