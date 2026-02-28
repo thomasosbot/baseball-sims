@@ -91,10 +91,8 @@ PLOTLY_TEMPLATE = "minimal"
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
-/* Hide hamburger menu and footer */
-#MainMenu {visibility: hidden;}
+/* Hide footer */
 footer {visibility: hidden;}
-header {visibility: hidden;}
 
 /* Metric cards */
 [data-testid="stMetric"] {
