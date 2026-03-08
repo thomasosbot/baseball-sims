@@ -1,5 +1,10 @@
 """
 Edge calculation: compare model win probabilities to market lines.
+
+Confidence-gated betting: raw model probabilities are shrunk toward market
+probabilities based on a game-level confidence score.  This prevents the
+model from over-betting when data is thin or when it wildly disagrees with
+the market.
 """
 
 import pandas as pd
@@ -8,24 +13,74 @@ from typing import Dict
 from src.betting.odds import american_to_decimal
 
 
+def compute_game_confidence(
+    cumulative_pitchers: int = 0,
+    model_prob: float = 0.5,
+    market_prob: float = 0.5,
+) -> float:
+    """
+    Compute a 0-1 confidence score for a single game prediction.
+
+    Components:
+      1. Season depth — more pitchers tracked → more reliable profiles.
+         Maps cumulative_pitchers from 850→1300 onto 0.2→1.0 (linear clamp).
+      2. Model-market agreement — penalise when model and market disagree on
+         the favourite (flipped favourite = low confidence).
+
+    Returns a single float in [0, 1].
+    """
+    # --- Season depth (0.2 to 1.0) ---
+    if cumulative_pitchers <= 850:
+        depth = 0.2
+    elif cumulative_pitchers >= 1300:
+        depth = 1.0
+    else:
+        depth = 0.2 + 0.8 * (cumulative_pitchers - 850) / (1300 - 850)
+
+    # --- Model-market agreement ---
+    # If both agree on the favourite, agreement = 1.0.
+    # If they disagree (one says >0.5, other says <0.5), penalise.
+    model_fav_home = model_prob >= 0.5
+    market_fav_home = market_prob >= 0.5
+    if model_fav_home == market_fav_home:
+        agreement = 1.0
+    else:
+        # Penalise proportional to how far apart they are
+        disagreement = abs(model_prob - market_prob)
+        agreement = max(0.3, 1.0 - disagreement * 2)
+
+    return depth * agreement
+
+
 def calculate_edge(
     model_prob: float,
     market_no_vig_prob: float,
     market_odds: float,
+    confidence: float = 1.0,
 ) -> Dict:
     """
     Compute the edge for a potential bet.
 
-    edge       = model_prob - market_no_vig_prob  (positive = model thinks side is undervalued)
-    ev_per_unit = model_prob * (decimal - 1) - (1 - model_prob)   (expected profit per $1 wagered)
+    When confidence < 1.0, the model probability is shrunk toward the market:
+        adjusted_prob = market + confidence * (model - market)
+    This reduces bet frequency when data is thin or the model wildly disagrees
+    with the market.
+
+    edge       = adjusted_prob - market_no_vig_prob
+    ev_per_unit = adjusted_prob * (decimal - 1) - (1 - adjusted_prob)
     """
+    # Shrink model prob toward market based on confidence
+    adjusted_prob = market_no_vig_prob + confidence * (model_prob - market_no_vig_prob)
+
     decimal = american_to_decimal(market_odds)
-    edge    = model_prob - market_no_vig_prob
-    ev      = model_prob * (decimal - 1) - (1 - model_prob)
+    edge    = adjusted_prob - market_no_vig_prob
+    ev      = adjusted_prob * (decimal - 1) - (1 - adjusted_prob)
 
     return {
         "model_prob":      model_prob,
+        "adjusted_prob":   adjusted_prob,
         "market_prob":     market_no_vig_prob,
+        "confidence":      confidence,
         "edge":            edge,
         "ev_per_unit":     ev,
         "roi_pct":         ev * 100,

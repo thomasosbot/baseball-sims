@@ -70,6 +70,7 @@ def render_betting(df: pd.DataFrame):
                 "best_home_odds", "best_away_odds",
                 "model_home_win_prob", "model_away_win_prob",
                 "bet_side", "bet_odds", "bet_edge",
+                "actual_home_score", "actual_away_score",
                 "bet_stake", "bet_profit", "bet_won",
             ]].copy()
             display.columns = [
@@ -77,8 +78,20 @@ def render_betting(df: pd.DataFrame):
                 "Home Odds", "Away Odds",
                 "Model Home%", "Model Away%",
                 "Bet Side", "Bet Odds", "Edge",
+                "Home Score", "Away Score",
                 "Stake", "Profit", "Won",
             ]
+            display["Score"] = display.apply(
+                lambda r: f"{int(r['Home Score'])}-{int(r['Away Score'])}"
+                if pd.notna(r["Home Score"]) else "—", axis=1,
+            )
+            display = display.drop(columns=["Home Score", "Away Score"])
+            # Reorder so Score comes after Edge
+            cols = display.columns.tolist()
+            cols.remove("Score")
+            edge_idx = cols.index("Edge") + 1
+            cols.insert(edge_idx, "Score")
+            display = display[cols]
             display["Date"] = display["Date"].dt.strftime("%Y-%m-%d")
             display["Home Odds"] = display["Home Odds"].apply(format_american_odds)
             display["Away Odds"] = display["Away Odds"].apply(format_american_odds)
@@ -120,6 +133,7 @@ def render_betting(df: pd.DataFrame):
                 "best_over_odds", "best_under_odds",
                 "model_over_prob", "model_under_prob",
                 "totals_bet_side", "totals_bet_odds", "totals_bet_edge",
+                "actual_home_score", "actual_away_score",
                 "totals_bet_stake", "totals_bet_profit", "totals_bet_won",
             ]].copy()
             display.columns = [
@@ -128,8 +142,26 @@ def render_betting(df: pd.DataFrame):
                 "Over Odds", "Under Odds",
                 "Model Over%", "Model Under%",
                 "Bet Side", "Bet Odds", "Edge",
+                "Home Score", "Away Score",
                 "Stake", "Profit", "Won",
             ]
+            display["Score"] = display.apply(
+                lambda r: f"{int(r['Home Score'])}-{int(r['Away Score'])}"
+                if pd.notna(r["Home Score"]) else "—", axis=1,
+            )
+            display["Actual"] = display.apply(
+                lambda r: int(r["Home Score"]) + int(r["Away Score"])
+                if pd.notna(r["Home Score"]) else "—", axis=1,
+            )
+            display = display.drop(columns=["Home Score", "Away Score"])
+            # Reorder: put Score and Actual after Edge
+            cols = display.columns.tolist()
+            cols.remove("Score")
+            cols.remove("Actual")
+            edge_idx = cols.index("Edge") + 1
+            cols.insert(edge_idx, "Score")
+            cols.insert(edge_idx + 1, "Actual")
+            display = display[cols]
             display["Date"] = display["Date"].dt.strftime("%Y-%m-%d")
             display["Line"] = display["Line"].apply(
                 lambda x: f"{x:.1f}" if pd.notna(x) else "\u2014"

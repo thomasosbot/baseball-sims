@@ -438,18 +438,37 @@ def build_closing_totals(totals_df: pd.DataFrame) -> pd.DataFrame:
     From raw historical totals odds, build one row per game using a **single
     book** (FanDuel) for consistency.  Falls back to median when FanDuel is
     missing.
+
+    Quality filters (mirroring build_closing_lines):
+      - |odds| >= 100 (American odds below ±100 are nonsensical)
+      - Per-book vig 0-12%
+      - Minimum 3 books per game
     """
     from src.betting.odds import american_to_prob, remove_vig
 
-    # Filter garbage lines
+    # Filter garbage lines: max odds cap + minimum |odds| >= 100
     clean = totals_df[
         (totals_df["over_odds"].abs() <= MAX_TOTAL_LINE_ODDS)
         & (totals_df["under_odds"].abs() <= MAX_TOTAL_LINE_ODDS)
+        & (totals_df["over_odds"].abs() >= 100)
+        & (totals_df["under_odds"].abs() >= 100)
     ].copy()
+
+    # Compute per-book implied probs and vig (same as build_closing_lines)
+    clean["_o_imp"] = clean["over_odds"].apply(american_to_prob)
+    clean["_u_imp"] = clean["under_odds"].apply(american_to_prob)
+    clean["_vig"] = clean["_o_imp"] + clean["_u_imp"] - 1.0
+
+    # Filter to coherent lines: vig should be 0-12%
+    clean = clean[(clean["_vig"] > -0.01) & (clean["_vig"] < 0.12)]
 
     records = []
 
     for (date, home, away), gdf in clean.groupby(["game_date", "home_team", "away_team"]):
+        # Minimum 3 books per game (same as moneyline filter)
+        if len(gdf) < 3:
+            continue
+
         # Use the most common total line (consensus) across books
         consensus_line = gdf["total_line"].mode().iloc[0]
         on_line = gdf[gdf["total_line"] == consensus_line]
@@ -470,9 +489,13 @@ def build_closing_totals(totals_df: pd.DataFrame) -> pd.DataFrame:
             best_under_odds = on_line["under_odds"].median()
             book_used = "consensus"
 
-        # No-vig
+        # No-vig — also validate the final pair's vig (consensus medians can
+        # produce impossible pairs when over/under medians come from different books)
         over_imp = american_to_prob(best_over_odds)
         under_imp = american_to_prob(best_under_odds)
+        final_vig = (over_imp + under_imp) - 1.0
+        if final_vig < -0.01 or final_vig > 0.12:
+            continue
         over_nv, under_nv = remove_vig(over_imp, under_imp)
 
         records.append({
@@ -486,7 +509,8 @@ def build_closing_totals(totals_df: pd.DataFrame) -> pd.DataFrame:
             "best_under_book":  book_used,
             "over_no_vig_prob": over_nv,
             "under_no_vig_prob": under_nv,
-            "totals_vig":       (over_imp + under_imp) - 1.0,
+            "totals_vig":       final_vig,
+            "n_books":          len(gdf),
         })
 
     return pd.DataFrame(records)

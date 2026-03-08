@@ -29,6 +29,7 @@ BACKTEST_END_YEAR = 2024
 KELLY_FRACTION = 0.25   # quarter Kelly — full Kelly is theoretically optimal but too aggressive in practice
 MAX_BET_FRACTION = 0.05  # hard cap: never more than 5% of bankroll on one game
 MIN_EDGE = 0.03          # minimum 3% edge (model prob vs no-vig market prob) to consider a bet
+MIN_CONFIDENCE = 0.0     # minimum game confidence to place a bet (tune via scripts/analyze_edges.py)
 
 # Regression — separate scales for batters and pitchers.
 # Pitchers are the biggest differentiator (starter faces ~21 BF) so they

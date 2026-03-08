@@ -412,4 +412,109 @@ The rolling backtest (honest, no look-ahead) shows **-5.7% ROI**. The model has 
 
 ---
 
+## v0.8 — Totals QC + Confidence-Gated Edge Detection
+
+**Date:** 2026-03-08
+**Status:** Complete (2,391 games, 1,000 sims/game)
+
+**Changes from v0.7:**
+
+1. **Totals quality controls** — `build_closing_totals()` now mirrors moneyline QC:
+   - Per-book vig filter (0-12%) — eliminates negative-vig garbage
+   - Minimum 3 books per game — eliminates thin-market consensus fallback noise
+   - Minimum |odds| >= 100 — American odds below ±100 are nonsensical
+   - Final-pair vig validation — catches impossible consensus median pairs
+   - Result: 0 negative-vig games (was 20+), 2,462 clean totals (was 2,487 with 22 garbage)
+
+2. **Confidence-gated edge detection** — raw model probabilities shrunk toward market:
+   - `adjusted_prob = market + confidence * (model - market)`
+   - `compute_game_confidence()` combines:
+     - Season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0
+     - Model-market agreement: penalises when model and market disagree on favourite
+   - Prevents overconfident early-season bets and large market disagreements
+
+3. **Kelly sizing fix** — `size_bet()` now uses `adjusted_prob` instead of raw `model_prob` for consistent sizing with edge detection
+
+4. **New analysis tool** — `scripts/analyze_edges.py` grid-searches alpha/min_edge/min_confidence on existing CSV without re-running Monte Carlo
+
+### Prediction Accuracy
+
+| Metric | v0.8 Rolling | v0.7 Rolling | Coin flip |
+|--------|-------------|-------------|-----------|
+| **Brier score** | **0.2455** | 0.2451 | 0.2500 |
+| **Log loss** | 0.6842 | 0.6832 | 0.6931 |
+| **Win rate** | 52.3% | 52.3% | 50.0% |
+
+Prediction accuracy is essentially unchanged from v0.7 — the confidence system affects betting decisions, not the underlying model probabilities.
+
+### Calibration (v0.8 Rolling)
+
+| Bucket | N games | Avg predicted | Actual win % |
+|--------|---------|---------------|-------------|
+| 10%-20% | 1 | 0.192 | 1.000 |
+| 20%-30% | 52 | 0.267 | 0.288 |
+| 30%-40% | 319 | 0.363 | 0.451 |
+| 40%-50% | 804 | 0.454 | 0.484 |
+| 50%-60% | 863 | 0.546 | 0.555 |
+| 60%-70% | 305 | 0.639 | 0.620 |
+| 70%-80% | 47 | 0.732 | 0.723 |
+
+### Betting Performance (default params: MIN_CONFIDENCE=0.0, 3% edge)
+
+| Metric | v0.8 Rolling | v0.7 Rolling |
+|--------|-------------|-------------|
+| **ML Bets placed** | 1,121 | 1,219 |
+| **ML Win rate** | 43.0% | 42.7% |
+| **ML Avg edge** | 6.6% | 8.8% |
+| **ML Avg odds** | +46 | +42 |
+| **ML ROI** | **-7.1%** | **-5.7%** |
+| **ML P&L** | -$17,109 | -$19,202 |
+| **Totals Bets** | 1,316 | — |
+| **Totals Win rate** | 47.7% | — |
+| **Totals ROI** | **-5.5%** | — |
+| **Totals P&L** | -$20,915 | — |
+
+With default parameters (no confidence filtering), results are similar to v0.7. The confidence system shrinks edges (avg 6.6% vs 8.8%) but without minimum confidence filtering, too many low-quality bets still pass.
+
+### Grid Search Results (v0.8 CSV)
+
+**Moneyline — Top combos (min 50 bets):**
+
+| Alpha | Min Edge | Min Conf | Bets | Win% | Profit | ROI |
+|-------|----------|----------|------|------|--------|-----|
+| 0.7 | 6% | 0.6 | 83 | 47.0% | +$1,518 | **+6.3%** |
+| 0.8 | 7% | 0.6 | 122 | 45.9% | +$1,296 | **+3.1%** |
+| 0.8 | 8% | 0.6 | 86 | 43.0% | +$626 | **+2.0%** |
+| 0.7 | 7% | 0.6 | 59 | 42.4% | +$352 | **+1.9%** |
+
+**Totals — Top combos:**
+
+| Alpha | Min Edge | Min Conf | Bets | Win% | Profit | ROI |
+|-------|----------|----------|------|------|--------|-----|
+| 0.3 | 7% | 0.0 | 41 | 65.9% | +$3,429 | **+24.9%** |
+| 0.3 | 5% | 0.0 | 82 | 61.0% | +$3,632 | **+18.2%** |
+| 0.3 | 3% | 0.0 | 282 | 50.7% | +$2,728 | **+8.7%** |
+| 0.5 | 7% | 0.0 | 125 | 56.8% | +$2,803 | **+6.0%** |
+
+### Key Findings
+
+1. **Confidence filtering works for moneyline.** With min_confidence=0.6 and 6% edge threshold, ROI improves from -7.1% to +6.3% — but with only 83 bets, this needs more data to confirm statistical significance.
+
+2. **Totals benefit from heavy market-shrinkage (alpha=0.3).** Heavily deferring to the market on totals while only betting when the model finds large disagreements produces the best totals ROI. This makes sense — the total runs line is set by sharp markets and the model's simulation-based total distribution is noisier than its win probability.
+
+3. **Moneyline and totals need different parameter settings.** Moneyline: alpha=0.7, min_edge=6%, min_conf=0.6. Totals: alpha=0.3, min_edge=5-7%, min_conf=0.0.
+
+4. **15-20%+ edges are almost always losers** (17.6% win rate at 15-20%, 14.3% at 20%+). These are cases where the model wildly disagrees with the market — the market is right.
+
+5. **The model's predictive signal is real but modest.** Brier 0.2455 vs coin-flip 0.2500. The confidence system's role is to prevent this modest signal from being overwhelmed by false edges.
+
+### Next Steps
+
+- Set separate alpha/min_edge/min_conf for moneyline vs totals in the pipeline
+- Test stability of optimal parameters on 2023 season (out-of-sample validation)
+- Add explicit home field advantage adjustment (~2.5% boost to home win probability)
+- Preseason projections (Steamer/ZiPS) for better early-season priors
+
+---
+
 *Future iterations will be appended below with date, config changes, and metric deltas.*

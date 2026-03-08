@@ -27,7 +27,7 @@ The Odds API        →  closing lines      →  ──────────�
 
 | Module | Purpose |
 |--------|---------|
-| `src/data/fetch.py` | Pulls data from Statcast (pybaseball), MLB Stats API (schedules/lineups), and The Odds API (historical + live odds, h2h + totals). All results cached to `data/cache/` as pickle files. Includes `build_closing_lines()` (per-book no-vig consensus) and `build_closing_totals()`. |
+| `src/data/fetch.py` | Pulls data from Statcast (pybaseball), MLB Stats API (schedules/lineups), and The Odds API (historical + live odds, h2h + totals). All results cached to `data/cache/` as pickle files. Includes `build_closing_lines()` and `build_closing_totals()` — both with quality filters: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. |
 | `src/data/process.py` | Aggregates pitch-level Statcast data into per-player PA outcome rates (K%, BB%, HR rate, etc.) with platoon splits. `extract_team_relievers()` identifies relievers per game (first pitcher per side = starter, rest = relievers). `aggregate_team_bullpen_rates()` builds per-team reliever rate DataFrames. `prepare_for_rolling()` sorts PAs chronologically for cumulative tracking (includes `home_team`, `away_team`, `inning_topbot`). |
 | `src/data/cumulative.py` | `CumulativeStats` class for rolling-window backtests. Tracks running PA counts per player, snapshots profiles before each game date. Supports prior-year seeding at configurable weight. Also tracks team relievers via `register_reliever()` / `get_team_reliever_rates()` for rolling bullpen profiles. |
 | `src/features/batting.py` | Builds batter profiles: regresses observed rates toward league mean based on sample size (Bayesian shrinkage). Outputs rates by platoon split (vs LHP / vs RHP). |
@@ -37,7 +37,7 @@ The Odds API        →  closing lines      →  ──────────�
 | `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors, normalises to a probability distribution over 8 PA outcomes. |
 | `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
 | `src/betting/odds.py` | Fetches live moneylines from The Odds API. Converts between American / decimal / implied probability. Strips vig. |
-| `src/betting/edge.py` | Compares model probability to no-vig market probability. Flags bets exceeding the minimum edge threshold (default 3%). Used for both moneyline and totals. |
+| `src/betting/edge.py` | Compares model probability to no-vig market probability. Applies confidence-gated shrinkage: `adjusted_prob = market + confidence * (model - market)`. `compute_game_confidence()` combines season depth (cumulative pitchers tracked) and model-market agreement. Flags bets exceeding the minimum edge threshold (default 3%). Used for both moneyline and totals. |
 | `src/betting/kelly.py` | Quarter-Kelly bet sizing with a hard cap (default 5% of bankroll). Used for both moneyline and totals. |
 | `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline and totals bets when historical odds are available. |
 | `src/backtest/metrics.py` | Brier score, log loss, ROI, CLV, calibration tables, bankroll growth tracking. |
@@ -64,6 +64,8 @@ The Odds API        →  closing lines      →  ──────────�
 | **FanGraphs replaced by Statcast** | pybaseball's FanGraphs endpoint is broken (403). All player stats derived directly from Statcast pitch data instead. |
 | **Historical odds at 22:00 UTC** | Snapshot at ~6pm ET captures near-closing lines for night games. ~180 API calls per season. |
 | **Per-book no-vig consensus** (v0.3.1) | Previous approach cherry-picked best home odds from one book and best away odds from another, creating impossible pairs (e.g. -106 / +400). Fix: compute no-vig probability per book (each book's pair is coherent), then take the median across books. Filters: \|American odds\| ≤ 600, vig 0-12%, minimum 3 books per game. |
+| **Totals quality controls** (v0.8) | `build_closing_totals()` now mirrors moneyline QC: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. Previously had no vig/min-books filters, causing 20+ games with negative vig and consensus fallback producing garbage odds (-6.5, -0.5). |
+| **Confidence-gated edge detection** (v0.8) | Raw model probabilities are shrunk toward market via `adjusted_prob = market + confidence * (model - market)`. Confidence combines (1) season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0, and (2) model-market agreement: penalises when model and market disagree on the favourite. Prevents overconfident early-season bets and large disagreements with the market. |
 | **Totals from simulation distribution** (v0.4) | `P(over) = count(total > line) / count(total ≠ line)` from the raw `total_runs_dist` array. Pushes (total == line) are excluded. More accurate than fitting a parametric distribution. |
 | **Rolling backtest with prior-year seeding** (v0.4) | `CumulativeStats` tracks running PA counts. Prior-year Statcast seeded at weight=0.5 (500 prior PA → 250 effective). Eliminates look-ahead bias. |
 
@@ -72,10 +74,10 @@ The Odds API        →  closing lines      →  ──────────�
 - **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
 - **Live dashboard:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app) (Streamlit Community Cloud, auto-deploys from `main`)
 
-## Current Limitations (v0.7)
+## Current Limitations (v0.8)
 
-- **Full rolling backtest not yet run** — v0.7 smoke test (50 games) shows std=0.108 vs market std=0.110. Full 2,400+ game backtest needed to confirm spread, calibration, and profitability.
 - **Rolling backtest early-season compression** — April/May predictions still somewhat compressed because current-year samples are tiny and prior-year data is discounted (even with 0.70 weight).
+- **No explicit home field advantage** — model avg home prob 0.501 vs market 0.529 and actual 0.526. Model relies on park factors alone for HFA.
 - **No weather or umpire adjustments**.
 - **Odds matching ~76%** — Seoul Series (neutral venue) and some Sunday games miss. Date/team-name matching has edge cases.
 - **Totals line selection** — uses FanDuel line with consensus fallback, which may differ from what's available at other books.

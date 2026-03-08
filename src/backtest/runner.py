@@ -15,7 +15,7 @@ from tqdm import tqdm
 from config import (
     BACKTEST_START_YEAR, BACKTEST_END_YEAR, N_SIMULATIONS,
     CACHE_DIR, KELLY_FRACTION, MAX_BET_FRACTION, MIN_EDGE,
-    PRIOR_YEAR_WEIGHT,
+    MIN_CONFIDENCE, PRIOR_YEAR_WEIGHT,
 )
 from src.data.fetch import (
     fetch_statcast_season, fetch_season_schedule, team_abbrev,
@@ -37,7 +37,7 @@ from src.features.park_factors import get_park_factors
 from src.simulation.constants import LEAGUE_RATES
 from src.simulation.game_sim import monte_carlo_win_probability
 from src.betting.odds import american_to_prob, american_to_decimal, remove_vig
-from src.betting.edge import calculate_edge
+from src.betting.edge import calculate_edge, compute_game_confidence
 from src.betting.kelly import size_bet
 
 
@@ -599,6 +599,15 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     best_home_odds = odds_row["best_home_odds"]
     best_away_odds = odds_row["best_away_odds"]
 
+    # Compute game confidence (uses cumulative_pitchers from rolling backtest)
+    cumulative_pitchers = pred.get("cumulative_pitchers", 1300)  # full backtest defaults to max
+    confidence = compute_game_confidence(
+        cumulative_pitchers=cumulative_pitchers,
+        model_prob=model_home,
+        market_prob=market_home_nv,
+    )
+    pred["confidence"] = confidence
+
     # Store market data
     pred["market_home_nv_prob"] = market_home_nv
     pred["market_away_nv_prob"] = market_away_nv
@@ -610,9 +619,9 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     pred["pinnacle_away"] = odds_row.get("pinnacle_away")
     pred["vig"] = odds_row.get("vig")
 
-    # Calculate edge for both sides
-    home_edge_info = calculate_edge(model_home, market_home_nv, best_home_odds)
-    away_edge_info = calculate_edge(model_away, market_away_nv, best_away_odds)
+    # Calculate edge for both sides (with confidence shrinkage)
+    home_edge_info = calculate_edge(model_home, market_home_nv, best_home_odds, confidence)
+    away_edge_info = calculate_edge(model_away, market_away_nv, best_away_odds, confidence)
 
     pred["home_edge"] = home_edge_info["edge"]
     pred["away_edge"] = away_edge_info["edge"]
@@ -629,9 +638,10 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     pred["bet_won"] = None
 
     # Check home side
-    if home_edge_info["edge"] >= MIN_EDGE and home_edge_info["ev_per_unit"] > 0:
-        sizing = size_bet(model_home, american_to_decimal(best_home_odds), bankroll,
-                          KELLY_FRACTION, MAX_BET_FRACTION)
+    if (home_edge_info["edge"] >= MIN_EDGE and home_edge_info["ev_per_unit"] > 0
+            and confidence >= MIN_CONFIDENCE):
+        sizing = size_bet(home_edge_info["adjusted_prob"], american_to_decimal(best_home_odds),
+                          bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
         if sizing["bet_dollars"] > 0:
             won = pred["actual_home_win"]
             decimal_odds = american_to_decimal(best_home_odds)
@@ -647,9 +657,10 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
 
     # Check away side (only if no home bet, to avoid hedging against ourselves)
     if pred["bet_side"] is None:
-        if away_edge_info["edge"] >= MIN_EDGE and away_edge_info["ev_per_unit"] > 0:
-            sizing = size_bet(model_away, american_to_decimal(best_away_odds), bankroll,
-                              KELLY_FRACTION, MAX_BET_FRACTION)
+        if (away_edge_info["edge"] >= MIN_EDGE and away_edge_info["ev_per_unit"] > 0
+                and confidence >= MIN_CONFIDENCE):
+            sizing = size_bet(away_edge_info["adjusted_prob"], american_to_decimal(best_away_odds),
+                              bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
             if sizing["bet_dollars"] > 0:
                 won = not pred["actual_home_win"]
                 decimal_odds = american_to_decimal(best_away_odds)
@@ -741,9 +752,10 @@ def _attach_totals(
     pred["best_over_book"] = totals_row.get("best_over_book", "")
     pred["best_under_book"] = totals_row.get("best_under_book", "")
 
-    # Calculate edges
-    over_edge_info = calculate_edge(model_over_prob, over_nv, best_over_odds)
-    under_edge_info = calculate_edge(model_under_prob, under_nv, best_under_odds)
+    # Calculate edges (use same confidence as moneyline)
+    confidence = pred.get("confidence", 1.0)
+    over_edge_info = calculate_edge(model_over_prob, over_nv, best_over_odds, confidence)
+    under_edge_info = calculate_edge(model_under_prob, under_nv, best_under_odds, confidence)
 
     pred["over_edge"] = over_edge_info["edge"]
     pred["under_edge"] = under_edge_info["edge"]
@@ -760,9 +772,10 @@ def _attach_totals(
     actual_total = pred.get("actual_home_score", 0) + pred.get("actual_away_score", 0)
 
     # Check over
-    if over_edge_info["edge"] >= MIN_EDGE and over_edge_info["ev_per_unit"] > 0:
-        sizing = size_bet(model_over_prob, american_to_decimal(best_over_odds), bankroll,
-                          KELLY_FRACTION, MAX_BET_FRACTION)
+    if (over_edge_info["edge"] >= MIN_EDGE and over_edge_info["ev_per_unit"] > 0
+            and confidence >= MIN_CONFIDENCE):
+        sizing = size_bet(over_edge_info["adjusted_prob"], american_to_decimal(best_over_odds),
+                          bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
         if sizing["bet_dollars"] > 0:
             if actual_total == line:
                 won = None  # push
@@ -782,9 +795,10 @@ def _attach_totals(
 
     # Check under (only if no over bet)
     if pred["totals_bet_side"] is None:
-        if under_edge_info["edge"] >= MIN_EDGE and under_edge_info["ev_per_unit"] > 0:
-            sizing = size_bet(model_under_prob, american_to_decimal(best_under_odds), bankroll,
-                              KELLY_FRACTION, MAX_BET_FRACTION)
+        if (under_edge_info["edge"] >= MIN_EDGE and under_edge_info["ev_per_unit"] > 0
+                and confidence >= MIN_CONFIDENCE):
+            sizing = size_bet(under_edge_info["adjusted_prob"], american_to_decimal(best_under_odds),
+                              bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
             if sizing["bet_dollars"] > 0:
                 if actual_total == line:
                     won = None
