@@ -57,20 +57,23 @@ def calculate_edge(
     market_no_vig_prob: float,
     market_odds: float,
     confidence: float = 1.0,
+    alpha: float = 1.0,
 ) -> Dict:
     """
     Compute the edge for a potential bet.
 
-    When confidence < 1.0, the model probability is shrunk toward the market:
-        adjusted_prob = market + confidence * (model - market)
-    This reduces bet frequency when data is thin or the model wildly disagrees
-    with the market.
+    The model probability is shrunk toward the market using both alpha
+    (how much to trust the model vs market) and confidence (game-level
+    data quality):
+        adjusted_prob = market + (alpha * confidence) * (model - market)
+
+    alpha=1.0 preserves backward compatibility (pure confidence gating).
 
     edge       = adjusted_prob - market_no_vig_prob
     ev_per_unit = adjusted_prob * (decimal - 1) - (1 - adjusted_prob)
     """
-    # Shrink model prob toward market based on confidence
-    adjusted_prob = market_no_vig_prob + confidence * (model_prob - market_no_vig_prob)
+    # Shrink model prob toward market based on alpha and confidence
+    adjusted_prob = market_no_vig_prob + (alpha * confidence) * (model_prob - market_no_vig_prob)
 
     decimal = american_to_decimal(market_odds)
     edge    = adjusted_prob - market_no_vig_prob
@@ -96,10 +99,15 @@ def find_edges(
     home_team: str,
     away_team: str,
     min_edge: float = 0.03,
+    max_edge: float = 0.15,
+    alpha: float = 1.0,
+    confidence: float = 1.0,
 ) -> pd.DataFrame:
     """
     For a single game, compare model probabilities to market odds and return
-    any sides that exceed min_edge.
+    any sides with edge in [min_edge, max_edge].
+
+    Uses alpha + confidence shrinkage to match backtest logic.
     """
     # Match game in odds data (fuzzy on team name substrings)
     mask = (
@@ -121,6 +129,8 @@ def find_edges(
             model_prob=sim_results[prob_key],
             market_no_vig_prob=g[nv_key],
             market_odds=g[odds_key],
+            confidence=confidence,
+            alpha=alpha,
         )
         e["team"] = home_team if side == "home" else away_team
         e["side"] = side
@@ -128,4 +138,4 @@ def find_edges(
         edges.append(e)
 
     df = pd.DataFrame(edges)
-    return df[df["edge"] >= min_edge]
+    return df[(df["edge"] >= min_edge) & (df["edge"] <= max_edge)]

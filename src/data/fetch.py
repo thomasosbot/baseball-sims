@@ -409,6 +409,18 @@ def build_closing_lines(odds_df: pd.DataFrame) -> pd.DataFrame:
             a_imp = float(gdf["_a_imp"].median())
             book_used = "consensus"
 
+        # Coherence: favorite must have more negative odds than underdog
+        # (both negative = one must be more negative; one neg one pos = fine)
+        home_neg = best_home_odds < 0
+        away_neg = best_away_odds < 0
+        if home_neg and away_neg:
+            # Both negative: the bigger favorite should have more negative odds
+            # This is structurally fine — just skip if both are identical (pick'em edge case)
+            pass
+        elif not home_neg and not away_neg:
+            # Both positive — incoherent moneyline (one side must be negative)
+            continue
+
         records.append({
             "game_date":         date,
             "home_team_full":    home,
@@ -431,6 +443,8 @@ def build_closing_lines(odds_df: pd.DataFrame) -> pd.DataFrame:
 
 
 MAX_TOTAL_LINE_ODDS = 300  # Filter garbage totals lines (legit lines rarely exceed ±250)
+MIN_TOTAL_LINE = 5.5       # MLB totals never go below 5.5
+MAX_TOTAL_LINE = 14.0      # MLB totals never go above 14
 
 
 def build_closing_totals(totals_df: pd.DataFrame) -> pd.DataFrame:
@@ -446,12 +460,14 @@ def build_closing_totals(totals_df: pd.DataFrame) -> pd.DataFrame:
     """
     from src.betting.odds import american_to_prob, remove_vig
 
-    # Filter garbage lines: max odds cap + minimum |odds| >= 100
+    # Filter garbage lines: max odds cap + minimum |odds| >= 100 + plausible total line range
     clean = totals_df[
         (totals_df["over_odds"].abs() <= MAX_TOTAL_LINE_ODDS)
         & (totals_df["under_odds"].abs() <= MAX_TOTAL_LINE_ODDS)
         & (totals_df["over_odds"].abs() >= 100)
         & (totals_df["under_odds"].abs() >= 100)
+        & (totals_df["total_line"] >= MIN_TOTAL_LINE)
+        & (totals_df["total_line"] <= MAX_TOTAL_LINE)
     ].copy()
 
     # Compute per-book implied probs and vig (same as build_closing_lines)

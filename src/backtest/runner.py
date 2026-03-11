@@ -14,8 +14,11 @@ from tqdm import tqdm
 
 from config import (
     BACKTEST_START_YEAR, BACKTEST_END_YEAR, N_SIMULATIONS,
-    CACHE_DIR, KELLY_FRACTION, MAX_BET_FRACTION, MIN_EDGE,
-    MIN_CONFIDENCE, PRIOR_YEAR_WEIGHT,
+    CACHE_DIR, KELLY_FRACTION, MAX_BET_FRACTION,
+    PRIOR_YEAR_WEIGHT, MARCEL_EFFECTIVE_PA,
+    ML_ALPHA, ML_MIN_EDGE, ML_MAX_EDGE, ML_MIN_CONFIDENCE,
+    TOTALS_ALPHA, TOTALS_MIN_EDGE, TOTALS_MAX_EDGE, TOTALS_MIN_CONFIDENCE,
+    HOME_FIELD_ADVANTAGE, ELO_BLEND_WEIGHT,
 )
 from src.data.fetch import (
     fetch_statcast_season, fetch_season_schedule, team_abbrev,
@@ -31,6 +34,10 @@ from src.data.process import (
     aggregate_team_bullpen_rates,
 )
 from src.data.cumulative import CumulativeStats
+from src.features.marcel import project_marcel, blend_bhq_marcel
+from src.data.bhq import load_bhq_hitters, load_bhq_pitchers
+from src.features.bhq_rates import convert_bhq_hitters, convert_bhq_pitchers
+from src.features.elo import EloRatings, build_preseason_elo
 from src.features.batting import build_batter_profile
 from src.features.pitching import build_pitcher_profile, build_bullpen_profile
 from src.features.park_factors import get_park_factors
@@ -236,18 +243,55 @@ def run_rolling_backtest(
             games_by_date.setdefault(game_date, []).append(g)
             game_count += 1
 
-        # Initialize cumulative tracker, seeded with prior-year data if cached
+        # Initialize cumulative tracker, seeded with Marcel projections
         cumulative = CumulativeStats()
-        prior_cache = CACHE_DIR / f"statcast_{year - 1}.pkl"
-        if prior_cache.exists():
-            print(f"  Seeding with {year - 1} Statcast (weight={PRIOR_YEAR_WEIGHT})...")
-            prior_statcast = fetch_statcast_season(year - 1)
-            prior_pa = prepare_for_rolling(prior_statcast)
-            cumulative.init_from_prior_year(prior_pa, weight=PRIOR_YEAR_WEIGHT)
-            print(f"    {cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers from {year - 1}")
-            del prior_statcast, prior_pa  # free memory
+        marcel_years = {}
+        for prior_yr in range(year - 3, year):
+            prior_cache = CACHE_DIR / f"statcast_{prior_yr}.pkl"
+            if prior_cache.exists():
+                marcel_years[prior_yr] = fetch_statcast_season(prior_yr)
+
+        if marcel_years:
+            available = sorted(marcel_years.keys())
+            print(f"  Building Marcel projections from {available} ...")
+            batter_proj, pitcher_proj = project_marcel(marcel_years, year)
+
+            # Blend with BHQ skills-based rates if available
+            from config import BHQ_BLEND_WEIGHT
+            if BHQ_BLEND_WEIGHT > 0:
+                # Use most recent prior year's BHQ data (no look-ahead)
+                bhq_year = year - 1
+                bhq_h = load_bhq_hitters(bhq_year)
+                bhq_p = load_bhq_pitchers(bhq_year)
+                if not bhq_h.empty or not bhq_p.empty:
+                    bhq_h_rates = convert_bhq_hitters(bhq_h) if not bhq_h.empty else {}
+                    bhq_p_rates = convert_bhq_pitchers(bhq_p) if not bhq_p.empty else {}
+                    batter_proj, pitcher_proj = blend_bhq_marcel(
+                        batter_proj, pitcher_proj, bhq_h_rates, bhq_p_rates
+                    )
+
+            cumulative.init_from_marcel(batter_proj, pitcher_proj,
+                                        effective_pa=MARCEL_EFFECTIVE_PA)
+            print(f"    {cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers seeded")
+            del marcel_years, batter_proj, pitcher_proj
         else:
-            print(f"  No cached {year - 1} Statcast — starting cold (pure league avg)")
+            print(f"  No prior Statcast cached — starting cold (pure league avg)")
+
+        # Build preseason Elo from prior seasons' results
+        elo_prior_games = {}
+        for prior_yr in range(year - 3, year):
+            prior_sched_cache = CACHE_DIR / f"schedule_{prior_yr}.pkl"
+            if prior_sched_cache.exists():
+                prior_sched = fetch_season_schedule(prior_yr)
+                elo_prior_games[prior_yr] = _schedule_to_games(prior_sched)
+        if elo_prior_games:
+            elo = build_preseason_elo(elo_prior_games)
+            print(f"  Elo seeded from {sorted(elo_prior_games.keys())} (spread={elo.spread:.0f})")
+            del elo_prior_games
+        else:
+            elo = EloRatings()
+            print(f"  Elo starting fresh (all teams at 1500)")
+
         games_simulated = 0
 
         print(f"  Simulating {game_count} games across {len(dates)} dates ({n_sims} sims each)...")
@@ -273,11 +317,13 @@ def run_rolling_backtest(
                 if max_games_per_year and games_simulated >= max_games_per_year:
                     break
                 try:
+                    elo_prob = elo.expected_win_prob(g["home_team"], g["away_team"])
                     pred = _sim_with_lineups(
                         g, g["lineup_data"],
                         batter_profiles, pitcher_profiles, batter_hands,
                         n_sims,
                         team_bullpen_profiles=team_bullpen_profiles,
+                        elo_home_prob=elo_prob,
                     )
                     pred["year"] = year
                     pred["cumulative_batters"] = cumulative.num_batters
@@ -292,7 +338,11 @@ def run_rolling_backtest(
             if max_games_per_year and games_simulated >= max_games_per_year:
                 break
 
-            # 3. Update cumulative stats with today's PA outcomes
+            # 3. Update Elo with today's actual results
+            for g in todays_games:
+                elo.update(g["home_team"], g["away_team"], g["home_win"])
+
+            # 4. Update cumulative stats with today's PA outcomes
             #    Also identify relievers from today's games for bullpen profiles
             if date in pa_by_date:
                 day_pa = pa_by_date[date]
@@ -374,6 +424,7 @@ def _sim_with_lineups(
     batter_hands: dict,
     n_sims: int,
     team_bullpen_profiles: dict = None,
+    elo_home_prob: float = None,
 ) -> dict:
     """Simulate a game using real starting lineups and pitcher profiles."""
     park = get_park_factors(game["home_team"])
@@ -409,6 +460,17 @@ def _sim_with_lineups(
     home_real = sum(1 for b in home_lineup if b is not _DEFAULT_BATTER)
     away_real = sum(1 for b in away_lineup if b is not _DEFAULT_BATTER)
 
+    # Apply home field advantage
+    raw_home = result["home_win_prob"]
+    sim_home = min(raw_home + HOME_FIELD_ADVANTAGE, 0.99)
+
+    # Blend simulation probability with Elo team-strength probability
+    if elo_home_prob is not None and ELO_BLEND_WEIGHT > 0:
+        adj_home = (1 - ELO_BLEND_WEIGHT) * sim_home + ELO_BLEND_WEIGHT * elo_home_prob
+        adj_home = max(0.01, min(0.99, adj_home))
+    else:
+        adj_home = sim_home
+
     return {
         "game_id":             game["game_id"],
         "date":                game["date"],
@@ -416,13 +478,15 @@ def _sim_with_lineups(
         "away_team":           game["away_team"],
         "home_name":           game.get("home_name", ""),
         "away_name":           game.get("away_name", ""),
-        "model_home_win_prob": result["home_win_prob"],
-        "model_away_win_prob": result["away_win_prob"],
+        "model_home_win_prob": adj_home,
+        "model_away_win_prob": 1.0 - adj_home,
         "avg_total_runs":      result["avg_total_runs"],
         "std_total_runs":      result["std_total_runs"],
         "actual_home_win":     game["home_win"],
         "actual_home_score":   game.get("home_score"),
         "actual_away_score":   game.get("away_score"),
+        "sim_home_prob":       sim_home,
+        "elo_home_prob":       elo_home_prob,
         "home_real_profiles":  home_real,
         "away_real_profiles":  away_real,
         "home_starter_id":     lineup_data.get("home_starter_id"),
@@ -479,6 +543,10 @@ def _sim_league_avg(game: dict, n_sims: int) -> dict:
         park_factors=park,
         n_simulations=n_sims,
     )
+    # Apply home field advantage
+    raw_home = result["home_win_prob"]
+    adj_home = min(raw_home + HOME_FIELD_ADVANTAGE, 0.99)
+
     return {
         "game_id":             game["game_id"],
         "date":                game["date"],
@@ -486,8 +554,8 @@ def _sim_league_avg(game: dict, n_sims: int) -> dict:
         "away_team":           game["away_team"],
         "home_name":           game.get("home_name", ""),
         "away_name":           game.get("away_name", ""),
-        "model_home_win_prob": result["home_win_prob"],
-        "model_away_win_prob": result["away_win_prob"],
+        "model_home_win_prob": adj_home,
+        "model_away_win_prob": 1.0 - adj_home,
         "avg_total_runs":      result["avg_total_runs"],
         "std_total_runs":      result["std_total_runs"],
         "actual_home_win":     game["home_win"],
@@ -592,7 +660,7 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     if odds_row is None:
         return
 
-    model_home = pred["model_home_win_prob"]
+    model_home = pred["model_home_win_prob"]  # already includes HFA
     model_away = pred["model_away_win_prob"]
     market_home_nv = odds_row["home_no_vig_prob"]
     market_away_nv = odds_row["away_no_vig_prob"]
@@ -600,6 +668,7 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     best_away_odds = odds_row["best_away_odds"]
 
     # Compute game confidence (uses cumulative_pitchers from rolling backtest)
+    # Pass post-HFA model_home so agreement check compares apples-to-apples with market
     cumulative_pitchers = pred.get("cumulative_pitchers", 1300)  # full backtest defaults to max
     confidence = compute_game_confidence(
         cumulative_pitchers=cumulative_pitchers,
@@ -619,9 +688,9 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     pred["pinnacle_away"] = odds_row.get("pinnacle_away")
     pred["vig"] = odds_row.get("vig")
 
-    # Calculate edge for both sides (with confidence shrinkage)
-    home_edge_info = calculate_edge(model_home, market_home_nv, best_home_odds, confidence)
-    away_edge_info = calculate_edge(model_away, market_away_nv, best_away_odds, confidence)
+    # Calculate edge for both sides (with alpha shrinkage + confidence)
+    home_edge_info = calculate_edge(model_home, market_home_nv, best_home_odds, confidence, alpha=ML_ALPHA)
+    away_edge_info = calculate_edge(model_away, market_away_nv, best_away_odds, confidence, alpha=ML_ALPHA)
 
     pred["home_edge"] = home_edge_info["edge"]
     pred["away_edge"] = away_edge_info["edge"]
@@ -638,8 +707,9 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
     pred["bet_won"] = None
 
     # Check home side
-    if (home_edge_info["edge"] >= MIN_EDGE and home_edge_info["ev_per_unit"] > 0
-            and confidence >= MIN_CONFIDENCE):
+    if (ML_MIN_EDGE <= home_edge_info["edge"] <= ML_MAX_EDGE
+            and home_edge_info["ev_per_unit"] > 0
+            and confidence >= ML_MIN_CONFIDENCE):
         sizing = size_bet(home_edge_info["adjusted_prob"], american_to_decimal(best_home_odds),
                           bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
         if sizing["bet_dollars"] > 0:
@@ -657,8 +727,9 @@ def _attach_odds(pred: dict, closing_lines: Optional[pd.DataFrame], bankroll: fl
 
     # Check away side (only if no home bet, to avoid hedging against ourselves)
     if pred["bet_side"] is None:
-        if (away_edge_info["edge"] >= MIN_EDGE and away_edge_info["ev_per_unit"] > 0
-                and confidence >= MIN_CONFIDENCE):
+        if (ML_MIN_EDGE <= away_edge_info["edge"] <= ML_MAX_EDGE
+                and away_edge_info["ev_per_unit"] > 0
+                and confidence >= ML_MIN_CONFIDENCE):
             sizing = size_bet(away_edge_info["adjusted_prob"], american_to_decimal(best_away_odds),
                               bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
             if sizing["bet_dollars"] > 0:
@@ -752,10 +823,10 @@ def _attach_totals(
     pred["best_over_book"] = totals_row.get("best_over_book", "")
     pred["best_under_book"] = totals_row.get("best_under_book", "")
 
-    # Calculate edges (use same confidence as moneyline)
+    # Calculate edges (totals-specific alpha, same confidence as moneyline)
     confidence = pred.get("confidence", 1.0)
-    over_edge_info = calculate_edge(model_over_prob, over_nv, best_over_odds, confidence)
-    under_edge_info = calculate_edge(model_under_prob, under_nv, best_under_odds, confidence)
+    over_edge_info = calculate_edge(model_over_prob, over_nv, best_over_odds, confidence, alpha=TOTALS_ALPHA)
+    under_edge_info = calculate_edge(model_under_prob, under_nv, best_under_odds, confidence, alpha=TOTALS_ALPHA)
 
     pred["over_edge"] = over_edge_info["edge"]
     pred["under_edge"] = under_edge_info["edge"]
@@ -772,8 +843,9 @@ def _attach_totals(
     actual_total = pred.get("actual_home_score", 0) + pred.get("actual_away_score", 0)
 
     # Check over
-    if (over_edge_info["edge"] >= MIN_EDGE and over_edge_info["ev_per_unit"] > 0
-            and confidence >= MIN_CONFIDENCE):
+    if (TOTALS_MIN_EDGE <= over_edge_info["edge"] <= TOTALS_MAX_EDGE
+            and over_edge_info["ev_per_unit"] > 0
+            and confidence >= TOTALS_MIN_CONFIDENCE):
         sizing = size_bet(over_edge_info["adjusted_prob"], american_to_decimal(best_over_odds),
                           bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
         if sizing["bet_dollars"] > 0:
@@ -795,8 +867,9 @@ def _attach_totals(
 
     # Check under (only if no over bet)
     if pred["totals_bet_side"] is None:
-        if (under_edge_info["edge"] >= MIN_EDGE and under_edge_info["ev_per_unit"] > 0
-                and confidence >= MIN_CONFIDENCE):
+        if (TOTALS_MIN_EDGE <= under_edge_info["edge"] <= TOTALS_MAX_EDGE
+                and under_edge_info["ev_per_unit"] > 0
+                and confidence >= TOTALS_MIN_CONFIDENCE):
             sizing = size_bet(under_edge_info["adjusted_prob"], american_to_decimal(best_under_odds),
                               bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
             if sizing["bet_dollars"] > 0:

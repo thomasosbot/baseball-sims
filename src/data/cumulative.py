@@ -254,6 +254,56 @@ class CumulativeStats:
                 team_dfs[team] = pd.DataFrame(records)
         return team_dfs
 
+    def init_from_marcel(self, batter_projections: dict, pitcher_projections: dict,
+                         effective_pa: float = 350):
+        """
+        Seed cumulative stats with Marcel preseason projections.
+
+        Converts projected rates into pseudo-counts at the given effective_pa weight.
+        As real current-year PAs accumulate (at weight 1.0 via update_from_day),
+        they gradually overtake the Marcel prior.
+        """
+        for pid, proj in batter_projections.items():
+            b = self._batters[pid]
+            pa = effective_pa
+            b["total"] = pa
+            for o in OUTCOMES:
+                b[o] = proj["rates"][o] * pa
+
+            # Platoon splits — distribute PA proportionally (approx 60/40 vs R/L)
+            for hand in ("L", "R"):
+                split_frac = 0.38 if hand == "L" else 0.62  # ~62% of PA vs RHP
+                split_pa = pa * split_frac
+                b[f"pa_vs{hand}"] = split_pa
+                split_rates = proj.get(f"rates_vs{hand}", proj["rates"])
+                for o in OUTCOMES:
+                    b[f"{o}_vs{hand}"] = split_rates[o] * split_pa
+
+            # Track handedness
+            bats = proj.get("bats", "R")
+            if bats == "S":
+                self._batter_stands[pid] = {"L", "R"}
+            else:
+                self._batter_stands[pid] = {bats}
+
+        for pid, proj in pitcher_projections.items():
+            p = self._pitchers[pid]
+            bf = effective_pa
+            p["total"] = bf
+            for o in OUTCOMES:
+                p[o] = proj["rates"][o] * bf
+
+            for hand in ("L", "R"):
+                split_frac = 0.44 if hand == "L" else 0.56  # ~56% of BF vs RHB
+                split_bf = bf * split_frac
+                p[f"bf_vs{hand}"] = split_bf
+                split_rates = proj.get(f"rates_vs{hand}", proj["rates"])
+                for o in OUTCOMES:
+                    p[f"{o}_vs{hand}"] = split_rates[o] * split_bf
+
+            if proj.get("throws"):
+                self._pitcher_throws[pid] = proj["throws"]
+
     @property
     def num_batters(self) -> int:
         return len(self._batters)

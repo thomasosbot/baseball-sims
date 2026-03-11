@@ -7,21 +7,26 @@ Monte Carlo baseball simulation that predicts game outcomes by modelling each pl
 ## Pipeline
 
 ```
-[Data Sources]         [Feature Eng.]         [Simulation]          [Betting]
-pybaseball          →  batter profiles     →  PA probability    →  ML edge calc
-  Statcast              (regressed rates)      model (b*p/l)       (model vs market)
-MLB Stats API          pitcher profiles   →  game sim           →  quarter-Kelly sizing
-  (schedules/lineups)  park factors           (MC engine)          moneyline bets
-The Odds API        →  closing lines      →  ─────────────────→  ROI / CLV / P&L
-  (h2h + totals)        (per-book no-vig      total runs dist  →  totals edge calc
-                         median consensus)                         over/under bets
+[Data Sources]         [Projections]          [Simulation]          [Betting]
+pybaseball          →  Marcel projections  →  PA probability    →  Elo blend
+  Statcast              (3yr weighted,         model (b*p/l)       (50% sim + 50% Elo)
+BHQ CSVs            →   regression, age)                        →  ML edge calc
+  (skills metrics)     BHQ blend (50/50)  →  game sim              (model vs market)
+MLB Stats API          batter profiles        (MC engine)       →  quarter-Kelly sizing
+  (schedules/lineups)  pitcher profiles                            moneyline bets
+The Odds API        →  park factors                             →  ROI / CLV / P&L
+  (h2h + totals)       closing lines      →  total runs dist   →  totals edge calc
+                        (FanDuel single-bk)                        over/under bets
                                                                     │
                                               ┌─────────────────────┘
                                               ▼
                                           [Dashboard]
                                           Streamlit + Plotly
-                                          5-page interactive viz
+                                          dashboard v2 (single-page)
 ```
+
+**Full pipeline flow:**
+`pybaseball data + BHQ CSVs → Marcel projections (3yr weighted) → BHQ blend (50/50) → player profiles (regressed rates + platoon splits) → PA model (multiplicative odds-ratio) → game sim (Monte Carlo) → Elo blend (50/50) → edge detection (model vs market) → Kelly sizing`
 
 ## Modules
 
@@ -29,19 +34,23 @@ The Odds API        →  closing lines      →  ──────────�
 |--------|---------|
 | `src/data/fetch.py` | Pulls data from Statcast (pybaseball), MLB Stats API (schedules/lineups), and The Odds API (historical + live odds, h2h + totals). All results cached to `data/cache/` as pickle files. Includes `build_closing_lines()` and `build_closing_totals()` — both with quality filters: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. |
 | `src/data/process.py` | Aggregates pitch-level Statcast data into per-player PA outcome rates (K%, BB%, HR rate, etc.) with platoon splits. `extract_team_relievers()` identifies relievers per game (first pitcher per side = starter, rest = relievers). `aggregate_team_bullpen_rates()` builds per-team reliever rate DataFrames. `prepare_for_rolling()` sorts PAs chronologically for cumulative tracking (includes `home_team`, `away_team`, `inning_topbot`). |
-| `src/data/cumulative.py` | `CumulativeStats` class for rolling-window backtests. Tracks running PA counts per player, snapshots profiles before each game date. Supports prior-year seeding at configurable weight. Also tracks team relievers via `register_reliever()` / `get_team_reliever_rates()` for rolling bullpen profiles. |
+| `src/data/cumulative.py` | `CumulativeStats` class for rolling-window backtests. Tracks running PA counts per player, snapshots profiles before each game date. Supports Marcel projection seeding via `init_from_marcel()` (preferred) or legacy `init_from_prior_year()`. Also tracks team relievers via `register_reliever()` / `get_team_reliever_rates()` for rolling bullpen profiles. |
 | `src/features/batting.py` | Builds batter profiles: regresses observed rates toward league mean based on sample size (Bayesian shrinkage). Outputs rates by platoon split (vs LHP / vs RHP). |
 | `src/features/pitching.py` | Same as batting but from the pitcher's perspective (rates allowed). `build_bullpen_profile()` aggregates reliever rates weighted by BF into a team-level bullpen profile. |
+| `src/features/marcel.py` | Marcel projection system: 3-year weighted history (5/4/3), regression to league average (1200 PA batters, 450 BF pitchers), age adjustment (+0.6%/yr under 29, -0.3%/yr over 29). Produces per-player projected PA outcome rates with platoon splits. `blend_bhq_marcel()` combines Marcel and BHQ skills-based rates at `BHQ_BLEND_WEIGHT=0.50`. Used to seed `CumulativeStats` on day 1 of each season. |
+| `src/data/bhq.py` | Loader for Baseball HQ CSV files from `data/raw/bhq/`. Reads hitter stats, pitcher-advanced, and pitcher-bb files by year. Joins on MLBAMID (same player ID used in Statcast). |
+| `src/features/bhq_rates.py` | Converts BHQ skills-based metrics into PA outcome rates compatible with the simulation model. Hitter: Ct%→K, BB%→BB, Brl%→HR, SPD→3B, H%/LD%/FB%/GB%→hit distribution. Pitcher: K%→K, BB%→BB, xHR/FB+FB%→HR, GB%/LD%/FB%→batted ball distribution, H%→hit rate. |
 | `src/features/park_factors.py` | Hardcoded 5-year regressed FanGraphs park factors by team. Multiplicative adjustments for HR, 1B, 2B, 3B. |
 | `src/simulation/constants.py` | League average rates, wOBA weights, base advancement probability tables, DP/sac-fly rates, starter usage limits, TTO hit boost multipliers. |
 | `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors, normalises to a probability distribution over 8 PA outcomes. |
 | `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
+| `src/features/elo.py` | Elo team-strength layer: K=20, HFA=24, regression=1/4 toward 1500 between seasons. Produces per-game Elo-based win probabilities. Blended 50/50 with simulation probabilities via `ELO_BLEND_WEIGHT=0.50`. |
 | `src/betting/odds.py` | Fetches live moneylines from The Odds API. Converts between American / decimal / implied probability. Strips vig. |
-| `src/betting/edge.py` | Compares model probability to no-vig market probability. Applies confidence-gated shrinkage: `adjusted_prob = market + confidence * (model - market)`. `compute_game_confidence()` combines season depth (cumulative pitchers tracked) and model-market agreement. Flags bets exceeding the minimum edge threshold (default 3%). Used for both moneyline and totals. |
+| `src/betting/edge.py` | Compares model probability to no-vig market probability. Applies alpha + confidence shrinkage: `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha controls how much to trust the model vs market (ML=0.4, Totals=0.3). `compute_game_confidence()` combines season depth and model-market agreement. Separate edge/confidence thresholds for moneyline and totals. |
 | `src/betting/kelly.py` | Quarter-Kelly bet sizing with a hard cap (default 5% of bankroll). Used for both moneyline and totals. |
 | `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline and totals bets when historical odds are available. |
 | `src/backtest/metrics.py` | Brier score, log loss, ROI, CLV, calibration tables, bankroll growth tracking. |
-| `dashboard/` | Streamlit app with 5 pages: **Performance** (hero KPIs, equity curve, monthly P&L), **How It Works** (plain-English model explainer with illustrative charts), **Predictions** (reliability diagram, calibration residuals, Brier by month, score-diff box plots), **Betting** (ML/totals bet tables, ROI breakdowns, drawdown, Kelly distribution, team performance), **Diagnostics** (rolling vs full comparison, knowledge growth, profile coverage, predicted vs actual runs). Custom Plotly template and CSS. Deployed at [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app). Run locally with `streamlit run dashboard/app.py`. |
+| `dashboard/` | **v1 (`app.py`):** Streamlit app with 5 pages: Performance, How It Works, Predictions, Betting, Diagnostics. Custom Plotly template and CSS. **v2 (`v2.py`):** Single-page dashboard with ROI chart + bet tables ($20K bankroll). Deployed at [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app). Run locally with `streamlit run dashboard/app.py` or `streamlit run dashboard/v2.py`. |
 
 ## Key Decisions
 
@@ -56,7 +65,7 @@ The Odds API        →  closing lines      →  ──────────�
 | **Times-through-order penalty** (v0.6) | Hit rates (1B/2B/3B/HR) boosted +10% on 2nd time through, +20% on 3rd+ time. Re-normalised after boost. Only applies vs the starter (not bullpen). Widens gap between aces (who go deep effectively) and weaker starters. |
 | **Team-specific bullpen profiles** (v0.6) | Relievers identified per game from Statcast (first pitcher per side = starter, rest = relievers). Reliever rates aggregated per team weighted by BF. Replaces league-average bullpen for ~3 innings/game. |
 | **Split regression scales** (v0.7) | Separate `BATTER_REGRESSION_SCALE=0.20` and `PITCHER_REGRESSION_SCALE=0.08` (was single 0.40). Pitchers get much less regression because starters face ~21 BF and are the primary game differentiator. Effective batter weights: K=40, BB=50, HR=80. Effective pitcher weights: K=24, BB=32, HR=48. |
-| **Prior-year weight 0.70** (v0.6) | Increased from 0.50 to give stronger priors in rolling backtest early-season. 500 prior-year PA → 350 effective (was 250). |
+| **Prior-year weight 0.70** (v0.6, replaced by Marcel in v0.9) | Was 0.50→0.70 for stronger early-season priors. Replaced by Marcel 3-year weighted projections which provide much better day-1 profiles. |
 | **FanDuel single-book odds** (v0.6) | Uses FanDuel as the single book for closing lines, with median-consensus fallback when FanDuel is missing. Eliminates cross-book cherry-picking of best odds per side. |
 | **Park factors hardcoded (2024)** | FanGraphs 5-year regressed factors are stable year-to-year. |
 | **Lineups from Statcast** | Reconstructed from pitch data (first 9 unique batters by `at_bat_number` per side). Avoids 2,400+ API calls per season. |
@@ -65,20 +74,40 @@ The Odds API        →  closing lines      →  ──────────�
 | **Historical odds at 22:00 UTC** | Snapshot at ~6pm ET captures near-closing lines for night games. ~180 API calls per season. |
 | **Per-book no-vig consensus** (v0.3.1) | Previous approach cherry-picked best home odds from one book and best away odds from another, creating impossible pairs (e.g. -106 / +400). Fix: compute no-vig probability per book (each book's pair is coherent), then take the median across books. Filters: \|American odds\| ≤ 600, vig 0-12%, minimum 3 books per game. |
 | **Totals quality controls** (v0.8) | `build_closing_totals()` now mirrors moneyline QC: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. Previously had no vig/min-books filters, causing 20+ games with negative vig and consensus fallback producing garbage odds (-6.5, -0.5). |
-| **Confidence-gated edge detection** (v0.8) | Raw model probabilities are shrunk toward market via `adjusted_prob = market + confidence * (model - market)`. Confidence combines (1) season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0, and (2) model-market agreement: penalises when model and market disagree on the favourite. Prevents overconfident early-season bets and large disagreements with the market. |
+| **Confidence-gated edge detection** (v0.8) | Raw model probabilities are shrunk toward market via `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha is per-bet-type (ML=0.4, Totals=0.3). Confidence combines (1) season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0, and (2) model-market agreement: penalises when model and market disagree on the favourite. |
+| **Separate ML/Totals betting params** (v0.9) | Moneyline and totals use independent alpha, min_edge, max_edge, and min_confidence settings. Grid search on v0.9+BHQ CSV found optimal: **ML: α=0.9, edge 7-15%, conf≥0.5** (+1.3% ROI, 232 bets). **Totals: α=0.3, edge 7-15%, conf≥0.0** (+5.1% ROI, 51 bets). High ML alpha works because BHQ improves projections enough to trust model-market disagreements. |
+| **Max edge cap** (v0.9) | Edges above 15% are filtered out. Large model-market disagreements (15-20%+) were almost always losers in v0.8 — the market is right when disagreement is that large. Applies to both moneyline and totals via `ML_MAX_EDGE` / `TOTALS_MAX_EDGE`. |
+| **Home field advantage** (v0.9) | Additive +2.5% boost to home win probability post-simulation. Model avg home prob was 0.501 vs actual 0.526 — HFA closes this gap. Applied in `_sim_with_lineups()` and `_sim_league_avg()`. Does not affect total runs distribution. |
+| **Marcel preseason projections** (v0.9) | Replaces raw prior-year seeding with Tom Tango's Marcel projection system. Uses 3 years of weighted Statcast (5/4/3), regression to league average (1200 PA batters / 450 BF pitchers), and age adjustment. Produces per-player projected rates with platoon splits. Seeded into `CumulativeStats` at `MARCEL_EFFECTIVE_PA=350` pseudo-PAs. For 2024 backtest: 2021+2022+2023 → 2,194 batters, 1,777 pitchers projected (vs 650 batters from single prior year). |
+| **BHQ skills-based blend** (v0.9) | Baseball HQ subscription data provides skills-based leading indicators (Ct%, Brl%, xHR/FB, SPD, etc.) that are converted to PA outcome rates and blended 50/50 with Marcel projections. BHQ metrics are calibrated against Statcast actuals (e.g., K = 0.620*(1-Ct%) + 0.065, r=0.747). Coverage: ~530 batters, ~650 pitchers (regulars only); non-covered players fall back to pure Marcel. Joins on MLBAMID. No look-ahead: backtesting 2024 uses BHQ 2023 data. |
+| **Elo team-strength layer** (v0.9) | Elo ratings (K=20, HFA=24, regression=1/4) blended 50/50 with MC simulation probabilities. Helps compensate for the structural compression of PA-by-PA simulation (law of large numbers over ~35 PA/team produces model std=0.057 vs market std=0.110 before Elo). |
+| **9.4x simulation speedup** (v0.9) | Pre-computed PA outcome arrays replace per-PA sampling. Reduced per-game simulation time from 38s to 4s. |
+| **Totals line range filter** (v0.9) | Total lines outside 5.5-14.0 are filtered out as implausible MLB totals. Prevents garbage consensus lines from entering the pipeline. |
+| **Moneyline coherence check** (v0.9) | Both-positive American odds pairs (where neither side is a favorite) are rejected. Ensures structurally valid moneyline pairs. |
 | **Totals from simulation distribution** (v0.4) | `P(over) = count(total > line) / count(total ≠ line)` from the raw `total_runs_dist` array. Pushes (total == line) are excluded. More accurate than fitting a parametric distribution. |
-| **Rolling backtest with prior-year seeding** (v0.4) | `CumulativeStats` tracks running PA counts. Prior-year Statcast seeded at weight=0.5 (500 prior PA → 250 effective). Eliminates look-ahead bias. |
+| **Rolling backtest with prior-year seeding** (v0.4) | `CumulativeStats` tracks running PA counts. Originally seeded with prior-year Statcast at configurable weight. Replaced by Marcel projections in v0.9. |
 
 ## Deployment
 
 - **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
 - **Live dashboard:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app) (Streamlit Community Cloud, auto-deploys from `main`)
 
-## Current Limitations (v0.8)
+## Validation Status
 
-- **Rolling backtest early-season compression** — April/May predictions still somewhat compressed because current-year samples are tiny and prior-year data is discounted (even with 0.70 weight).
-- **No explicit home field advantage** — model avg home prob 0.501 vs market 0.529 and actual 0.526. Model relies on park factors alone for HFA.
+**2025 out-of-sample backtest (params tuned on 2024, zero adjustments):**
+- Brier 0.2428 (improved from 0.2441 on training year)
+- ML: 250 bets, **+12.0% ROI** (+$18,853 profit)
+- Totals: 36 bets, -5.7% ROI (edge didn't generalize)
+- Combined: **+9.9% ROI**, $20K → $37.6K bankroll
+- Conclusion: **Model is not overfit. Moneyline edge is real.**
+
+## Current Limitations (v0.9)
+
+- **Structural simulation compression** — PA-by-PA MC simulation is compressed by the law of large numbers over ~35 PA/team. Model std=0.057 before Elo blending vs market std=0.110. Elo blend (50/50) and alpha shrinkage compensate at the betting layer.
+- **BHQ coverage is regulars only** — ~530 batters and ~650 pitchers have BHQ data. Bench players, callups, and September roster expansions fall back to pure Marcel projections.
 - **No weather or umpire adjustments**.
 - **Odds matching ~76%** — Seoul Series (neutral venue) and some Sunday games miss. Date/team-name matching has edge cases.
 - **Totals line selection** — uses FanDuel line with consensus fallback, which may differ from what's available at other books.
 - **Static bullpen composition** — relievers are identified from Statcast game data; in a daily pipeline, pre-game bullpen composition isn't known exactly.
+- **Marcel age data** — uses Statcast `age_bat`/`age_pit` columns (age at season start). Players missing from all 3 prior years get no Marcel projection (pure league avg fallback).
+- **BHQ data is annual** — skills metrics are from prior full-season data (no in-season updates during backtest). Daily pipeline could incorporate current-year BHQ if subscription provides rolling updates.

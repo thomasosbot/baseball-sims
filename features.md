@@ -77,14 +77,75 @@ Regression weights are multiplied by separate scales for batters and pitchers:
 
 **Impact:** At old settings (0.40/0.40), compound regression of both batter AND pitcher toward the same league mean killed spread — only 68% of scoring spread was preserved early season. At new settings (0.20/0.08), model probability std matches market std within 2%.
 
-### Rolling backtest priors
+### Preseason priors: Marcel projections (v0.9)
 
-In the rolling-window backtest (`src/data/cumulative.py`), prior-year Statcast data is seeded at `config.PRIOR_YEAR_WEIGHT` (default 0.70, increased from 0.50 in v0.6). 500 prior-year PA → 350 effective PA. This means early-season predictions are still somewhat compressed because:
-- Prior-year data is discounted 30%
-- Current-year PA counts are tiny in April
-- Regression weights further pull toward the mean
+In the rolling-window backtest, day-1 player profiles are seeded from **Marcel projections** (`src/features/marcel.py`) instead of raw prior-year data. Marcel uses Tom Tango's open formula:
 
-The increased weight (0.70 vs 0.50) gives stronger priors, especially beneficial for early-season differentiation.
+1. **3-year weighted history**: weights 5/4/3 (most recent heaviest). If only 2 or 1 years are available, uses what's there.
+2. **Regression to league average**: `player_weight = PA / (PA + 1200)` for batters, `BF / (BF + 450)` for pitchers. Players with few PA regress heavily; high-PA players keep their rates.
+3. **Age adjustment**: contact-quality rates (HR, 2B, 3B, 1B) multiplied by `1 + 0.006 * (29 - age)` for young players, `1 - 0.003 * (age - 29)` for older players. K/BB/HBP not age-adjusted. Pitchers get inverted adjustment (young pitchers improve = lower rates allowed).
+4. **Platoon splits**: each split (vs LHP/RHP for batters, vs LHB/RHB for pitchers) is projected separately with the same weighting/regression.
+
+Marcel projections are loaded into `CumulativeStats` at `MARCEL_EFFECTIVE_PA=350` pseudo-PAs. As real current-year PAs accumulate at weight 1.0, they gradually overtake the Marcel prior.
+
+**Impact**: For the 2024 backtest, Marcel projects 2,194 batters and 1,777 pitchers from 2021+2022+2023 data. The old single-year approach only covered 650 batters from 2023 alone. Multi-year weighting stabilises projections (a player's one bad year is balanced by adjacent seasons) and the age curve properly handles aging stars and improving young players.
+
+**Config**: `MARCEL_WEIGHTS`, `MARCEL_BATTER_REGRESSION`, `MARCEL_PITCHER_REGRESSION`, `MARCEL_EFFECTIVE_PA`, `MARCEL_AGE_PEAK`, `MARCEL_AGE_YOUNG_RATE`, `MARCEL_AGE_OLD_RATE` — all in `config.py`.
+
+### BHQ Skills-Based Rates (v0.9)
+
+Baseball HQ provides skills-based leading indicators that complement Marcel's counting-stat projections. BHQ metrics measure underlying skills (contact quality, plate discipline, speed) rather than outcomes, making them more predictive of future performance.
+
+**Loader:** `src/data/bhq.py` — reads CSV files from `data/raw/bhq/` by year, indexed by MLBAMID.
+**Converter:** `src/features/bhq_rates.py` — transforms BHQ metrics into the 8 PA outcome rates.
+**Blender:** `src/features/marcel.py:blend_bhq_marcel()` — combines BHQ and Marcel at `BHQ_BLEND_WEIGHT=0.50`.
+
+#### Hitter BHQ Features
+
+| BHQ Metric | Target Rate | Correlation | Calibration Formula | Rationale |
+|------------|-------------|-------------|---------------------|-----------|
+| **Ct%** (contact rate) | K rate | r=0.747 | `K = 0.620 * (1 - Ct%) + 0.065` | Contact rate is the strongest predictor of strikeout rate; players who make contact don't strike out |
+| **BB%** | BB rate | r=0.608 | Direct (BB% / 100) | Plate discipline metric; directly measures walk tendency |
+| **Brl%** (barrel rate) | HR rate | r=0.526 | `HR/BIP = 0.015 + 0.30 * Brl%` | Barrels (optimal exit velo + launch angle) are the strongest HR predictor; more stable than HR/FB |
+| **SPD** (speed score) | 3B rate | r=0.296 | Scaled to league average | Speed is the primary driver of triples; park effects handled separately |
+| **H%** (BABIP) | Hit rate on BIP | — | Direct | Batting average on balls in play; used with batted ball profile for 1B/2B split |
+| **LD%**, **FB%**, **GB%** | 1B/2B distribution | — | Batted ball profile | Line drives produce more extra-base hits; ground balls produce more singles |
+| **xBA**, **PX**, **HctX** | Fallback indicators | — | Used when primary metrics missing | Expected batting average, power index, and hard-contact index as secondary signals |
+
+#### Pitcher BHQ Features
+
+| BHQ Metric | Target Rate | Correlation | Calibration Formula | Rationale |
+|------------|-------------|-------------|---------------------|-----------|
+| **K%** | K rate | r=0.475 | Direct (K% / 100) | Strikeout percentage is a true skill metric for pitchers |
+| **SwK%** (swinging-K rate) | K rate (fallback) | — | Used when K% missing | Measures swing-and-miss ability independent of called strikes |
+| **BB%** | BB rate | r=0.320 | Direct (BB% / 100) | Command metric; lower correlation than hitters because pitcher BB% is noisier |
+| **xHR/FB** + **FB%** | HR rate | r=0.310 | BHQ scale: 1.0 = 10% HR/FB | Expected HR/FB rate combined with fly ball tendency; more stable than raw HR rate |
+| **GB%**, **LD%**, **FB%** | Batted ball distribution | — | Direct | Ground-ball pitchers suppress extra-base hits; fly-ball pitchers allow more HR |
+| **H%** (BABIP) | Hit rate on BIP | — | Direct | Pitcher BABIP; partially skill-based (batted ball quality) |
+
+#### Coverage and Fallback
+
+- **Hitters:** ~530 per year (regulars with enough PA for BHQ to publish)
+- **Pitchers:** ~650 per year (starters + high-usage relievers)
+- Players without BHQ data receive pure Marcel projections (no BHQ blend)
+- **No look-ahead:** Backtesting 2024 uses BHQ 2023 data only
+
+**Config:** `BHQ_BLEND_WEIGHT = 0.50` in `config.py`.
+
+### Elo Team-Strength Layer (v0.9)
+
+An Elo rating system provides a team-level strength signal that is blended with the PA-by-PA simulation output.
+
+**Implementation:** `src/features/elo.py`
+- K-factor: 20 (standard for baseball)
+- Home-field advantage: 24 Elo points
+- Between-season regression: 1/4 toward 1500
+- Preseason spread: std=45.2 (top team LAD home vs avg: 0.631, bottom CWS: 0.385)
+
+**Blending:** `final_prob = ELO_BLEND_WEIGHT * elo_prob + (1 - ELO_BLEND_WEIGHT) * sim_prob`
+`ELO_BLEND_WEIGHT = 0.50` — the simulation captures matchup-level detail (lineups, platoon splits, park factors) while Elo captures season-level team strength that the compressed simulation misses.
+
+**Why needed:** The PA-by-PA MC simulation is structurally compressed (law of large numbers over ~35 PA/team → model std=0.057 vs market std=0.110). Elo blending helps widen the probability spread to be more realistic.
 
 ## Multiplicative Odds-Ratio Blending (v0.7)
 
@@ -157,14 +218,15 @@ These are not player features but rather game-state parameters that affect the s
 
 - **Source**: The Odds API historical endpoint, FanDuel as single book (consensus fallback)
 - **Closing line construction**: FanDuel odds for both home and away (coherent pair from one book). Filters: |American odds| ≤ 600, vig 0-12%, minimum 3 books available per game. Falls back to median-consensus when FanDuel is missing.
-- **Edge detection**: `model_prob - market_no_vig_prob`, minimum 3% edge to bet
+- **Edge detection**: `adjusted_prob = market + (alpha * confidence) * (model - market)`. ML: α=0.9, edge 7-15%, min confidence 0.5 (grid-search optimal from v0.9+BHQ).
 - **Sizing**: Quarter-Kelly with 5% hard cap
+- **Max edge cap**: Edges above 15% filtered out (market is right when disagreement is that large)
 
 ### Totals (over/under)
 
 - **Source**: Same API, totals market. Consensus line = mode across books, FanDuel odds on that line (median fallback).
 - **Model probability**: From MC simulation distribution — `P(over) = count(total > line) / count(total ≠ line)` (pushes excluded)
-- **Edge & sizing**: Same 3% threshold and quarter-Kelly as moneyline
+- **Edge & sizing**: Totals: α=0.3, edge 7-15%, no min confidence (grid-search optimal from v0.9+BHQ). Quarter-Kelly with 5% hard cap.
 
 ## Probability Spread (resolved in v0.7)
 
@@ -177,7 +239,7 @@ The model's predicted win probabilities were historically narrower than the mark
 4. ~~Log5 double-compression~~ → Multiplicative `b*p/l` removes ~7% OUT compression (v0.7)
 
 **Remaining cause:**
-5. **Rolling backtest early-season compression** — April/May predictions still somewhat compressed because current-year samples are tiny and prior-year data is discounted (even with 0.70 weight). Preseason projections would help.
+5. **Structural simulation compression** — PA-by-PA MC simulation compressed by law of large numbers (model std=0.057 before Elo). Addressed in v0.9 with Elo blending (50/50) which widens spread. Marcel + BHQ priors also improve early-season profiles. Alpha shrinkage at the betting layer compensates further.
 
 ## Improvement Roadmap
 
@@ -197,15 +259,33 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Split regression scales** | `config.py`, `batting.py`, `pitching.py` | Done — batter 0.20, pitcher 0.08 (was single 0.40) |
 | **Multiplicative PA model** | `pa_model.py` | Done — `b*p/l` replaces full log5, removes ~7% OUT compression |
 
-### v0.8 — Better priors and context (next)
+### v0.8 — Confidence-gated edges + totals QC (DONE)
 
-| Change | Module | Expected impact |
-|--------|--------|-----------------|
-| **Preseason projection priors** | `cumulative.py`, `batting.py` | Use Steamer/ZiPS projections (regression-adjusted, include aging curves) instead of raw prior-year Statcast. Better early-season predictions. |
-| **Lineup-order weighting** | `game_sim.py` | Batting order determines PA frequency — the 1-4 hitters get ~15% more PA than 7-9 hitters. Currently all 9 batters cycle equally. |
-| **Platoon-aware bullpen** | `game_sim.py` | Switch to LHP/RHP reliever based on batter handedness. Currently bullpen profile is a single aggregate regardless of matchup. |
+| Change | Module | Status |
+|--------|--------|--------|
+| **Totals quality controls** | `fetch.py` | Done — per-book vig, min 3 books, |odds|≥100, final-pair validation |
+| **Confidence-gated edge detection** | `edge.py` | Done — season depth + model-market agreement |
+| **Grid search tool** | `scripts/analyze_edges.py` | Done — sweeps alpha/edge/conf on existing CSV |
 
-### v0.9+ — Additional features
+### v0.9 — Marcel + BHQ + Elo + separate params + HFA (DONE)
+
+| Change | Module | Status |
+|--------|--------|--------|
+| **Marcel preseason projections** | `src/features/marcel.py`, `cumulative.py`, `runner.py` | Done — 3-year weighted, regression, age adjustment, platoon splits |
+| **BHQ skills-based blend** | `src/data/bhq.py`, `src/features/bhq_rates.py`, `marcel.py` | Done — 50/50 blend, ~530 batters + ~650 pitchers, calibrated correlations |
+| **Elo team-strength layer** | `src/features/elo.py`, `runner.py` | Done — K=20, HFA=24, regression=1/4, 50% blend with sim |
+| **Separate ML/Totals params** | `config.py`, `runner.py`, `edge.py` | Done — ML α=0.9 edge 7-15% conf≥0.5, Totals α=0.3 edge 7-15% (grid-search optimal) |
+| **Max edge cap** | `config.py`, `runner.py`, `edge.py` | Done — 15% cap filters out market-is-right overconfidence |
+| **Home field advantage** | `runner.py` | Done — +2.5% additive boost to home win prob |
+| **9.4x simulation speedup** | `game_sim.py` | Done — pre-computed PA arrays (38s→4s per game) |
+| **Dashboard v2** | `dashboard/v2.py` | Done — single-page ROI chart + bet tables |
+| **v0.9 rolling backtest (no BHQ)** | — | Complete — see backtest_results.md |
+| **v0.9+BHQ rolling backtest** | — | Complete — ML +1.3% ROI, Totals +5.1% ROI (optimal params) |
+| **2025 out-of-sample validation** | — | **Complete — ML +12.0% ROI (250 bets), $20K→$37.6K. Model validated.** |
+| **Odds QC: total line range** | `fetch.py` | Done — 5.5-14.0 plausible MLB range |
+| **Odds QC: ML coherence** | `fetch.py` | Done — rejects both-positive American odds pairs |
+
+### v1.0+ — Additional features
 
 | Feature | Expected impact |
 |---------|-----------------|

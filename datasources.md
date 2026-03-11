@@ -2,11 +2,12 @@
 
 ## Data libraries
 
-- **pybaseball** — Python wrapper for Statcast (Baseball Savant). Statcast is the primary data source.
+- **pybaseball** — Python wrapper for Statcast (Baseball Savant). Statcast is the primary data source for PA-level outcomes.
 - **MLB-StatsAPI** (statsapi) — Official MLB API for schedules, lineups, boxscores, player metadata.
+- **Baseball HQ (BHQ)** — Subscription-based skills metrics. CSV exports in `data/raw/bhq/` (hitter stats, pitcher-advanced, pitcher-bb). Provides leading indicators that complement Statcast counting stats.
 - **FanGraphs** — currently broken in pybaseball 2.2.7 (403 on `/leaders-legacy.aspx`). We derive all player stats from Statcast instead.
 
-All API results are cached to `data/cache/` as pickle files after first fetch.
+All API results are cached to `data/cache/` as pickle files after first fetch. BHQ data is stored as raw CSVs (not cached/pickled).
 
 ### Statcast (via Baseball Savant)
 
@@ -43,6 +44,67 @@ pybaseball 2.2.7 hits a 403 error on FanGraphs' `/leaders-legacy.aspx` endpoint.
 | Function | Purpose |
 |----------|---------|
 | `pybaseball.playerid_lookup(last, first)` | Returns MLBAM ID, FanGraphs ID, BBRef ID for cross-referencing |
+
+## Baseball HQ (BHQ)
+
+**Source:** Baseball HQ subscription (baseballhq.com). CSV exports stored in `data/raw/bhq/`.
+
+### File Types
+
+| File pattern | Contents | Years available |
+|-------------|----------|-----------------|
+| `mlb_seasonal_hitter_stats_and_splits-{year}.csv` | Hitter skills metrics with platoon splits | 2021-2025 |
+| `mlb_seasonal_pitcher_stats-advanced-{year}.csv` | Pitcher advanced metrics (K%, BB%, SwK%, xHR/FB, etc.) | 2021-2025 |
+| `mlb_seasonal_pitcher_stats-bb-{year}.csv` | Pitcher batted ball profile (GB%, LD%, FB%, H%, etc.) | 2021-2025 |
+
+### Key ID
+
+**MLBAMID** — the MLB Advanced Media player ID. This is the same ID used in Statcast's `batter`/`pitcher` columns and the MLB Stats API's `personId`. No ID mapping is required.
+
+### Hitter Metrics Used
+
+| BHQ Metric | Maps to | Correlation | Calibration |
+|------------|---------|-------------|-------------|
+| **Ct%** (contact rate) | K rate | r=0.747 | `K = 0.620 * (1 - Ct%) + 0.065` |
+| **BB%** | BB rate | r=0.608 | Direct (BB% / 100) |
+| **Brl%** (barrel rate) | HR rate | r=0.526 | `HR/BIP = 0.015 + 0.30 * Brl%` |
+| **SPD** (speed score) | 3B rate | r=0.296 | Scaled to league average |
+| **H%** (BABIP) | Hit rate on BIP | — | Used for 1B/2B distribution |
+| **LD%**, **FB%**, **GB%** | Hit type distribution | — | 1B/2B split from batted ball profile |
+| **xBA**, **PX**, **HctX** | Fallback indicators | — | Used when primary metrics are missing |
+
+### Pitcher Metrics Used
+
+| BHQ Metric | Maps to | Correlation | Calibration |
+|------------|---------|-------------|-------------|
+| **K%** | K rate | r=0.475 | Direct (K% / 100) |
+| **SwK%** | K rate (fallback) | — | Used when K% is missing |
+| **BB%** | BB rate | r=0.320 | Direct (BB% / 100) |
+| **xHR/FB** + **FB%** | HR rate | r=0.310 | BHQ scale: 1.0 = 10% HR/FB |
+| **GB%**, **LD%**, **FB%** | Batted ball distribution | — | Determines 1B/2B/3B split |
+| **H%** (BABIP) | Hit rate on BIP | — | Direct |
+
+### Coverage
+
+- **Hitters:** ~530 per year (regulars with enough PA for BHQ to publish)
+- **Pitchers:** ~650 per year (starters + high-usage relievers)
+- Players without BHQ data fall back to pure Marcel projections
+
+### Blending with Marcel
+
+`src/features/marcel.py:blend_bhq_marcel()` combines BHQ skills-based rates with Marcel statistical projections:
+
+```
+blended_rate = BHQ_BLEND_WEIGHT * bhq_rate + (1 - BHQ_BLEND_WEIGHT) * marcel_rate
+```
+
+`BHQ_BLEND_WEIGHT = 0.50` in `config.py` (50% BHQ skills, 50% Marcel counting stats).
+
+**No look-ahead:** When backtesting 2024, BHQ 2023 data is used. BHQ metrics are prior full-season summaries, not in-season updates.
+
+### Loader
+
+`src/data/bhq.py` reads CSV files by year, standardises column names, and returns DataFrames indexed by MLBAMID. `src/features/bhq_rates.py` converts raw BHQ metrics into the 8 PA outcome rates (K, BB, HBP, HR, 3B, 2B, 1B, OUT) used by the simulation.
 
 ## The Odds API
 
@@ -124,13 +186,31 @@ All fetched data is stored in `data/cache/` as pickle files:
 | `closing_lines_{year}.pkl` | Processed per-game closing moneylines |
 | `closing_totals_{year}.pkl` | Processed per-game closing totals |
 
+**BHQ data** is stored as raw CSVs in `data/raw/bhq/` (not pickled). See the Baseball HQ section above for file patterns.
+
 Delete any cache file to force a re-fetch on next run.
+
+### Marcel Projections (built in-house)
+
+Instead of relying on external projection systems (Steamer/ZiPS behind FanGraphs paywall + Cloudflare), we implemented Marcel (Tom Tango's open formula) using our own cached Statcast data.
+
+| Parameter | Value |
+|-----------|-------|
+| Input | 3 prior years of Statcast (e.g., 2021+2022+2023 for 2024 projection) |
+| Year weights | 5/4/3 (most recent heaviest) |
+| Batter regression | 1200 PA denominator |
+| Pitcher regression | 450 BF denominator |
+| Age adjustment | +0.6%/yr under 29, -0.3%/yr over 29 (contact-quality rates only) |
+| Output | Per-player projected PA outcome rates (8 categories) with platoon splits |
+
+**Cached Statcast years:** 2021 (732M), 2022 (748M), 2023 (588M), 2024 (716M).
+
+For the 2024 backtest, Marcel produces 2,194 batter and 1,777 pitcher projections from 2021-2023 data. Degrades gracefully with fewer years available.
 
 ## Data Not Yet Integrated (planned)
 
 | Source | What | Why |
 |--------|------|-----|
-| Steamer / ZiPS | Preseason projections | Better priors than raw prior-year Statcast for early-season rolling backtest |
 | Rotowire / Baseball Press | Confirmed lineups (posted ~2-4 hours before first pitch) | More reliable than probable pitcher announcements for daily pipeline |
 | Retrosheet | Historical play-by-play | Better backtest: actual lineups, pitcher changes, base-out states |
 | Weather APIs | Wind speed/direction, temperature, humidity | Wind at Wrigley and Coors significantly affects HR rates |
