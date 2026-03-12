@@ -163,7 +163,7 @@ if not DATA_PATH.exists():
 
 df = load_data()
 
-st.title("MLB Model — 2025 Out-of-Sample Backtest")
+st.title("MLB Model — v1.0 Out-of-Sample Backtest (2025)")
 
 sides = extract_sides_bets(df)
 totals = extract_totals_bets(df)
