@@ -8,4 +8,6 @@ data/raw/
 .claude/
 *.pkl
 *.pickle
+# Allow state pickles (needed by CI pipeline)
+!data/state/*.pkl
 .DS_Store
