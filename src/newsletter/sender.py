@@ -98,7 +98,19 @@ def send_daily_picks(picks_data: dict, season_stats: dict = None):
         return
 
     resend.api_key = api_key
-    subscribers = load_subscribers()
+
+    # Try Resend audience first, fall back to local file
+    audience_id = os.getenv("RESEND_AUDIENCE_ID", "")
+    subscribers = []
+    if audience_id:
+        try:
+            contacts = resend.Contacts.list(audience_id=audience_id)
+            contact_list = contacts.get('data', []) if hasattr(contacts, 'get') else []
+            subscribers = [c['email'] for c in contact_list if not c.get('unsubscribed')]
+        except Exception as e:
+            print(f"  Warning: could not fetch Resend audience: {e}")
+    if not subscribers:
+        subscribers = load_subscribers()
     if not subscribers:
         print("  No subscribers found.")
         return
