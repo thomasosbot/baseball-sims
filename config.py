@@ -76,3 +76,9 @@ BHQ_BLEND_WEIGHT = 0.50            # 0=pure Marcel, 1=pure BHQ skills rates
 
 # Elo / team-strength blending
 ELO_BLEND_WEIGHT = 0.50            # fraction of final prob from Elo (rest from sim)
+
+# Bullpen tiering
+BULLPEN_HIGH_LEV_THRESHOLD = 2     # use high-leverage bullpen when |run_diff| <= this
+
+# Weather adjustments
+WEATHER_ENABLED = True             # toggle weather adjustments on/off

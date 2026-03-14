@@ -5,6 +5,7 @@ Builds per-pitcher PA outcome profiles (rates allowed) with platoon splits.
 
 import numpy as np
 import pandas as pd
+from typing import Tuple
 
 import config
 from src.simulation.constants import LEAGUE_RATES
@@ -70,23 +71,11 @@ def build_pitcher_profile(pitcher_row: pd.Series) -> dict:
     return profile
 
 
-def build_bullpen_profile(reliever_rows: pd.DataFrame = None) -> dict:
-    """
-    Build a team-level bullpen profile by averaging across relievers.
-    If no data, returns league-average rates (a safe default).
-    """
-    if reliever_rows is None or reliever_rows.empty:
-        return {
-            "throws": "R",
-            "L": LEAGUE_RATES.copy(),
-            "R": LEAGUE_RATES.copy(),
-        }
-
-    # Weight each reliever by batters faced
+def _weighted_bullpen_profile(reliever_rows: pd.DataFrame) -> dict:
+    """Build a BF-weighted average bullpen profile from reliever rows."""
     weights = reliever_rows["total_bf"].values
-    total_w = weights.sum()
 
-    profile = {"throws": "R"}  # bullpen has mixed handedness; "R" is a placeholder
+    profile = {"throws": "R"}
     for batter_hand in ("L", "R"):
         rates = {}
         for outcome in OUTCOMES:
@@ -103,3 +92,73 @@ def build_bullpen_profile(reliever_rows: pd.DataFrame = None) -> dict:
         profile[batter_hand] = {k: v / total for k, v in rates.items()}
 
     return profile
+
+
+_DEFAULT_BULLPEN = {
+    "throws": "R",
+    "L": LEAGUE_RATES.copy(),
+    "R": LEAGUE_RATES.copy(),
+}
+
+
+def build_bullpen_profile(reliever_rows: pd.DataFrame = None) -> dict:
+    """
+    Build a team-level bullpen profile by averaging across relievers.
+    If no data, returns league-average rates (a safe default).
+    """
+    if reliever_rows is None or reliever_rows.empty:
+        return _DEFAULT_BULLPEN.copy()
+    return _weighted_bullpen_profile(reliever_rows)
+
+
+def build_tiered_bullpen_profiles(
+    reliever_rows: pd.DataFrame = None,
+) -> Tuple[dict, dict]:
+    """
+    Split relievers into high-leverage and low-leverage tiers.
+    Returns (high_leverage_profile, low_leverage_profile).
+
+    Tier split: rank by quality metric (K_rate - BB_rate - 3*HR_rate,
+    a FIP proxy), split at cumulative 50% of total BF.
+    Top half = high-leverage, bottom half = low-leverage.
+    If fewer than 4 relievers, both tiers get the same blended profile.
+    """
+    if reliever_rows is None or reliever_rows.empty:
+        default = _DEFAULT_BULLPEN.copy()
+        return default, _DEFAULT_BULLPEN.copy()
+
+    if len(reliever_rows) < 4:
+        profile = _weighted_bullpen_profile(reliever_rows)
+        return profile, profile.copy()
+
+    # Compute quality score for each reliever
+    df = reliever_rows.copy()
+    k_col = "rate_K" if "rate_K" in df.columns else "rate_K_vsR"
+    bb_col = "rate_BB" if "rate_BB" in df.columns else "rate_BB_vsR"
+    hr_col = "rate_HR" if "rate_HR" in df.columns else "rate_HR_vsR"
+
+    df["_quality"] = (
+        df[k_col].fillna(LEAGUE_RATES["K"])
+        - df[bb_col].fillna(LEAGUE_RATES["BB"])
+        - 3 * df[hr_col].fillna(LEAGUE_RATES["HR"])
+    )
+
+    # Sort by quality descending, split at 50% cumulative BF
+    df = df.sort_values("_quality", ascending=False)
+    cum_bf = df["total_bf"].cumsum()
+    half_bf = df["total_bf"].sum() / 2
+
+    hi_mask = cum_bf <= half_bf
+    # Ensure at least 2 in each tier
+    if hi_mask.sum() < 2:
+        hi_mask.iloc[:2] = True
+    if (~hi_mask).sum() < 2:
+        hi_mask.iloc[-2:] = False
+
+    hi_rows = df[hi_mask]
+    lo_rows = df[~hi_mask]
+
+    hi_profile = _weighted_bullpen_profile(hi_rows)
+    lo_profile = _weighted_bullpen_profile(lo_rows)
+
+    return hi_profile, lo_profile

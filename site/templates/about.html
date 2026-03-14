@@ -5,70 +5,211 @@
 
 {% block content %}
 <section class="hero">
-    <h1>How the Model Works</h1>
-    <p class="hero-sub">A bottom-up Monte Carlo simulation, plate appearance by plate appearance.</p>
+    <h1>The Model</h1>
+    <p class="hero-sub">A fully independent, research-grade MLB simulation built from the ground up.</p>
 </section>
 
 <section class="section">
-    <div class="about-card glass fade-in">
-        <h2>Monte Carlo Simulation</h2>
-        <p>Every game is simulated 10,000 times, plate appearance by plate appearance. Each PA outcome (strikeout, walk, single, homer, etc.) is sampled from probabilities built by blending the specific batter and pitcher matchup.</p>
+    <!-- Overview / elevator pitch -->
+    <div class="about-card glass fade-in highlight-card">
+        <h2>What Makes This Different</h2>
+        <p>Most sports models are black boxes. Ours is a transparent, bottom-up simulation that models every plate appearance individually &mdash; 10,000 times per game &mdash; using real Statcast data, professional scouting metrics, and game-time weather conditions. No shortcuts, no vibes, no "trust me" numbers.</p>
+        <div class="about-stats-row">
+            <div class="about-stat">
+                <span class="about-stat-value">10,000</span>
+                <span class="about-stat-label">Simulations per game</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">8</span>
+                <span class="about-stat-label">PA outcome categories</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">2,000+</span>
+                <span class="about-stat-label">Player profiles tracked</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">30</span>
+                <span class="about-stat-label">Team-specific bullpens</span>
+            </div>
+        </div>
     </div>
 
+    <div class="about-divider">
+        <span>How It Works</span>
+    </div>
+
+    <!-- Pipeline overview -->
+    <div class="about-card glass fade-in">
+        <h2>The Pipeline</h2>
+        <p>Every day before first pitch, the model runs a complete pipeline:</p>
+        <div class="pipeline-steps">
+            <div class="pipeline-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <strong>Data Ingestion</strong>
+                    <p>Pull confirmed lineups and live odds from every major sportsbook.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <strong>Player Profiles</strong>
+                    <p>Build matchup-specific probabilities for every batter-pitcher combination using 3 years of Statcast + skills metrics.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <strong>Simulation</strong>
+                    <p>Simulate each game 10,000 times PA-by-PA, incorporating park factors, weather, bullpen tiers, and baserunning.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <strong>Edge Detection</strong>
+                    <p>Compare model probabilities to market lines. Only bet when the edge exceeds 7% and passes confidence filters.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-divider">
+        <span>Data & Projections</span>
+    </div>
+
+    <!-- Player profiles -->
     <div class="about-card glass fade-in">
         <h2>Player Profiles</h2>
-        <p>Each player's rates are built from:</p>
+        <p>Every player in the model has a detailed outcome profile built from multiple data sources, ensuring accuracy from Opening Day through October.</p>
         <ul>
-            <li><strong>Marcel projections</strong> — 3-year weighted (5/4/3) with regression to league average</li>
-            <li><strong>Baseball HQ skills metrics</strong> — contact rate, barrel rate, speed scores blended 50/50 with Marcel</li>
-            <li><strong>In-season cumulative stats</strong> — updated daily from box scores, gradually replacing preseason projections</li>
+            <li><strong>Marcel projections</strong> &mdash; Tom Tango's open projection system using 3 years of weighted Statcast history (5/4/3), regression to league average, and age curve adjustments. Provides day-1 profiles for 2,000+ players.</li>
+            <li><strong>Baseball HQ skills metrics</strong> &mdash; professional scouting-grade indicators (contact rate, barrel rate, speed scores, swinging-strike rate) blended 50/50 with Marcel. Skills-based rates are more predictive than raw counting stats.</li>
+            <li><strong>In-season cumulative updates</strong> &mdash; as real games are played, actual results gradually replace preseason projections. By mid-season, the model is driven primarily by current performance.</li>
+            <li><strong>Platoon splits</strong> &mdash; every rate is computed separately vs LHP and vs RHP (batters) and vs LHB and vs RHB (pitchers). The platoon advantage is one of the most reliable effects in baseball.</li>
         </ul>
     </div>
 
+    <!-- Matchup blending -->
     <div class="about-card glass fade-in">
         <h2>Matchup Blending</h2>
-        <p>Batter and pitcher outcome rates are combined using the <strong>multiplicative odds-ratio method</strong> (b&times;p/l). This produces more accurate probabilities than the commonly-used log5 method for outcomes far from 50%.</p>
+        <p>When a specific batter faces a specific pitcher, their individual outcome rates are combined using the <strong>multiplicative odds-ratio method</strong>:</p>
+        <div class="formula-box">
+            P(outcome) = (batter_rate &times; pitcher_rate) / league_rate
+        </div>
+        <p>This is more accurate than the commonly-used log5 formula, which introduces ~7% systematic compression on the OUT rate &mdash; a small error that compounds across 70+ plate appearances per game into meaningful win probability distortion. Our method avoids this while preserving correct behavior when both players are league-average.</p>
     </div>
 
+    <div class="about-divider">
+        <span>Simulation Engine</span>
+    </div>
+
+    <!-- Game simulation -->
     <div class="about-card glass fade-in">
-        <h2>Game Features</h2>
-        <ul>
-            <li>Park factors (HR, singles, doubles, triples, walks, strikeouts) from Baseball HQ</li>
-            <li>Stolen bases — speed-adjusted attempt and success rates</li>
-            <li>Wild pitches, errors, productive outs, sacrifice flies</li>
-            <li>Starter pulled after ~21 batters faced, then team-specific bullpen profile</li>
-            <li>Times-through-order penalty (hitters improve 10-20% on later ABs)</li>
-        </ul>
+        <h2>Full-Game Simulation</h2>
+        <p>The simulation engine doesn't just predict outcomes &mdash; it plays entire baseball games, tracking every baserunner, every out, every scoring opportunity. This captures non-linear interactions that simple models miss.</p>
+        <div class="feature-grid">
+            <div class="feature-item">
+                <div class="feature-icon">&#9889;</div>
+                <strong>Park Factors</strong>
+                <p>6-component park adjustments (HR, 1B, 2B, 3B, BB, K) from Baseball HQ. Coors Field isn't just "hitter-friendly" &mdash; it's +30% runs, -11% K, +14% BA.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">&#127777;</div>
+                <strong>Weather</strong>
+                <p>Real-time temperature and wind adjustments. Cold suppresses HR by up to 15%; wind blowing out at Wrigley can add 1-2 expected runs. Based on analysis of 2,391 games.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">&#9935;</div>
+                <strong>Tiered Bullpen</strong>
+                <p>Relievers split into high-leverage and low-leverage tiers. Close games get the team's best arms; blowouts get mop-up guys. Mirrors actual managerial decisions.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">&#128200;</div>
+                <strong>Times Through Order</strong>
+                <p>Batters hit better the more they see a pitcher. Hit rates increase +10% on 2nd pass and +20% on 3rd+ pass &mdash; calibrated to MLB data.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">&#127939;</div>
+                <strong>Baserunning</strong>
+                <p>Speed-adjusted stolen base attempts, wild pitches, errors, productive outs, and sacrifice flies. Every run-scoring mechanism is modeled.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">&#127959;</div>
+                <strong>Extra Innings</strong>
+                <p>Ghost runner on 2B, high-leverage bullpen always deployed. The model handles the full complexity of modern extra-inning rules.</p>
+            </div>
+        </div>
     </div>
 
+    <div class="about-divider">
+        <span>Team Strength & Betting</span>
+    </div>
+
+    <!-- Elo -->
     <div class="about-card glass fade-in">
-        <h2>Team Strength (Elo)</h2>
-        <p>An Elo rating system (K=20, home field +24 pts) captures team-level quality that individual PA outcomes don't. Elo probabilities are blended 50/50 with simulation output for the final win probability.</p>
+        <h2>Team Strength Layer</h2>
+        <p>PA-by-PA simulation captures matchup-level detail but can miss broader team quality signals. An <strong>Elo rating system</strong> (K=20, home field +24 pts, between-season regression) provides a team-strength prior that's blended 50/50 with simulation output. This combines the best of both approaches: granular matchup modeling and macro team quality.</p>
     </div>
 
+    <!-- Edge detection -->
     <div class="about-card glass fade-in">
         <h2>Edge Detection & Bet Sizing</h2>
+        <p>Finding edges isn't enough &mdash; you need to size them correctly and filter out noise. The model uses a multi-layer approach:</p>
         <ul>
-            <li><strong>Confidence gating</strong> — model probabilities are shrunk toward market based on data quality</li>
-            <li><strong>Minimum 7% edge</strong> to trigger a bet (filters noise)</li>
-            <li><strong>Maximum 15% edge</strong> cap (very large edges are usually the market being right)</li>
-            <li><strong>Quarter-Kelly sizing</strong> with 5% bankroll hard cap per bet</li>
+            <li><strong>Alpha shrinkage</strong> &mdash; model probabilities are blended toward market consensus. The market is usually right; we only bet when the disagreement is significant and justified.</li>
+            <li><strong>Confidence gating</strong> &mdash; early-season bets with thin data are down-weighted. Model-market agreement adds confidence; large disagreements are penalized.</li>
+            <li><strong>7% minimum edge</strong> &mdash; small edges are more likely to be noise than signal. This threshold was optimized via grid search across multiple seasons.</li>
+            <li><strong>15% maximum edge</strong> &mdash; when our model disagrees with the market by more than 15%, the market is almost always right. These bets are filtered out.</li>
+            <li><strong>Quarter-Kelly sizing</strong> &mdash; mathematically optimal growth rate, reduced by 75% for safety. No single bet exceeds 5% of bankroll.</li>
         </ul>
     </div>
 
+    <div class="about-divider">
+        <span>Validation</span>
+    </div>
+
+    <!-- Backtest results -->
+    <div class="about-card glass fade-in highlight-card">
+        <h2>Out-of-Sample Validation</h2>
+        <p>The ultimate test of any model is performance on data it has never seen. The model was developed on 2021&ndash;2024 data and validated on the complete 2025 MLB season with zero parameter adjustments:</p>
+        <div class="about-stats-row">
+            <div class="about-stat">
+                <span class="about-stat-value profit">+16.2%</span>
+                <span class="about-stat-label">ML ROI (247 bets)</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">50.2%</span>
+                <span class="about-stat-label">Win rate at avg +102</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">0.2428</span>
+                <span class="about-stat-label">Brier score</span>
+            </div>
+        </div>
+        <p class="about-footnote">The model performed <em>better</em> on unseen 2025 data than on its 2024 training set &mdash; the opposite of overfitting. This suggests the underlying signal is real.</p>
+        <p class="about-footnote"><a href="backtest.html">View full backtest results &rarr;</a></p>
+    </div>
+
+    <!-- What it's built on -->
     <div class="about-card glass fade-in">
-        <h2>2025 Backtest Results (Out-of-Sample)</h2>
-        <p>The model was trained on 2021-2024 data and validated on the full 2025 season:</p>
+        <h2>Under the Hood</h2>
+        <p>This isn't a weekend project. The model represents thousands of hours of research, development, and backtesting across 12 major iterations:</p>
         <ul>
-            <li>Moneyline: <strong>+16.2% ROI</strong> on 247 bets ($20K &rarr; $45,224)</li>
-            <li>50.2% win rate at average +102 odds</li>
-            <li>Brier score: 0.2428 (better than training set)</li>
+            <li><strong>4 years of Statcast data</strong> &mdash; every pitch thrown in MLB from 2021&ndash;2024, totaling billions of data points</li>
+            <li><strong>Baseball HQ subscription data</strong> &mdash; professional-grade skills metrics not available in free datasets</li>
+            <li><strong>Custom Marcel projection system</strong> &mdash; built from scratch using Tom Tango's open methodology</li>
+            <li><strong>Bayesian regression framework</strong> &mdash; outcome-specific shrinkage weights calibrated separately for batters and pitchers</li>
+            <li><strong>Pre-computed PA arrays</strong> &mdash; 9.4x simulation speedup enables 10,000 sims per game in under 4 seconds</li>
+            <li><strong>Rolling backtest framework</strong> &mdash; no look-ahead bias, only data available before each game is used</li>
+            <li><strong>Grid-searched betting parameters</strong> &mdash; alpha, edge thresholds, and confidence gates optimized across multiple seasons</li>
         </ul>
     </div>
 
+    <!-- Disclaimer -->
     <div class="about-card glass fade-in">
         <h2>Disclaimer</h2>
-        <p>This model is for educational and entertainment purposes. Past backtest performance does not guarantee future results. Sports betting involves risk. Only bet what you can afford to lose.</p>
+        <p>This model is for educational and entertainment purposes. Past backtest performance does not guarantee future results. Sports betting involves risk &mdash; only bet what you can afford to lose. The model's edge, while validated out-of-sample, may not persist as markets adapt.</p>
     </div>
 </section>
 {% endblock %}

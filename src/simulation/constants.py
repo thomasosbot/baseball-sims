@@ -102,7 +102,7 @@ DOUBLE_PLAY_PROB        = 0.12
 GROUND_BALL_OUT_FRAC    = 0.45   # fraction of field outs that are ground balls
 
 # Starter usage: switch to bullpen after this many batters faced
-STARTER_BATTER_LIMIT = 21   # ~7 innings (3 batters/inning × 7)
+STARTER_BATTER_LIMIT = 22   # ~7.3 innings (actual 2024 MLB starter avg)
 
 # Times-Through-Order penalty: hit rate multiplier by TTO pass
 # 1st time = baseline, 2nd time = +10% hits, 3rd+ time = +20% hits

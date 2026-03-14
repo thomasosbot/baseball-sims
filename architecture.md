@@ -36,11 +36,12 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `src/data/process.py` | Aggregates pitch-level Statcast data into per-player PA outcome rates (K%, BB%, HR rate, etc.) with platoon splits. `extract_team_relievers()` identifies relievers per game (first pitcher per side = starter, rest = relievers). `aggregate_team_bullpen_rates()` builds per-team reliever rate DataFrames. `prepare_for_rolling()` sorts PAs chronologically for cumulative tracking (includes `home_team`, `away_team`, `inning_topbot`). |
 | `src/data/cumulative.py` | `CumulativeStats` class for rolling-window backtests. Tracks running PA counts per player, snapshots profiles before each game date. Supports Marcel projection seeding via `init_from_marcel()` (preferred) or legacy `init_from_prior_year()`. Also tracks team relievers via `register_reliever()` / `get_team_reliever_rates()` for rolling bullpen profiles. |
 | `src/features/batting.py` | Builds batter profiles: regresses observed rates toward league mean based on sample size (Bayesian shrinkage). Outputs rates by platoon split (vs LHP / vs RHP). |
-| `src/features/pitching.py` | Same as batting but from the pitcher's perspective (rates allowed). `build_bullpen_profile()` aggregates reliever rates weighted by BF into a team-level bullpen profile. |
+| `src/features/pitching.py` | Same as batting but from the pitcher's perspective (rates allowed). `build_tiered_bullpen_profiles()` splits relievers into high-leverage and low-leverage tiers by quality metric, returns (hi, lo) tuple. |
 | `src/features/marcel.py` | Marcel projection system: 3-year weighted history (5/4/3), regression to league average (1200 PA batters, 450 BF pitchers), age adjustment (+0.6%/yr under 29, -0.3%/yr over 29). Produces per-player projected PA outcome rates with platoon splits. `blend_bhq_marcel()` combines Marcel and BHQ skills-based rates at `BHQ_BLEND_WEIGHT=0.50`. Used to seed `CumulativeStats` on day 1 of each season. |
 | `src/data/bhq.py` | Loader for Baseball HQ CSV files from `data/raw/bhq/`. Reads hitter stats, pitcher-advanced, and pitcher-bb files by year. Joins on MLBAMID (same player ID used in Statcast). |
 | `src/features/bhq_rates.py` | Converts BHQ skills-based metrics into PA outcome rates compatible with the simulation model. Hitter: Ct%→K, BB%→BB, Brl%→HR, SPD→3B, H%/LD%/FB%/GB%→hit distribution. Pitcher: K%→K, BB%→BB, xHR/FB+FB%→HR, GB%/LD%/FB%→batted ball distribution, H%→hit rate. |
 | `src/features/park_factors.py` | BHQ park factor table by team. Multiplicative adjustments for HR, 1B, 2B, 3B, BB, K, plus runs factor and platoon splits. |
+| `src/features/weather.py` | Weather adjustments for PA outcome probabilities (v1.2). Temperature and wind factors on HR/2B/3B rates, merged into park_factors. Dome/roof detection. Park CF bearing table for compass→field-relative wind conversion. |
 | `src/simulation/constants.py` | League average rates, wOBA weights, base advancement probability tables, DP/sac-fly rates, starter usage limits, TTO hit boost multipliers, stolen base rates, wild pitch rate. |
 | `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors (including BB/K), normalises to a probability distribution over 8 PA outcomes. |
 | `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. **Stolen base attempts** checked before each PA (calibrated to 2024 MLB: ~0.70 SB/team/game, 78% success rate, speed-adjusted). **Wild pitches/passed balls** (~0.30/team/game) advance runners. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
@@ -61,7 +62,9 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Bayesian regression to the mean** | Small sample sizes are the biggest noise source in baseball. Regression weights vary by outcome stability (K stabilises fast → low weight; 3B is noisy → high weight). |
 | **Quarter Kelly** bet sizing | Full Kelly maximises log-growth but assumes perfect calibration. Quarter Kelly reduces variance ~75% while sacrificing only ~25% of expected growth. |
 | **10,000 simulations per game** | Gives ±1% precision on win probability. Reduced to 1,000 for backtesting speed. |
-| **Starter pulled after 21 BF** | ~7 innings of starter, then team-specific bullpen takes over. |
+| **Starter pulled after 22 BF** (v1.2) | ~7.3 innings of starter (actual 2024 MLB avg), then team-specific tiered bullpen takes over. |
+| **Tiered bullpen** (v1.2) | Relievers split into high-leverage (top half by K%-BB%-3×HR%) and low-leverage tiers. Selected per half-inning based on run differential: \|diff\| ≤ 2 → high-lev. Extra innings always high-lev. Better models actual bullpen usage. |
+| **Weather adjustments** (v1.2) | Temperature factor on HR/2B/3B (0.2%/°F from 72°F neutral), wind factor on HR (0.8%/mph out, 0.6%/mph in). Merged into park_factors pre-normalization. Dome/roof games exempt. Addresses +0.48 run overshoot from ignoring cold-weather suppression. |
 | **Times-through-order penalty** (v0.6) | Hit rates (1B/2B/3B/HR) boosted +10% on 2nd time through, +20% on 3rd+ time. Re-normalised after boost. Only applies vs the starter (not bullpen). Widens gap between aces (who go deep effectively) and weaker starters. |
 | **Team-specific bullpen profiles** (v0.6) | Relievers identified per game from Statcast (first pitcher per side = starter, rest = relievers). Reliever rates aggregated per team weighted by BF. Replaces league-average bullpen for ~3 innings/game. |
 | **Split regression scales** (v0.7) | Separate `BATTER_REGRESSION_SCALE=0.20` and `PITCHER_REGRESSION_SCALE=0.08` (was single 0.40). Pitchers get much less regression because starters face ~21 BF and are the primary game differentiator. Effective batter weights: K=40, BB=50, HR=80. Effective pitcher weights: K=24, BB=32, HR=48. |
@@ -99,14 +102,14 @@ The Odds API        →  park factors                             →  ROI / CLV
 |-----------|--------|---------|
 | `src/data/state.py` | State persistence | Saves/loads CumulativeStats, Elo, batter speeds, bankroll between daily runs as pickles in `data/state/` |
 | `scripts/init_season.py` | Preseason setup | One-time: builds Marcel+BHQ projections, seeds Elo from prior seasons, saves initial state |
-| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds, runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json` |
+| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds, runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Games without confirmed lineups are included with `status: "lineups_pending"` instead of being skipped. |
 | `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L |
 | `site/generate.py` | Static site generator | Reads daily JSON files, renders Jinja2 templates to `site/public/` (Netlify) |
 | `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + games), `history.html` (chart + results), `about.html` (model info) |
 | `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges |
 | `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
 | `site/netlify.toml` | Netlify config | Build settings, publish dir, functions dir |
-| `src/newsletter/sender.py` | Email newsletter | Sends daily picks to subscribers via Resend API |
+| `src/newsletter/sender.py` | Email newsletter | Fetches subscribers from Resend Contacts API (audience-based), sends daily picks HTML email from `picks@ozzyanalytics.com` |
 | `.github/workflows/daily_picks.yml` | Automation | Cron at 5 PM UTC: update results → run pipeline → generate site → send newsletter → commit + push |
 
 **Daily pipeline flow:**
@@ -138,7 +141,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 
 - **Structural simulation compression** — PA-by-PA MC simulation is compressed by the law of large numbers over ~35 PA/team. Model std=0.057 before Elo blending vs market std=0.110. Elo blend (50/50) and alpha shrinkage compensate at the betting layer.
 - **BHQ coverage is regulars only** — ~530 batters and ~650 pitchers have BHQ data. Bench players, callups, and September roster expansions fall back to pure Marcel projections.
-- **No weather or umpire adjustments**.
+- **No umpire adjustments**.
 - **Odds matching ~76%** — Seoul Series (neutral venue) and some Sunday games miss. Date/team-name matching has edge cases.
 - **Totals line selection** — uses FanDuel line with consensus fallback, which may differ from what's available at other books.
 - **Static bullpen composition** — relievers are identified from Statcast game data; in a daily pipeline, pre-game bullpen composition isn't known exactly.

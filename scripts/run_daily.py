@@ -33,8 +33,13 @@ from src.betting.odds import (
 from src.betting.edge import calculate_edge, compute_game_confidence
 from src.betting.kelly import size_bet
 from src.features.batting import build_batter_profile
-from src.features.pitching import build_pitcher_profile, build_bullpen_profile
+from src.features.pitching import build_pitcher_profile, build_bullpen_profile, build_tiered_bullpen_profiles
 from src.features.park_factors import get_park_factors
+from src.features.weather import (
+    compute_weather_factors, merge_weather_into_park_factors,
+    compass_to_field_relative, PARK_CF_BEARING,
+    RETRACTABLE_ROOF_PARKS, FIXED_DOME_PARKS,
+)
 from src.simulation.constants import LEAGUE_RATES
 from src.simulation.game_sim import monte_carlo_win_probability
 
@@ -121,7 +126,7 @@ def run_daily(
 
     team_reliever_rates = cumulative.get_team_reliever_rates()
     team_bullpen_profiles = {
-        team: build_bullpen_profile(df) for team, df in team_reliever_rates.items()
+        team: build_tiered_bullpen_profiles(df) for team, df in team_reliever_rates.items()
     }
     print(f"  {len(batter_profiles)} batters, {len(pitcher_profiles)} pitchers, "
           f"{len(team_bullpen_profiles)} bullpens")
@@ -159,9 +164,32 @@ def run_daily(
         sim_away_lineup = _build_lineup(away_lineup, batter_profiles, batter_hands, batter_speeds)
         home_starter = _get_pitcher(home_starter_id, pitcher_profiles)
         away_starter = _get_pitcher(away_starter_id, pitcher_profiles)
-        home_bullpen = team_bullpen_profiles.get(home_abbr, _DEFAULT_PITCHER.copy())
-        away_bullpen = team_bullpen_profiles.get(away_abbr, _DEFAULT_PITCHER.copy())
+        _default_bp = _DEFAULT_PITCHER.copy()
+        home_bp = team_bullpen_profiles.get(home_abbr)
+        away_bp = team_bullpen_profiles.get(away_abbr)
+        if home_bp and isinstance(home_bp, tuple):
+            home_bullpen_hi, home_bullpen_lo = home_bp
+        else:
+            home_bullpen_hi = home_bp if home_bp else _default_bp
+            home_bullpen_lo = None
+        if away_bp and isinstance(away_bp, tuple):
+            away_bullpen_hi, away_bullpen_lo = away_bp
+        else:
+            away_bullpen_hi = away_bp if away_bp else _default_bp
+            away_bullpen_lo = None
         park = get_park_factors(home_abbr)
+
+        # Fetch weather forecast and adjust park factors
+        weather_info = _fetch_game_weather(home_abbr, today)
+        weather_factors = None
+        if weather_info:
+            weather_factors = compute_weather_factors(
+                temperature=weather_info.get("temperature"),
+                wind_speed=weather_info.get("wind_speed", 0),
+                wind_direction=weather_info.get("wind_direction", ""),
+                condition=weather_info.get("condition", ""),
+            )
+            park = merge_weather_into_park_factors(park, weather_factors)
 
         # Run simulation
         result = monte_carlo_win_probability(
@@ -169,10 +197,12 @@ def run_daily(
             away_lineup=sim_away_lineup,
             home_starter=home_starter,
             away_starter=away_starter,
-            home_bullpen=home_bullpen,
-            away_bullpen=away_bullpen,
+            home_bullpen=home_bullpen_hi,
+            away_bullpen=away_bullpen_hi,
             park_factors=park,
             n_simulations=n_sims,
+            home_bullpen_lo=home_bullpen_lo,
+            away_bullpen_lo=away_bullpen_lo,
         )
 
         # Apply HFA + Elo blend
@@ -444,6 +474,88 @@ def _parse_totals_response(odds_data):
             "under_no_vig_prob": under_nv,
         })
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# Park coordinates for Open-Meteo weather forecast
+# ---------------------------------------------------------------------------
+
+PARK_COORDS = {
+    "ARI": (33.445, -112.067), "ATL": (33.891, -84.468), "BAL": (39.284, -76.622),
+    "BOS": (42.346, -71.098), "CHC": (41.948, -87.656), "CWS": (41.830, -87.634),
+    "CIN": (39.097, -84.507), "CLE": (41.496, -81.685), "COL": (39.756, -104.994),
+    "DET": (42.339, -83.049), "HOU": (29.757, -95.355), "KC":  (39.051, -94.480),
+    "LAA": (33.800, -117.883), "LAD": (34.074, -118.240), "MIA": (25.778, -80.220),
+    "MIL": (43.028, -87.971), "MIN": (44.982, -93.278), "NYM": (40.757, -73.846),
+    "NYY": (40.829, -73.926), "OAK": (37.751, -122.201), "PHI": (39.906, -75.167),
+    "PIT": (40.447, -80.006), "SD":  (32.707, -117.157), "SF":  (37.778, -122.389),
+    "SEA": (47.591, -122.332), "STL": (38.623, -90.193), "TB":  (27.768, -82.653),
+    "TEX": (32.747, -97.084), "TOR": (43.641, -79.389), "WSH": (38.873, -77.007),
+}
+
+
+def _fetch_game_weather(home_abbr: str, game_date: str) -> dict:
+    """
+    Fetch weather forecast for a park from Open-Meteo (free, no API key).
+    Returns dict with temperature (F), wind_speed (mph), wind_direction (field-relative).
+    """
+    import urllib.request
+    import json as _json
+
+    coords = PARK_COORDS.get(home_abbr)
+    if coords is None:
+        return {}
+
+    # Fixed dome parks — no weather effect
+    if home_abbr in FIXED_DOME_PARKS:
+        return {"condition": "Dome"}
+
+    lat, lon = coords
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}"
+        f"&hourly=temperature_2m,wind_speed_10m,wind_direction_10m"
+        f"&temperature_unit=fahrenheit&wind_speed_unit=mph"
+        f"&start_date={game_date}&end_date={game_date}"
+        f"&timezone=America%2FNew_York"
+    )
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = _json.loads(resp.read())
+
+        hourly = data.get("hourly", {})
+        times = hourly.get("time", [])
+        temps = hourly.get("temperature_2m", [])
+        winds = hourly.get("wind_speed_10m", [])
+        wind_dirs = hourly.get("wind_direction_10m", [])
+
+        if not times:
+            return {}
+
+        # Use 7 PM local (typical first pitch) — index 19
+        idx = min(19, len(times) - 1)
+
+        temperature = temps[idx] if idx < len(temps) else None
+        wind_speed = winds[idx] if idx < len(winds) else 0
+        wind_bearing = wind_dirs[idx] if idx < len(wind_dirs) else 0
+
+        # Convert compass bearing to field-relative direction
+        field_dir = compass_to_field_relative(wind_bearing, home_abbr)
+
+        # For retractable roof parks, we can't know if roof will be open
+        # Conservative: assume roof closed (no weather effect) for these parks
+        if home_abbr in RETRACTABLE_ROOF_PARKS:
+            return {"condition": "Roof Closed"}
+
+        return {
+            "temperature": temperature,
+            "wind_speed": wind_speed,
+            "wind_direction": field_dir,
+            "condition": "Forecast",
+        }
+    except Exception:
+        return {}
 
 
 def _evaluate_ml_edge(

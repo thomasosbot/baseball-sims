@@ -146,6 +146,20 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 
 **Per-sportsbook odds in daily pipeline:** `parse_odds_response()` now collects `books_home` / `books_away` dicts with every sportsbook's American odds per game. `run_daily.py` attaches `sportsbook_odds` to each pick in the daily JSON output. The website renders these as color-coded badges per book (FanDuel=blue, DraftKings=green, BetMGM=gold, Caesars=burgundy, BetRivers=purple, ESPN BET=red, Fanatics=teal, Pinnacle=dark gray), with the best odds highlighted.
 
+## Resend (Email Newsletter)
+
+**Service:** [resend.com](https://resend.com) — transactional email API.
+
+| Component | Details |
+|-----------|---------|
+| **Sending domain** | `ozzyanalytics.com` (verified, DNS records in Netlify) |
+| **From address** | `picks@ozzyanalytics.com` |
+| **Subscriber storage** | Resend Contacts API (audience-based, not local JSON) |
+| **Audience ID** | Stored in `RESEND_AUDIENCE_ID` env var |
+| **Subscribe flow** | Website form → Netlify function → Resend Contacts API |
+| **Send flow** | `sender.py` fetches audience contacts → sends HTML email per subscriber |
+| **Free tier** | 3,000 emails/month, 100/day |
+
 **Data quality notes:**
 - Some books (pointsbetus, wynnbet) have garbage placeholder lines (-1000000, +20000). These are filtered out.
 - Pinnacle (`bookmaker.key == "pinnacle"`) is the sharpest line but its `pinnacle_home`/`pinnacle_away` columns are often null in 2024 data. Do not rely on Pinnacle-specific columns.
@@ -199,6 +213,7 @@ All fetched data is stored in `data/cache/` as pickle files:
 
 | File | Contents |
 |------|----------|
+| `game_weather_{year}.pkl` | Per-game weather data from MLB Stats API (temp, wind, condition) |
 | `statcast_{year}.pkl` | Full Statcast pitch-level data for the season |
 | `schedule_{year}.pkl` | MLB schedule with scores |
 | `historical_odds_{year}.pkl` | Raw h2h odds from all books |
@@ -227,6 +242,42 @@ Instead of relying on external projection systems (Steamer/ZiPS behind FanGraphs
 
 For the 2024 backtest, Marcel produces 2,194 batter and 1,777 pitcher projections from 2021-2023 data. Degrades gracefully with fewer years available.
 
+## Weather Data (v1.2)
+
+### MLB Stats API — Historical Game Weather
+
+Used in backtesting. The MLB Stats API includes game-time weather in the `gameData.weather` object:
+
+| Field | Description | Example values |
+|-------|-------------|----------------|
+| `temp` | Temperature (°F) | 72 |
+| `wind` | Wind speed and direction (field-relative) | "9 mph, In From LF", "12 mph, Out To CF" |
+| `condition` | General conditions | "Partly Cloudy", "Roof Closed", "Dome" |
+
+**Cached as:** `data/cache/game_weather_{year}.pkl` — one row per game with columns: `game_id`, `date`, `home_team`, `away_team`, `temperature`, `wind_speed`, `wind_direction`, `wind_raw`, `condition`, `venue_name`, `home_score`, `away_score`, `total_runs`.
+
+**Key insight:** Wind direction is already field-relative ("Out To CF" means blowing toward center field), so no park orientation conversion is needed for historical data.
+
+**2024 stats:** 2,391 games, 457 dome/roof-closed (19%), avg temp 73.5°F, wind directions: None (428), L To R (317), Out To CF (296), R To L (282), Out To LF (273), In From LF (173), etc.
+
+### Open-Meteo — Daily Weather Forecast
+
+Used in the daily pipeline for game-day weather forecasts. Free, no API key required.
+
+| Parameter | Value |
+|-----------|-------|
+| **Endpoint** | `https://api.open-meteo.com/v1/forecast` |
+| **Rate limit** | 10,000 calls/day (free tier) |
+| **Variables** | `temperature_2m`, `wind_speed_10m`, `wind_direction_10m` (hourly) |
+| **Units** | Temperature in °F (`temperature_unit=fahrenheit`), wind in mph (`wind_speed_unit=mph`) |
+| **Time** | Uses 7 PM local time (index 19) as typical first pitch |
+
+**Park coordinates:** Latitude/longitude for all 30 parks stored in `PARK_COORDS` dict in `run_daily.py`.
+
+**Wind conversion:** Open-Meteo returns compass wind bearing (degrees from north). Converted to field-relative direction using `compass_to_field_relative()` in `weather.py`, which uses `PARK_CF_BEARING` — the approximate compass bearing from home plate to center field for each park.
+
+**Retractable roof parks:** Conservatively treated as "Roof Closed" in daily pipeline (can't predict roof status). These are: ARI, TEX, MIL, HOU, MIA, TOR, SEA.
+
 ## Derived Constants (calibrated from public data)
 
 | Constant | Value | Source |
@@ -249,4 +300,4 @@ For the 2024 backtest, Marcel produces 2,194 batter and 1,777 pitcher projection
 |--------|------|-----|
 | Rotowire / Baseball Press | Confirmed lineups (posted ~2-4 hours before first pitch) | More reliable than probable pitcher announcements for daily pipeline |
 | Retrosheet | Historical play-by-play | Better backtest: actual lineups, pitcher changes, base-out states |
-| Weather APIs | Wind speed/direction, temperature, humidity | Wind at Wrigley and Coors significantly affects HR rates |
+| ~~Weather APIs~~ | ~~Wind speed/direction, temperature, humidity~~ | **INTEGRATED in v1.2** — MLB Stats API for backtest, Open-Meteo for daily pipeline |

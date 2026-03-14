@@ -177,19 +177,22 @@ Multiplicative adjustments applied to PA outcome rates and total runs distributi
 | **Platoon HR factors** (v1.0) | BHQ (LHB HR, RHB HR) | Yankee Stadium +17% LHB / +16% RHB; ARI -28% LHB / -13% RHB. Stored in data, blended factor used in PA model. |
 | **Platoon BA factors** (v1.0) | BHQ (LHB BA, RHB BA) | Fenway +10% LHB, Seattle -9% LHB / -14% RHB. Stored in data for future per-PA platoon application. |
 
-## Bullpen Modelling (v0.6)
+## Bullpen Modelling (v0.6, tiered in v1.2)
 
-After the starter is pulled (21 BF), a **team-specific bullpen profile** takes over for the rest of the game (~3 innings).
+After the starter is pulled (22 BF), a **team-specific tiered bullpen profile** takes over for the rest of the game (~3 innings).
 
 **Implementation:**
 1. `extract_team_relievers()` in `process.py` identifies relievers per game from Statcast — first pitcher per side = starter, all others = relievers
 2. `aggregate_team_bullpen_rates()` filters Statcast to reliever PAs only (merged on pitcher_id + game_pk), aggregates per-pitcher rates with `min_bf=10`, then maps pitchers to teams
-3. `build_bullpen_profile()` in `pitching.py` averages reliever rates weighted by BF, with platoon splits, normalised to sum to 1
-4. In the backtest, team bullpen profiles are passed to `_sim_with_lineups()`, which looks up `team_bullpen_profiles[team]` with fallback to `_DEFAULT_PITCHER` (league-average)
+3. `build_tiered_bullpen_profiles()` in `pitching.py` splits relievers into **high-leverage** and **low-leverage** tiers based on quality metric (K% - BB% - 3×HR%, a FIP proxy), split at cumulative 50% of total BF. Returns (hi, lo) tuple. Minimum 2 relievers per tier; < 4 total relievers → both tiers get the same blended profile.
+4. In the simulation, `_simulate_half_inning()` selects tier at the start of each half-inning based on run differential: `|run_diff| ≤ BULLPEN_HIGH_LEV_THRESHOLD` → high-leverage, else low-leverage. Extra innings always use high-leverage.
+5. `monte_carlo_win_probability()` accepts optional `home_bullpen_lo` / `away_bullpen_lo` kwargs (backward compatible — if omitted, high-leverage profile used for both).
 
 **Rolling backtest:** `CumulativeStats` tracks relievers via `register_reliever(pitcher_id, team)` as each day's games are processed. `get_team_reliever_rates()` exports per-team reliever rate DataFrames on demand.
 
-**Impact:** The Dodgers' elite bullpen and the Rockies' terrible bullpen are now differentiated, adding ~3 innings of team-specific data per game. All 30 MLB teams have bullpen profiles in 2024 Statcast data.
+**Config:** `BULLPEN_HIGH_LEV_THRESHOLD = 2` in `config.py`.
+
+**Impact:** The Dodgers' elite bullpen and the Rockies' terrible bullpen are now differentiated, adding ~3 innings of team-specific data per game. Tiering separates high-leverage arms (higher K rate ~0.283) from low-leverage arms (~0.230), better reflecting actual bullpen usage patterns.
 
 ## Times-Through-Order Penalty (v0.6)
 
@@ -218,7 +221,7 @@ These are not player features but rather game-state parameters that affect the s
 | Error rate | **1.4%** of outs become reached-on-error (v1.0) | 2024 MLB: ~0.55 errors/team/game |
 | Productive out: 2B→3B | **18%** on non-sac-fly, non-DP outs (v1.0) | Statcast BsR 2022-2024 (0.45 GB × 0.40 advance) |
 | Productive out: 1B→2B | **11%** on non-sac-fly, non-DP outs (v1.0) | Statcast BsR 2022-2024 (0.45 GB × 0.25 advance) |
-| Starter batter limit | 21 batters faced | ~7 innings; proxy for when bullpen takes over |
+| Starter batter limit | **22** batters faced (v1.2) | ~7.3 innings; matches actual 2024 MLB starter avg BF |
 
 ### Stolen Bases (v1.0)
 
@@ -295,6 +298,31 @@ On regular outs (non-sac-fly, non-DP), runners can advance on groundball outs to
 `SAC_FLY_PROB` reduced from 0.30 to **0.13**.
 
 **Why:** The old value (0.30) was calibrated assuming only fly ball outs reached the sac fly code path. But in the simulation, ALL outs pass through `_handle_out()`, so the effective sac fly rate was 0.30 × all outs ≈ 1.35 sac flies/team/game — 4x higher than MLB reality (~0.33). The corrected value: ~0.33 SF/game ÷ ~2.5 opportunities/game ≈ 0.13.
+
+## Weather Adjustments (v1.2)
+
+Temperature and wind affect HR/XBH rates. These factors are merged into park_factors before PA probability computation.
+
+**Signal from 2024 MLB data (2,391 games):**
+- **Temperature:** <55°F: 7.89 avg runs, 85°F+: 9.54 avg runs (+1.64 run swing)
+- **Wind direction:** Out 8.82, In 8.48, Cross 8.84, Dome 9.00 (+0.34 out vs in)
+- **Dome/roof:** 457 games (19%), avg 9.06 runs. Detected via "Roof Closed"/"Dome" in condition field.
+
+**Implementation** (`src/features/weather.py`):
+- `compute_weather_factors(temperature, wind_speed, wind_direction, condition)` → multiplicative factors dict (keys: HR, 2B, 3B)
+- `merge_weather_into_park_factors(park_factors, weather_factors)` → merged dict
+- Temperature: `temp_factor = 1.0 + 0.002 * (temp - 72)`, applied to HR/2B/3B. Clamped to [0.85, 1.15].
+- Wind out: `wind_hr = 1.0 + 0.008 * wind_speed`, applied to HR only. Clamped to [0.85, 1.20].
+- Wind in: `wind_hr = 1.0 - 0.006 * wind_speed`, applied to HR only.
+- Cross-wind and no-wind: no HR adjustment.
+- **Dome games:** No weather effect (returns None, park_factors unchanged).
+- **Retractable roof parks:** Conservative — treated as roof closed in daily pipeline (can't predict roof status).
+
+**Data Sources:**
+- **Backtesting:** MLB Stats API `gameData.weather` — temp, field-relative wind direction, condition. Cached in `data/cache/game_weather_{year}.pkl`.
+- **Daily pipeline:** Open-Meteo forecast API (free, no key, 10K calls/day). Compass wind bearing converted to field-relative using park CF bearing table (`PARK_CF_BEARING`). Uses 7 PM local hour forecast.
+
+**Why included:** The +0.48 run overshoot (model 9.28 vs actual 8.80) is partly from ignoring cold-weather games that suppress HR/XBH. Weather adjustments help close this gap and improve totals calibration.
 
 ## Per-Sportsbook Odds Display (v1.1)
 
@@ -409,7 +437,15 @@ The model's predicted win probabilities were historically narrower than the mark
 | **2024 backtest** | — | Complete — Brier 0.2436, ML +1.6% ROI |
 | **2025 OOS validation** | — | **Complete — ML +16.2% ROI, $20K→$45.2K. Best result yet.** |
 
-### v1.0+ — Additional features
+### v1.2 — Tiered Bullpen + Weather Adjustments (DONE)
+
+| Change | Module | Status |
+|--------|--------|--------|
+| **Tiered bullpen** | `pitching.py`, `game_sim.py`, `runner.py`, `run_daily.py` | Done — high/low leverage tiers by quality metric, selected per half-inning by run differential |
+| **Starter BF limit** | `constants.py` | Done — 21→22 BF (matches 2024 MLB avg) |
+| **Weather adjustments** | `src/features/weather.py`, `runner.py`, `run_daily.py` | Done — temperature + wind factors on HR/XBH, dome detection, Open-Meteo for daily pipeline |
+
+### v1.2+ — Additional features
 
 | Feature | Expected impact |
 |---------|-----------------|
@@ -417,7 +453,6 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Per-player speed in base advancement** | Individual runner speed affecting advancement probs (currently team-avg for SB only) |
 | **Catcher framing** | Shifts K/BB rates by ~1-2% for elite/poor framers |
 | **Umpire tendencies** | Some umps have measurably larger/smaller strike zones |
-| **Weather (wind, temp)** | Wind out at Wrigley can add 1-2 runs to expected total |
 | **Bullpen availability** | Back-to-back usage degrades reliever quality; bullpen games vs. traditional starts |
 | **Lineup-order weighting** | Top of order gets more PA; currently all 9 cycle equally |
 | **Batter vs specific pitcher history** | Only useful with 50+ PA sample (rare); mostly noise |

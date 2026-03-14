@@ -39,13 +39,22 @@ from src.data.bhq import load_bhq_hitters, load_bhq_pitchers
 from src.features.bhq_rates import convert_bhq_hitters, convert_bhq_pitchers
 from src.features.elo import EloRatings, build_preseason_elo
 from src.features.batting import build_batter_profile
-from src.features.pitching import build_pitcher_profile, build_bullpen_profile
+from src.features.pitching import build_pitcher_profile, build_bullpen_profile, build_tiered_bullpen_profiles
 from src.features.park_factors import get_park_factors
+from src.features.weather import compute_weather_factors, merge_weather_into_park_factors
 from src.simulation.constants import LEAGUE_RATES
 from src.simulation.game_sim import monte_carlo_win_probability
 from src.betting.odds import american_to_prob, american_to_decimal, remove_vig
 from src.betting.edge import calculate_edge, compute_game_confidence
 from src.betting.kelly import size_bet
+
+
+def _load_weather(year: int) -> Optional[pd.DataFrame]:
+    """Load cached game weather data for a season."""
+    path = CACHE_DIR / f"game_weather_{year}.pkl"
+    if path.exists():
+        return pd.read_pickle(path)
+    return None
 
 
 _DEFAULT_PITCHER = {
@@ -103,6 +112,12 @@ def run_backtest(
         if closing_totals is not None:
             print(f"  Loaded {len(closing_totals)} closing totals lines")
 
+        weather_df = _load_weather(year)
+        weather_lookup = {}
+        if weather_df is not None:
+            weather_lookup = {int(row["game_id"]): row for _, row in weather_df.iterrows()}
+            print(f"  Loaded {len(weather_lookup)} game weather records")
+
         if not use_statcast:
             # Fallback: league-average profiles, no lineups
             games = schedule_games[:max_games_per_year] if max_games_per_year else schedule_games
@@ -129,11 +144,11 @@ def run_backtest(
         pitcher_profiles = _build_pitcher_profiles(pitcher_rates)
         batter_hands     = extract_batter_handedness(statcast)
 
-        print("  Building team bullpen profiles...")
+        print("  Building team bullpen profiles (tiered)...")
         reliever_info = extract_team_relievers(statcast)
         team_bullpen_rates = aggregate_team_bullpen_rates(statcast, reliever_info)
         team_bullpen_profiles = {
-            team: build_bullpen_profile(df) for team, df in team_bullpen_rates.items()
+            team: build_tiered_bullpen_profiles(df) for team, df in team_bullpen_rates.items()
         }
         print(f"    {len(batter_profiles)} batters, {len(pitcher_profiles)} pitchers, "
               f"{len(team_bullpen_profiles)} team bullpens")
@@ -157,12 +172,14 @@ def run_backtest(
         print(f"  Simulating {len(matched)} games ({n_sims} sims each)...")
         for g in tqdm(matched, desc=f"  {year}"):
             try:
+                weather_row = weather_lookup.get(g["game_id"])
                 pred = _sim_with_lineups(
                     g, g["lineup_data"],
                     batter_profiles, pitcher_profiles, batter_hands,
                     n_sims,
                     team_bullpen_profiles=team_bullpen_profiles,
                     batter_speeds=batter_speeds,
+                    weather_row=weather_row,
                 )
                 pred["year"] = year
                 _attach_odds(pred, closing_lines, bankroll)
@@ -218,6 +235,12 @@ def run_rolling_backtest(
         closing_totals = _load_closing_totals(year)
         if closing_totals is not None:
             print(f"  Loaded {len(closing_totals)} closing totals lines")
+
+        weather_df = _load_weather(year)
+        weather_lookup = {}
+        if weather_df is not None:
+            weather_lookup = {int(row["game_id"]): row for _, row in weather_df.iterrows()}
+            print(f"  Loaded {len(weather_lookup)} game weather records")
 
         print("  Loading Statcast data...")
         statcast = fetch_statcast_season(year)
@@ -316,10 +339,10 @@ def run_rolling_backtest(
             pitcher_profiles = _build_pitcher_profiles(pitcher_rates) if not pitcher_rates.empty else {}
             batter_hands = cumulative.get_batter_handedness()
 
-            # Build team bullpen profiles from cumulative reliever data
+            # Build tiered team bullpen profiles from cumulative reliever data
             team_reliever_rates = cumulative.get_team_reliever_rates()
             team_bullpen_profiles = {
-                team: build_bullpen_profile(df) for team, df in team_reliever_rates.items()
+                team: build_tiered_bullpen_profiles(df) for team, df in team_reliever_rates.items()
             }
 
             # 2. Simulate all games on this date
@@ -329,6 +352,7 @@ def run_rolling_backtest(
                     break
                 try:
                     elo_prob = elo.expected_win_prob(g["home_team"], g["away_team"])
+                    weather_row = weather_lookup.get(g["game_id"])
                     pred = _sim_with_lineups(
                         g, g["lineup_data"],
                         batter_profiles, pitcher_profiles, batter_hands,
@@ -336,6 +360,7 @@ def run_rolling_backtest(
                         team_bullpen_profiles=team_bullpen_profiles,
                         elo_home_prob=elo_prob,
                         batter_speeds=batter_speeds,
+                        weather_row=weather_row,
                     )
                     pred["year"] = year
                     pred["cumulative_batters"] = cumulative.num_batters
@@ -438,9 +463,20 @@ def _sim_with_lineups(
     team_bullpen_profiles: dict = None,
     elo_home_prob: float = None,
     batter_speeds: dict = None,
+    weather_row=None,
 ) -> dict:
     """Simulate a game using real starting lineups and pitcher profiles."""
     park = get_park_factors(game["home_team"])
+
+    # Apply weather adjustments (merge into park factors)
+    if weather_row is not None:
+        weather_factors = compute_weather_factors(
+            temperature=weather_row.get("temperature"),
+            wind_speed=weather_row.get("wind_speed", 0),
+            wind_direction=weather_row.get("wind_direction", ""),
+            condition=weather_row.get("condition", ""),
+        )
+        park = merge_weather_into_park_factors(park, weather_factors)
 
     # Build lineups (with speed scores for stolen base model)
     home_lineup = _build_lineup(lineup_data["home_lineup"], batter_profiles, batter_hands, batter_speeds)
@@ -450,23 +486,38 @@ def _sim_with_lineups(
     home_starter = _get_pitcher(lineup_data["home_starter_id"], pitcher_profiles)
     away_starter = _get_pitcher(lineup_data["away_starter_id"], pitcher_profiles)
 
-    # Team-specific bullpen profiles, falling back to league average
+    # Team-specific tiered bullpen profiles, falling back to league average
+    _default_bp = _DEFAULT_PITCHER.copy()
     if team_bullpen_profiles:
-        home_bullpen = team_bullpen_profiles.get(game["home_team"], _DEFAULT_PITCHER.copy())
-        away_bullpen = team_bullpen_profiles.get(game["away_team"], _DEFAULT_PITCHER.copy())
+        home_bp = team_bullpen_profiles.get(game["home_team"])
+        away_bp = team_bullpen_profiles.get(game["away_team"])
+        if home_bp and isinstance(home_bp, tuple):
+            home_bullpen_hi, home_bullpen_lo = home_bp
+        else:
+            home_bullpen_hi = home_bp if home_bp else _default_bp
+            home_bullpen_lo = None
+        if away_bp and isinstance(away_bp, tuple):
+            away_bullpen_hi, away_bullpen_lo = away_bp
+        else:
+            away_bullpen_hi = away_bp if away_bp else _default_bp
+            away_bullpen_lo = None
     else:
-        home_bullpen = _DEFAULT_PITCHER.copy()
-        away_bullpen = _DEFAULT_PITCHER.copy()
+        home_bullpen_hi = _default_bp
+        home_bullpen_lo = None
+        away_bullpen_hi = _default_bp
+        away_bullpen_lo = None
 
     result = monte_carlo_win_probability(
         home_lineup=home_lineup,
         away_lineup=away_lineup,
         home_starter=home_starter,
         away_starter=away_starter,
-        home_bullpen=home_bullpen,
-        away_bullpen=away_bullpen,
+        home_bullpen=home_bullpen_hi,
+        away_bullpen=away_bullpen_hi,
         park_factors=park,
         n_simulations=n_sims,
+        home_bullpen_lo=home_bullpen_lo,
+        away_bullpen_lo=away_bullpen_lo,
     )
 
     # Count how many real profiles we used (vs league-avg fallbacks)

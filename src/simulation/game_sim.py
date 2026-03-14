@@ -37,41 +37,56 @@ _K, _BB, _HBP, _HR, _3B, _2B, _1B, _OUT = range(8)
 # Pre-compute PA probability arrays for all matchups in a game
 # ---------------------------------------------------------------------------
 
+def _compute_bullpen_probs(
+    lineup: List[dict],
+    bullpen_profile: dict,
+    park_factors: dict,
+) -> np.ndarray:
+    """Compute PA probabilities for a lineup vs a bullpen profile. Returns shape (9, 8)."""
+    probs = np.empty((9, 8))
+    pitcher_hand = bullpen_profile.get("throws", "R")
+    for slot in range(9):
+        batter = lineup[slot]
+        batter_hand = batter.get("bats", "R")
+        if batter_hand == "S":
+            eff_hand = "L" if pitcher_hand == "R" else "R"
+        else:
+            eff_hand = batter_hand
+        batter_rates = batter["profile"].get(pitcher_hand, batter["profile"].get("R"))
+        pitcher_rates = bullpen_profile.get(eff_hand, bullpen_profile.get("R"))
+        bp_probs = compute_pa_probabilities(batter_rates, pitcher_rates, park_factors=park_factors)
+        probs[slot] = np.array([bp_probs[o] for o in OUTCOMES])
+    return probs
+
+
 def _precompute_pa_arrays(
     lineup: List[dict],
     starter_profile: dict,
-    bullpen_profile: dict,
+    bullpen_hi_profile: dict,
+    bullpen_lo_profile: dict,
     park_factors: dict,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Pre-compute PA probability arrays for all batter-pitcher matchups.
 
     Returns:
-        starter_probs: shape (9, 3, 8) — [lineup_slot, tto_level_idx, outcome]
-            tto_level_idx: 0=TTO1 (no boost), 1=TTO2, 2=TTO3+
-        bullpen_probs: shape (9, 8) — [lineup_slot, outcome]
+        starter_probs:    shape (9, 3, 8) — [lineup_slot, tto_level_idx, outcome]
+        bullpen_hi_probs: shape (9, 8) — high-leverage bullpen
+        bullpen_lo_probs: shape (9, 8) — low-leverage bullpen
     """
     starter_probs = np.empty((9, 3, 8))
-    bullpen_probs = np.empty((9, 8))
 
+    pitcher_hand_s = starter_profile.get("throws", "R")
     for slot in range(9):
         batter = lineup[slot]
         batter_hand = batter.get("bats", "R")
-        pitcher_hand_s = starter_profile.get("throws", "R")
-        pitcher_hand_b = bullpen_profile.get("throws", "R")
-
-        # Effective batter hand vs each pitcher
         if batter_hand == "S":
             eff_hand_s = "L" if pitcher_hand_s == "R" else "R"
-            eff_hand_b = "L" if pitcher_hand_b == "R" else "R"
         else:
             eff_hand_s = batter_hand
-            eff_hand_b = batter_hand
 
         batter_rates_s = batter["profile"].get(pitcher_hand_s, batter["profile"].get("R"))
         pitcher_rates_s = starter_profile.get(eff_hand_s, starter_profile.get("R"))
-        batter_rates_b = batter["profile"].get(pitcher_hand_b, batter["profile"].get("R"))
-        pitcher_rates_b = bullpen_profile.get(eff_hand_b, bullpen_profile.get("R"))
 
         # Base PA probs vs starter (TTO1 = no boost)
         base_probs = compute_pa_probabilities(batter_rates_s, pitcher_rates_s, park_factors=park_factors)
@@ -89,11 +104,10 @@ def _precompute_pa_arrays(
             boosted /= boosted.sum()
             starter_probs[slot, tto_idx] = boosted
 
-        # Bullpen probs
-        bp_probs = compute_pa_probabilities(batter_rates_b, pitcher_rates_b, park_factors=park_factors)
-        bullpen_probs[slot] = np.array([bp_probs[o] for o in OUTCOMES])
+    bullpen_hi_probs = _compute_bullpen_probs(lineup, bullpen_hi_profile, park_factors)
+    bullpen_lo_probs = _compute_bullpen_probs(lineup, bullpen_lo_profile, park_factors)
 
-    return starter_probs, bullpen_probs
+    return starter_probs, bullpen_hi_probs, bullpen_lo_probs
 
 
 # ---------------------------------------------------------------------------
@@ -270,10 +284,13 @@ def _check_wild_pitch(
 
 def _simulate_half_inning(
     starter_probs: np.ndarray,
-    bullpen_probs: np.ndarray,
+    bullpen_hi_probs: np.ndarray,
+    bullpen_lo_probs: np.ndarray,
     order_pos: int,
     pitcher_bf: int,
     rng: np.random.Generator,
+    run_diff: int = 0,
+    high_lev_threshold: int = 2,
     ghost_runner: bool = False,
     batter_tto: Optional[Dict[int, int]] = None,
     team_speed: float = 100.0,
@@ -286,6 +303,10 @@ def _simulate_half_inning(
 
     if ghost_runner:
         bases[1] = True
+
+    # Select bullpen tier based on score differential at start of half-inning
+    use_hi = abs(run_diff) <= high_lev_threshold
+    bullpen_probs = bullpen_hi_probs if use_hi else bullpen_lo_probs
 
     while outs < 3:
         # --- Stolen base check (before PA) ---
@@ -350,15 +371,19 @@ def _simulate_half_inning(
 
 def simulate_game(
     home_starter_probs: np.ndarray,
-    home_bullpen_probs: np.ndarray,
+    home_bullpen_hi_probs: np.ndarray,
+    home_bullpen_lo_probs: np.ndarray,
     away_starter_probs: np.ndarray,
-    away_bullpen_probs: np.ndarray,
+    away_bullpen_hi_probs: np.ndarray,
+    away_bullpen_lo_probs: np.ndarray,
     rng: np.random.Generator,
     home_speed: float = 100.0,
     away_speed: float = 100.0,
+    high_lev_threshold: int = 2,
 ) -> Tuple[int, int]:
     """
     Simulate a full 9-inning game using pre-computed PA probability arrays.
+    Uses tiered bullpen: high-leverage arms in close games, low-leverage in blowouts.
     Returns (away_score, home_score).
     """
     away_score = 0
@@ -373,8 +398,10 @@ def simulate_game(
     for inning in range(1, 10):
         # Top: away bats vs home pitching
         r, away_order, home_pitcher_bf, away_batter_tto = _simulate_half_inning(
-            home_starter_probs, home_bullpen_probs,
+            home_starter_probs, home_bullpen_hi_probs, home_bullpen_lo_probs,
             away_order, home_pitcher_bf, rng,
+            run_diff=home_score - away_score,
+            high_lev_threshold=high_lev_threshold,
             batter_tto=away_batter_tto,
             team_speed=away_speed,
         )
@@ -385,8 +412,10 @@ def simulate_game(
             break
 
         r, home_order, away_pitcher_bf, home_batter_tto = _simulate_half_inning(
-            away_starter_probs, away_bullpen_probs,
+            away_starter_probs, away_bullpen_hi_probs, away_bullpen_lo_probs,
             home_order, away_pitcher_bf, rng,
+            run_diff=away_score - home_score,
+            high_lev_threshold=high_lev_threshold,
             batter_tto=home_batter_tto,
             team_speed=home_speed,
         )
@@ -395,24 +424,28 @@ def simulate_game(
         if inning >= 9 and home_score > away_score:
             break
 
-    # Extra innings (ghost runner, bullpen only)
+    # Extra innings — always high-leverage (close game by definition)
     extra = 0
     while away_score == home_score and extra < 10:
         extra += 1
 
+        hi_as_starter = home_bullpen_hi_probs.reshape(9, 1, 8).repeat(3, axis=1)
         r, away_order, home_pitcher_bf, _ = _simulate_half_inning(
-            home_bullpen_probs.reshape(9, 1, 8).repeat(3, axis=1),  # bullpen as "starter"
-            home_bullpen_probs,
+            hi_as_starter, home_bullpen_hi_probs, home_bullpen_lo_probs,
             away_order, STARTER_BATTER_LIMIT + 1, rng,
+            run_diff=0,
+            high_lev_threshold=high_lev_threshold,
             ghost_runner=True,
             team_speed=away_speed,
         )
         away_score += r
 
+        hi_as_starter = away_bullpen_hi_probs.reshape(9, 1, 8).repeat(3, axis=1)
         r, home_order, away_pitcher_bf, _ = _simulate_half_inning(
-            away_bullpen_probs.reshape(9, 1, 8).repeat(3, axis=1),
-            away_bullpen_probs,
+            hi_as_starter, away_bullpen_hi_probs, away_bullpen_lo_probs,
             home_order, STARTER_BATTER_LIMIT + 1, rng,
+            run_diff=away_score - home_score,
+            high_lev_threshold=high_lev_threshold,
             ghost_runner=True,
             team_speed=home_speed,
         )
@@ -434,22 +467,37 @@ def monte_carlo_win_probability(
     park_factors: dict,
     n_simulations: int = 10_000,
     seed: Optional[int] = None,
+    home_bullpen_lo: dict = None,
+    away_bullpen_lo: dict = None,
 ) -> Dict:
     """
     Run N simulations and return win probabilities + score distributions.
 
     Pre-computes all PA probability arrays once, then runs the fast sim loop.
+
+    Supports tiered bullpens: home_bullpen / away_bullpen are treated as the
+    high-leverage tier. If home_bullpen_lo / away_bullpen_lo are provided,
+    they are used as the low-leverage tier; otherwise the high-leverage
+    profile is used for both (backward compatible).
     """
+    from config import BULLPEN_HIGH_LEV_THRESHOLD
+    high_lev_threshold = BULLPEN_HIGH_LEV_THRESHOLD
+
+    if home_bullpen_lo is None:
+        home_bullpen_lo = home_bullpen
+    if away_bullpen_lo is None:
+        away_bullpen_lo = away_bullpen
+
     rng = np.random.default_rng(seed)
 
     # Pre-compute all matchup probabilities (the expensive part — done once)
-    # "home_starter_probs" = probs for away batters vs home starter/bullpen
-    # "away_starter_probs" = probs for home batters vs away starter/bullpen
-    home_s_probs, home_b_probs = _precompute_pa_arrays(
-        away_lineup, home_starter, home_bullpen, park_factors
+    # "home_*" = probs for away batters vs home starter/bullpen
+    # "away_*" = probs for home batters vs away starter/bullpen
+    home_s_probs, home_bhi_probs, home_blo_probs = _precompute_pa_arrays(
+        away_lineup, home_starter, home_bullpen, home_bullpen_lo, park_factors
     )
-    away_s_probs, away_b_probs = _precompute_pa_arrays(
-        home_lineup, away_starter, away_bullpen, park_factors
+    away_s_probs, away_bhi_probs, away_blo_probs = _precompute_pa_arrays(
+        home_lineup, away_starter, away_bullpen, away_bullpen_lo, park_factors
     )
 
     # Team average speed for stolen base model (BHQ SPD, default 100)
@@ -462,11 +510,12 @@ def monte_carlo_win_probability(
 
     for i in range(n_simulations):
         a, h = simulate_game(
-            home_s_probs, home_b_probs,
-            away_s_probs, away_b_probs,
+            home_s_probs, home_bhi_probs, home_blo_probs,
+            away_s_probs, away_bhi_probs, away_blo_probs,
             rng,
             home_speed=home_speed,
             away_speed=away_speed,
+            high_lev_threshold=high_lev_threshold,
         )
         home_runs_list[i] = h
         away_runs_list[i] = a
