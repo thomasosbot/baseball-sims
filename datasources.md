@@ -68,7 +68,7 @@ pybaseball 2.2.7 hits a 403 error on FanGraphs' `/leaders-legacy.aspx` endpoint.
 | **Ct%** (contact rate) | K rate | r=0.747 | `K = 0.620 * (1 - Ct%) + 0.065` |
 | **BB%** | BB rate | r=0.608 | Direct (BB% / 100) |
 | **Brl%** (barrel rate) | HR rate | r=0.526 | `HR/BIP = 0.015 + 0.30 * Brl%` |
-| **SPD** (speed score) | 3B rate | r=0.296 | Scaled to league average |
+| **SPD** (speed score) | 3B rate + stolen base model | r=0.296 | Scaled to league average for 3B; team avg SPD adjusts SB attempt/success rates in game sim |
 | **H%** (BABIP) | Hit rate on BIP | — | Used for 1B/2B distribution |
 | **LD%**, **FB%**, **GB%** | Hit type distribution | — | 1B/2B split from batted ball profile |
 | **xBA**, **PX**, **HctX** | Fallback indicators | — | Used when primary metrics are missing |
@@ -106,6 +106,24 @@ blended_rate = BHQ_BLEND_WEIGHT * bhq_rate + (1 - BHQ_BLEND_WEIGHT) * marcel_rat
 
 `src/data/bhq.py` reads CSV files by year, standardises column names, and returns DataFrames indexed by MLBAMID. `src/features/bhq_rates.py` converts raw BHQ metrics into the 8 PA outcome rates (K, BB, HBP, HR, 3B, 2B, 1B, OUT) used by the simulation.
 
+### BHQ Park Factors (v1.0)
+
+**File:** `data/raw/bhq/park factors.csv`
+
+BHQ park factor table provides richer park adjustments than FanGraphs component-only factors:
+
+| Factor | Description | Example values |
+|--------|-------------|----------------|
+| **RUNS** | Overall run environment | Coors +30%, Seattle -17%, CIN +5% |
+| **LHB BA** | Batting average for left-handed batters | Coors +14%, Fenway +10%, Seattle -9% |
+| **RHB BA** | Batting average for right-handed batters | Coors +17%, Seattle -14% |
+| **LHB HR** | Home runs for left-handed batters | CIN +35%, PHI +29%, ARI -28% |
+| **RHB HR** | Home runs for right-handed batters | LAD +35%, BAL +22%, CLE -21% |
+| **BB** | Walk rate | KC +10%, MIA +6%, BAL -8%, Oracle -14% |
+| **K** | Strikeout rate | Seattle +14%, MIL +14%, Coors -11% |
+
+Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K factors are applied in the PA model (`pa_model.py`). Runs factor scales the total_runs_dist for totals betting (`runner.py`).
+
 ## The Odds API
 
 **Endpoint:** `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds`
@@ -124,7 +142,9 @@ blended_rate = BHQ_BLEND_WEIGHT * bhq_rate + (1 - BHQ_BLEND_WEIGHT) * marcel_rat
 - `bookmakers[].markets[].outcomes[].price` — the American odds for each side at each book
 - For totals: `bookmakers[].markets[].outcomes[].point` — the total line (e.g. 8.5)
 
-**Sportsbooks available (~13):** FanDuel, DraftKings, BetMGM, Caesars, BetRivers, PointsBet, WynnBET, Bovada, BetUS, etc.
+**Sportsbooks available (~13):** FanDuel, DraftKings, BetMGM, Caesars, BetRivers, PointsBet, WynnBET, Bovada, BetUS, ESPN BET, Fanatics, Pinnacle, etc.
+
+**Per-sportsbook odds in daily pipeline:** `parse_odds_response()` now collects `books_home` / `books_away` dicts with every sportsbook's American odds per game. `run_daily.py` attaches `sportsbook_odds` to each pick in the daily JSON output. The website renders these as color-coded badges per book (FanDuel=blue, DraftKings=green, BetMGM=gold, Caesars=burgundy, BetRivers=purple, ESPN BET=red, Fanatics=teal, Pinnacle=dark gray), with the best odds highlighted.
 
 **Data quality notes:**
 - Some books (pointsbetus, wynnbet) have garbage placeholder lines (-1000000, +20000). These are filtered out.
@@ -206,6 +226,22 @@ Instead of relying on external projection systems (Steamer/ZiPS behind FanGraphs
 **Cached Statcast years:** 2021 (732M), 2022 (748M), 2023 (588M), 2024 (716M).
 
 For the 2024 backtest, Marcel produces 2,194 batter and 1,777 pitcher projections from 2021-2023 data. Degrades gracefully with fewer years available.
+
+## Derived Constants (calibrated from public data)
+
+| Constant | Value | Source |
+|----------|-------|--------|
+| `SB_ATTEMPT_RATE_1B` | 0.07 | 2024 MLB: ~0.70 SB/team/game, ~13 PA with runner on 1B |
+| `SB_ATTEMPT_RATE_2B` | 0.015 | ~20% of all SB attempts are steal of 3B |
+| `SB_SUCCESS_RATE` | 0.78 | 2024 MLB stolen base success rate |
+| `SB_SPEED_FACTOR` | 0.008 | Success rate adjustment per BHQ SPD point above/below 100 |
+| `WILD_PITCH_RATE` | 0.008 | 2024 MLB: ~0.30 WP+PB/team/game, ~38 PA/team |
+| `ERROR_RATE` | 0.014 | 2024 MLB: ~0.55 errors/team/game, ~38 PA/team |
+| `PRODUCTIVE_OUT_2B_TO_3B` | 0.18 | Statcast BsR 2022-2024: 0.45 GB fraction × 0.40 advance rate |
+| `PRODUCTIVE_OUT_1B_TO_2B` | 0.11 | Statcast BsR 2022-2024: 0.45 GB fraction × 0.25 advance rate |
+| `SAC_FLY_PROB` | 0.13 | MLB ~0.33 SF/team/game ÷ ~2.5 opportunities (fixed from 0.30) |
+| Base advancement (1B, runner on 1B) | 72% 2B / 28% 3B | Statcast/FanGraphs BsR, 2022-2024 avg |
+| Base advancement (2B, runner on 1B) | 44% 3B / 56% score | Statcast/FanGraphs BsR, 2022-2024 avg |
 
 ## Data Not Yet Integrated (planned)
 

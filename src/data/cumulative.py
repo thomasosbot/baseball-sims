@@ -41,6 +41,33 @@ class CumulativeStats:
         # {team_abbrev: set(pitcher_id)} — known relievers per team
         self._team_relievers = defaultdict(set)
 
+    def __getstate__(self):
+        """Convert defaultdicts to regular dicts for pickling."""
+        state = self.__dict__.copy()
+        state["_batters"] = {k: dict(v) for k, v in self._batters.items()}
+        state["_pitchers"] = {k: dict(v) for k, v in self._pitchers.items()}
+        state["_batter_stands"] = dict(self._batter_stands)
+        state["_team_relievers"] = {k: set(v) for k, v in self._team_relievers.items()}
+        return state
+
+    def __setstate__(self, state):
+        """Restore defaultdicts from regular dicts after unpickling."""
+        self.__dict__.update(state)
+        batters = defaultdict(lambda: defaultdict(float))
+        for k, v in self._batters.items():
+            batters[k].update(v)
+        self._batters = batters
+        pitchers = defaultdict(lambda: defaultdict(float))
+        for k, v in self._pitchers.items():
+            pitchers[k].update(v)
+        self._pitchers = pitchers
+        stands = defaultdict(set)
+        stands.update(self._batter_stands)
+        self._batter_stands = stands
+        relievers = defaultdict(set)
+        relievers.update(self._team_relievers)
+        self._team_relievers = relievers
+
     def update_from_day(self, day_pa: pd.DataFrame):
         """
         Ingest one date's worth of PA events (already classified).

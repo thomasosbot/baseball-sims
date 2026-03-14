@@ -1,0 +1,154 @@
+{
+  "date": "2026-03-12",
+  "generated_at": "2026-03-13T22:30:17.490689",
+  "games": [
+    {
+      "away": "NYM",
+      "home": "STL",
+      "away_pitcher": "Sean Manaea",
+      "home_pitcher": "Michael McGreevy",
+      "model_home_wp": 0.5048,
+      "model_away_wp": 0.4952,
+      "avg_total_runs": 8.91,
+      "elo_home_wp": 0.5215,
+      "sim_home_wp": 0.4882
+    },
+    {
+      "away": "BOS",
+      "home": "MIN",
+      "away_pitcher": "Connelly Early",
+      "home_pitcher": "Bailey Ober",
+      "model_home_wp": 0.4675,
+      "model_away_wp": 0.5325,
+      "avg_total_runs": 8.85,
+      "elo_home_wp": 0.3885,
+      "sim_home_wp": 0.5465
+    },
+    {
+      "away": "TOR",
+      "home": "PHI",
+      "away_pitcher": "CJ Van Eyk",
+      "home_pitcher": "Jes\u00fas Luzardo",
+      "model_home_wp": 0.5359,
+      "model_away_wp": 0.4641,
+      "avg_total_runs": 9.78,
+      "elo_home_wp": 0.5517,
+      "sim_home_wp": 0.52
+    },
+    {
+      "away": "NYY",
+      "home": "DET",
+      "away_pitcher": "Will Warren",
+      "home_pitcher": "Justin Verlander",
+      "model_home_wp": 0.4491,
+      "model_away_wp": 0.5509,
+      "avg_total_runs": 9.62,
+      "elo_home_wp": 0.3637,
+      "sim_home_wp": 0.5345
+    },
+    {
+      "away": "SEA",
+      "home": "CHC",
+      "away_pitcher": "Emerson Hancock",
+      "home_pitcher": "Edward Cabrera",
+      "model_home_wp": 0.4997,
+      "model_away_wp": 0.5003,
+      "avg_total_runs": 8.7,
+      "elo_home_wp": 0.4864,
+      "sim_home_wp": 0.5131
+    },
+    {
+      "away": "Athletics",
+      "home": "TEX",
+      "away_pitcher": "J.T. Ginn",
+      "home_pitcher": "Jack Leiter",
+      "model_home_wp": 0.5224,
+      "model_away_wp": 0.4776,
+      "avg_total_runs": 9.04,
+      "elo_home_wp": 0.4998,
+      "sim_home_wp": 0.5449
+    },
+    {
+      "away": "COL",
+      "home": "ARI",
+      "away_pitcher": "Sean Sullivan",
+      "home_pitcher": "Taylor Clarke",
+      "model_home_wp": 0.6131,
+      "model_away_wp": 0.3869,
+      "avg_total_runs": 7.95,
+      "elo_home_wp": 0.7157,
+      "sim_home_wp": 0.5104
+    },
+    {
+      "away": "WSN",
+      "home": "HOU",
+      "away_pitcher": "Jake Irvin",
+      "home_pitcher": "Mike Burrows",
+      "model_home_wp": 0.5938,
+      "model_away_wp": 0.4062,
+      "avg_total_runs": 8.61,
+      "elo_home_wp": 0.6072,
+      "sim_home_wp": 0.5804
+    },
+    {
+      "away": "ATL",
+      "home": "PIT",
+      "away_pitcher": "Grant Holmes",
+      "home_pitcher": "Bubba Chandler",
+      "model_home_wp": 0.5563,
+      "model_away_wp": 0.4437,
+      "avg_total_runs": 8.44,
+      "elo_home_wp": 0.5199,
+      "sim_home_wp": 0.5926
+    },
+    {
+      "away": "CIN",
+      "home": "LAD",
+      "away_pitcher": "Nick Lodolo",
+      "home_pitcher": "Cole Irvin",
+      "model_home_wp": 0.5673,
+      "model_away_wp": 0.4327,
+      "avg_total_runs": 9.79,
+      "elo_home_wp": 0.5931,
+      "sim_home_wp": 0.5415
+    },
+    {
+      "away": "CWS",
+      "home": "SFG",
+      "away_pitcher": "Ryan Borucki",
+      "home_pitcher": "Trevor McDonald",
+      "model_home_wp": 0.5956,
+      "model_away_wp": 0.4044,
+      "avg_total_runs": 8.47,
+      "elo_home_wp": 0.5983,
+      "sim_home_wp": 0.593
+    },
+    {
+      "away": "MIL",
+      "home": "CLE",
+      "away_pitcher": "DL Hall",
+      "home_pitcher": "Slade Cecconi",
+      "model_home_wp": 0.5339,
+      "model_away_wp": 0.4661,
+      "avg_total_runs": 8.32,
+      "elo_home_wp": 0.5556,
+      "sim_home_wp": 0.5122
+    },
+    {
+      "away": "KCR",
+      "home": "SDP",
+      "away_pitcher": "Kris Bubic",
+      "home_pitcher": "Germ\u00e1n M\u00e1rquez",
+      "model_home_wp": 0.5688,
+      "model_away_wp": 0.4312,
+      "avg_total_runs": 8.29,
+      "elo_home_wp": 0.5458,
+      "sim_home_wp": 0.5917
+    }
+  ],
+  "picks": [],
+  "bankroll": {
+    "current": 1000.0,
+    "today_wagered": 0.0
+  }
+}

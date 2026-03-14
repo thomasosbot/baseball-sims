@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% set active = "picks" %}
+
+{% block title %}Today's Picks — Ozzy Analytics{% endblock %}
+
+{% block content %}
+<section class="hero">
+    {% if today %}
+    <p class="hero-date">{{ today.date }}</p>
+    <h1>Today's Picks</h1>
+    <div class="stats-bar fade-in">
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.wins }}-{{ stats.losses }}</span>
+            <span class="stat-label">Season Record</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.total_profit) }}</span>
+            <span class="stat-label">Season P&L</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.roi }}%</span>
+            <span class="stat-label">ROI</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value">${{ "%.0f"|format(stats.current_bankroll) }}</span>
+            <span class="stat-label">Bankroll</span>
+        </div>
+    </div>
+    {% else %}
+    <h1>No picks yet</h1>
+    <p class="hero-sub">The daily pipeline hasn't run yet. Check back after lineups are confirmed.</p>
+    {% endif %}
+</section>
+
+{% if today and today.picks %}
+<section class="section fade-in">
+    <h2 class="section-title">Today's Picks ({{ today.picks|length }})</h2>
+    <div class="picks-grid">
+        {% for pick in today.picks %}
+        <div class="pick-card glass">
+            <div class="pick-header">
+                <span class="pick-name">{{ pick.pick }}</span>
+                <span class="pick-odds">{{ pick.odds }}</span>
+            </div>
+            <div class="pick-details">
+                <div class="pick-metric">
+                    <span class="metric-label">Edge</span>
+                    <span class="metric-value edge">{{ pick.edge_pct }}%</span>
+                </div>
+                <div class="pick-metric">
+                    <span class="metric-label">Confidence</span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: {{ (pick.confidence * 100)|int if pick.confidence else 70 }}%"></div>
+                    </div>
+                </div>
+                <div class="pick-metric">
+                    <span class="metric-label">Wager</span>
+                    <span class="metric-value">${{ "%.0f"|format(pick.wager) if pick.wager else "—" }}</span>
+                </div>
+            </div>
+            {% if pick.sportsbook_odds %}
+            <div class="sportsbook-odds">
+                {% for book, odds in pick.sportsbook_odds.items() %}
+                {% set odds_str = "+" ~ odds if odds > 0 else odds %}
+                {% set is_best = (odds|string == pick.odds|replace("+", "")|string) or (odds_str == pick.odds) %}
+                <span class="book-badge {{ book }} {% if is_best %}best-odds{% endif %}">
+                    <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("pinnacle", "Pinnacle") | replace("betrivers", "BetRivers") | replace("espnbet", "ESPN BET") | replace("fanatics", "Fanatics") }}</span>
+                    {{ odds_str }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if pick.explanation %}
+            <p class="pick-explanation">{{ pick.explanation }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% elif today %}
+<section class="no-picks fade-in">
+    <h2>No Edges Found</h2>
+    <p>The model didn't find any bets meeting the minimum 7% edge threshold today.</p>
+</section>
+{% endif %}
+
+{% if today and today.games %}
+<section class="section fade-in">
+    <h2 class="section-title">All Games ({{ today.games|length }})</h2>
+    <div class="table-card glass">
+        <table class="games-table">
+            <thead>
+                <tr>
+                    <th>Matchup</th>
+                    <th>Model</th>
+                    <th>Market</th>
+                    <th>Edge</th>
+                    <th>Pick</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in today.games %}
+                <tr>
+                    <td>
+                        <span class="team">{{ game.away }}</span>
+                        <span class="at">@</span>
+                        <span class="team">{{ game.home }}</span>
+                    </td>
+                    <td>{{ "%.1f"|format(game.model_home_wp * 100) }}%</td>
+                    <td>{{ "%.1f"|format(game.market_home_wp * 100) if game.market_home_wp else "—" }}%</td>
+                    <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
+                        {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
+                    </td>
+                    <td>{{ game.pick if game.pick else "—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

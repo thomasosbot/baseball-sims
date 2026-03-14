@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% set active = "history" %}
+
+{% block title %}Season History — Ozzy Analytics{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Season History</h1>
+    <div class="stats-bar fade-in">
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.total_picks }}</span>
+            <span class="stat-label">Total Picks</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.wins }}-{{ stats.losses }}</span>
+            <span class="stat-label">Record</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.win_rate }}%</span>
+            <span class="stat-label">Win Rate</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.total_profit) }}</span>
+            <span class="stat-label">Total P&L</span>
+        </div>
+        <div class="stat-card glass">
+            <span class="stat-value">{{ stats.roi }}%</span>
+            <span class="stat-label">ROI</span>
+        </div>
+    </div>
+</section>
+
+{% if stats.daily_pnl %}
+<section class="section fade-in">
+    <h2 class="section-title">Cumulative P&L</h2>
+    <div class="chart-card glass">
+        <div class="chart-container">
+            <canvas id="pnlChart"></canvas>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if results %}
+<section class="section fade-in">
+    <h2 class="section-title">Daily Results</h2>
+    <div class="table-card glass">
+        <table class="games-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Picks</th>
+                    <th>W-L</th>
+                    <th>Day P&L</th>
+                    <th>Bankroll</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in results|reverse %}
+                <tr>
+                    <td>{{ day.date }}</td>
+                    <td>{{ day.picks_count }}</td>
+                    <td>{{ day.wins }}-{{ day.losses }}</td>
+                    <td class="{% if day.day_profit > 0 %}profit{% elif day.day_profit < 0 %}loss{% endif %}">
+                        ${{ "%.0f"|format(day.day_profit) }}
+                    </td>
+                    <td>${{ "%.0f"|format(day.bankroll) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if stats.daily_pnl %}
+<script>
+const ctx = document.getElementById('pnlChart').getContext('2d');
+const data = {{ stats.daily_pnl | tojson }};
+const isPositive = data[data.length-1].cumulative >= 0;
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: data.map(d => d.date),
+        datasets: [{
+            label: 'Cumulative P&L ($)',
+            data: data.map(d => d.cumulative),
+            borderColor: isPositive ? '#31A24C' : '#FA383E',
+            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.06)' : 'rgba(250, 56, 62, 0.06)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: isPositive ? '#31A24C' : '#FA383E',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(28, 30, 33, 0.9)',
+                titleFont: { family: 'Inter' },
+                bodyFont: { family: 'Inter' },
+                padding: 10,
+                cornerRadius: 8,
+            },
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: {
+                    color: '#8A8D91',
+                    font: { family: 'Inter', size: 11 },
+                    callback: v => '$' + v,
+                },
+            },
+        },
+    },
+});
+</script>
+{% endif %}
+{% endblock %}

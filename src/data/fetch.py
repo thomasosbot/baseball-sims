@@ -165,7 +165,7 @@ def fetch_game_lineup(game_id: int) -> dict:
     return result
 
 
-def fetch_daily_lineups(date: str) -> List[dict]:
+def fetch_daily_lineups(date: str, include_spring: bool = False) -> List[dict]:
     """
     Fetch all games and their starting lineups for a given date (YYYY-MM-DD).
     Returns list of dicts, each with: game_id, home_team, away_team,
@@ -175,8 +175,9 @@ def fetch_daily_lineups(date: str) -> List[dict]:
     m, d, y = date[5:7], date[8:10], date[:4]
     games = statsapi.schedule(date=f"{m}/{d}/{y}")
     results = []
+    allowed_types = {"R", "S"} if include_spring else {"R"}
     for g in games:
-        if g.get("game_type") != "R":
+        if g.get("game_type") not in allowed_types:
             continue
         try:
             lineups = fetch_game_lineup(g["game_id"])

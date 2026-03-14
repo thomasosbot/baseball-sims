@@ -10,7 +10,10 @@ RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
 CACHE_DIR = DATA_DIR / "cache"
 
-for d in [RAW_DIR, PROCESSED_DIR, CACHE_DIR]:
+STATE_DIR = DATA_DIR / "state"
+DAILY_DIR = DATA_DIR / "daily"
+
+for d in [RAW_DIR, PROCESSED_DIR, CACHE_DIR, STATE_DIR, DAILY_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
 # API keys

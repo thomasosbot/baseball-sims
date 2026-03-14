@@ -12,10 +12,19 @@ from typing import Dict, List, Optional, Tuple
 from src.simulation.constants import (
     BASE_ADVANCEMENT,
     DOUBLE_PLAY_PROB,
+    ERROR_RATE,
     GROUND_BALL_OUT_FRAC,
+    LEAGUE_AVG_SPEED,
+    PRODUCTIVE_OUT_1B_TO_2B,
+    PRODUCTIVE_OUT_2B_TO_3B,
     SAC_FLY_PROB,
+    SB_ATTEMPT_RATE_1B,
+    SB_ATTEMPT_RATE_2B,
+    SB_SPEED_FACTOR,
+    SB_SUCCESS_RATE,
     STARTER_BATTER_LIMIT,
     TTO_HIT_BOOST,
+    WILD_PITCH_RATE,
 )
 from src.simulation.pa_model import compute_pa_probabilities
 
@@ -141,15 +150,32 @@ def _handle_walk(bases: list) -> Tuple[list, int]:
 
 
 def _handle_out(bases: list, outs: int, rng: np.random.Generator) -> Tuple[list, int, int]:
+    """Handle an out outcome, including sac flies, DPs, errors, and productive outs."""
     new = list(bases)
     runs = 0
     extra_outs = 0
 
+    # --- Reached on error: batter reaches 1B, runners advance one base ---
+    # This converts an out into a baserunner (no out recorded)
+    if rng.random() < ERROR_RATE:
+        if new[2]:
+            runs += 1
+            new[2] = False
+        if new[1]:
+            new[2] = True
+            new[1] = False
+        if new[0]:
+            new[1] = True
+        new[0] = True
+        return new, runs, -1  # -1 signals "no out recorded"
+
+    # --- Sac fly: runner on 3B scores ---
     if new[2] and outs < 2 and rng.random() < SAC_FLY_PROB:
         runs += 1
         new[2] = False
         return new, runs, 0
 
+    # --- Double play ---
     if new[0] and outs < 2 and rng.random() < GROUND_BALL_OUT_FRAC:
         if rng.random() < DOUBLE_PLAY_PROB:
             new[0] = False
@@ -159,7 +185,83 @@ def _handle_out(bases: list, outs: int, rng: np.random.Generator) -> Tuple[list,
                 new[1] = False
             return new, runs, extra_outs
 
+    # --- Productive out: runners advance on groundball outs ---
+    if new[1] and not new[2] and rng.random() < PRODUCTIVE_OUT_2B_TO_3B:
+        new[2] = True
+        new[1] = False
+    if new[0] and not new[1] and rng.random() < PRODUCTIVE_OUT_1B_TO_2B:
+        new[1] = True
+        new[0] = False
+
     return new, runs, 0
+
+
+# ---------------------------------------------------------------------------
+# Stolen bases and wild pitches
+# ---------------------------------------------------------------------------
+
+def _check_stolen_base(
+    bases: list, outs: int, team_speed: float, rng: np.random.Generator,
+) -> Tuple[list, int, int]:
+    """
+    Check for stolen base attempts before a PA.
+    Returns (new_bases, runs_scored, outs_added).
+    """
+    new = list(bases)
+    runs = 0
+    extra_outs = 0
+    speed_ratio = team_speed / LEAGUE_AVG_SPEED
+
+    # Steal of 2B: runner on 1B, 2B empty
+    if new[0] and not new[1] and outs < 2:
+        attempt_rate = SB_ATTEMPT_RATE_1B * speed_ratio
+        if rng.random() < attempt_rate:
+            success_rate = SB_SUCCESS_RATE + SB_SPEED_FACTOR * (team_speed - LEAGUE_AVG_SPEED)
+            success_rate = np.clip(success_rate, 0.50, 0.95)
+            if rng.random() < success_rate:
+                new[1] = True
+                new[0] = False
+            else:
+                new[0] = False
+                extra_outs = 1
+
+    # Steal of 3B: runner on 2B, 3B empty (rarer)
+    elif new[1] and not new[2] and outs < 2:
+        attempt_rate = SB_ATTEMPT_RATE_2B * speed_ratio
+        if rng.random() < attempt_rate:
+            success_rate = SB_SUCCESS_RATE + SB_SPEED_FACTOR * (team_speed - LEAGUE_AVG_SPEED)
+            success_rate = np.clip(success_rate, 0.50, 0.95)
+            if rng.random() < success_rate:
+                new[2] = True
+                new[1] = False
+            else:
+                new[1] = False
+                extra_outs = 1
+
+    return new, runs, extra_outs
+
+
+def _check_wild_pitch(
+    bases: list, rng: np.random.Generator,
+) -> Tuple[list, int]:
+    """
+    Check for wild pitch / passed ball before a PA.
+    Advances all runners one base; runner on 3B scores.
+    """
+    if not any(bases):
+        return bases, 0
+    if rng.random() >= WILD_PITCH_RATE:
+        return bases, 0
+
+    new = [False, False, False]
+    runs = 0
+    if bases[2]:
+        runs += 1
+    if bases[1]:
+        new[2] = True
+    if bases[0]:
+        new[1] = True
+    return new, runs
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +276,7 @@ def _simulate_half_inning(
     rng: np.random.Generator,
     ghost_runner: bool = False,
     batter_tto: Optional[Dict[int, int]] = None,
+    team_speed: float = 100.0,
 ) -> Tuple[int, int, int, Dict[int, int]]:
     outs = 0
     bases = [False, False, False]
@@ -185,6 +288,18 @@ def _simulate_half_inning(
         bases[1] = True
 
     while outs < 3:
+        # --- Stolen base check (before PA) ---
+        if any(bases):
+            bases, sb_runs, sb_outs = _check_stolen_base(bases, outs, team_speed, rng)
+            runs += sb_runs
+            outs += sb_outs
+            if outs >= 3:
+                break
+
+            # --- Wild pitch check (before PA) ---
+            bases, wp_runs = _check_wild_pitch(bases, rng)
+            runs += wp_runs
+
         lineup_slot = order_pos % 9
         is_starter = pitcher_bf < STARTER_BATTER_LIMIT
 
@@ -220,7 +335,11 @@ def _simulate_half_inning(
         elif outcome_idx == _OUT:
             bases, r, extra = _handle_out(bases, outs, rng)
             runs += r
-            outs += 1 + extra
+            if extra == -1:
+                # Reached on error — no out recorded
+                pass
+            else:
+                outs += 1 + extra
 
     return runs, order_pos % 9, pitcher_bf, batter_tto
 
@@ -235,6 +354,8 @@ def simulate_game(
     away_starter_probs: np.ndarray,
     away_bullpen_probs: np.ndarray,
     rng: np.random.Generator,
+    home_speed: float = 100.0,
+    away_speed: float = 100.0,
 ) -> Tuple[int, int]:
     """
     Simulate a full 9-inning game using pre-computed PA probability arrays.
@@ -255,6 +376,7 @@ def simulate_game(
             home_starter_probs, home_bullpen_probs,
             away_order, home_pitcher_bf, rng,
             batter_tto=away_batter_tto,
+            team_speed=away_speed,
         )
         away_score += r
 
@@ -266,6 +388,7 @@ def simulate_game(
             away_starter_probs, away_bullpen_probs,
             home_order, away_pitcher_bf, rng,
             batter_tto=home_batter_tto,
+            team_speed=home_speed,
         )
         home_score += r
 
@@ -282,6 +405,7 @@ def simulate_game(
             home_bullpen_probs,
             away_order, STARTER_BATTER_LIMIT + 1, rng,
             ghost_runner=True,
+            team_speed=away_speed,
         )
         away_score += r
 
@@ -290,6 +414,7 @@ def simulate_game(
             away_bullpen_probs,
             home_order, STARTER_BATTER_LIMIT + 1, rng,
             ghost_runner=True,
+            team_speed=home_speed,
         )
         home_score += r
 
@@ -327,6 +452,10 @@ def monte_carlo_win_probability(
         home_lineup, away_starter, away_bullpen, park_factors
     )
 
+    # Team average speed for stolen base model (BHQ SPD, default 100)
+    home_speed = float(np.mean([b.get("speed", LEAGUE_AVG_SPEED) for b in home_lineup]))
+    away_speed = float(np.mean([b.get("speed", LEAGUE_AVG_SPEED) for b in away_lineup]))
+
     home_wins = 0
     home_runs_list = np.empty(n_simulations, dtype=np.int32)
     away_runs_list = np.empty(n_simulations, dtype=np.int32)
@@ -336,6 +465,8 @@ def monte_carlo_win_probability(
             home_s_probs, home_b_probs,
             away_s_probs, away_b_probs,
             rng,
+            home_speed=home_speed,
+            away_speed=away_speed,
         )
         home_runs_list[i] = h
         away_runs_list[i] = a

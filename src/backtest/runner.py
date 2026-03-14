@@ -57,6 +57,7 @@ _DEFAULT_PITCHER = {
 _DEFAULT_BATTER = {
     "profile": {"R": LEAGUE_RATES.copy(), "L": LEAGUE_RATES.copy()},
     "bats": "R",
+    "speed": 100,
 }
 
 
@@ -83,6 +84,8 @@ def run_backtest(
         print(f"\n{'=' * 50}")
         print(f"  Backtesting {year}")
         print(f"{'=' * 50}")
+
+        batter_speeds = {}  # populated from BHQ SPD in rolling backtest
 
         # Load schedule (for actual game results)
         schedule = fetch_season_schedule(year)
@@ -159,6 +162,7 @@ def run_backtest(
                     batter_profiles, pitcher_profiles, batter_hands,
                     n_sims,
                     team_bullpen_profiles=team_bullpen_profiles,
+                    batter_speeds=batter_speeds,
                 )
                 pred["year"] = year
                 _attach_odds(pred, closing_lines, bankroll)
@@ -245,6 +249,7 @@ def run_rolling_backtest(
 
         # Initialize cumulative tracker, seeded with Marcel projections
         cumulative = CumulativeStats()
+        batter_speeds = {}  # {mlbamid: SPD} for stolen base model
         marcel_years = {}
         for prior_yr in range(year - 3, year):
             prior_cache = CACHE_DIR / f"statcast_{prior_yr}.pkl"
@@ -269,6 +274,12 @@ def run_rolling_backtest(
                     batter_proj, pitcher_proj = blend_bhq_marcel(
                         batter_proj, pitcher_proj, bhq_h_rates, bhq_p_rates
                     )
+                # Extract speed scores for stolen base model
+                if not bhq_h.empty and "SPD" in bhq_h.columns:
+                    for mlbamid, row in bhq_h.iterrows():
+                        spd = row.get("SPD")
+                        if pd.notna(spd) and spd > 0:
+                            batter_speeds[int(mlbamid)] = float(spd)
 
             cumulative.init_from_marcel(batter_proj, pitcher_proj,
                                         effective_pa=MARCEL_EFFECTIVE_PA)
@@ -324,6 +335,7 @@ def run_rolling_backtest(
                         n_sims,
                         team_bullpen_profiles=team_bullpen_profiles,
                         elo_home_prob=elo_prob,
+                        batter_speeds=batter_speeds,
                     )
                     pred["year"] = year
                     pred["cumulative_batters"] = cumulative.num_batters
@@ -425,13 +437,14 @@ def _sim_with_lineups(
     n_sims: int,
     team_bullpen_profiles: dict = None,
     elo_home_prob: float = None,
+    batter_speeds: dict = None,
 ) -> dict:
     """Simulate a game using real starting lineups and pitcher profiles."""
     park = get_park_factors(game["home_team"])
 
-    # Build lineups
-    home_lineup = _build_lineup(lineup_data["home_lineup"], batter_profiles, batter_hands)
-    away_lineup = _build_lineup(lineup_data["away_lineup"], batter_profiles, batter_hands)
+    # Build lineups (with speed scores for stolen base model)
+    home_lineup = _build_lineup(lineup_data["home_lineup"], batter_profiles, batter_hands, batter_speeds)
+    away_lineup = _build_lineup(lineup_data["away_lineup"], batter_profiles, batter_hands, batter_speeds)
 
     # Build pitcher profiles
     home_starter = _get_pitcher(lineup_data["home_starter_id"], pitcher_profiles)
@@ -495,18 +508,23 @@ def _sim_with_lineups(
     }
 
 
-def _build_lineup(lineup_ids, batter_profiles: dict, batter_hands: dict) -> list:
+def _build_lineup(lineup_ids, batter_profiles: dict, batter_hands: dict,
+                   batter_speeds: dict = None) -> list:
     """
     Build a 9-batter lineup from MLBAM IDs.
     Falls back to league average for any batter not in our profiles.
+    Includes BHQ speed score (SPD) for stolen base model.
     """
+    if batter_speeds is None:
+        batter_speeds = {}
     lineup = []
     for pid in lineup_ids[:9]:
         pid = int(pid)
         prof = batter_profiles.get(pid)
         if prof is not None:
             hand = batter_hands.get(pid, "R")
-            lineup.append({"profile": prof, "bats": hand})
+            speed = batter_speeds.get(pid, 100)
+            lineup.append({"profile": prof, "bats": hand, "speed": speed})
         else:
             lineup.append(_DEFAULT_BATTER)
 
@@ -800,6 +818,10 @@ def _attach_totals(
     under_nv = totals_row["under_no_vig_prob"]
     best_over_odds = totals_row["best_over_odds"]
     best_under_odds = totals_row["best_under_odds"]
+
+    # NOTE: park runs factor removed — component park factors (HR/1B/2B/3B/BB/K)
+    # already adjust PA outcomes in the simulation, so the total_runs_dist already
+    # reflects park effects. Applying the runs factor on top was double-counting.
 
     # Compute model over/under probabilities from sim distribution
     # Games exactly on the line are a push (neither over nor under)

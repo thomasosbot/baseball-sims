@@ -52,10 +52,12 @@ def fetch_mlb_odds(
     markets: str = "h2h",
     regions: str = "us",
     odds_format: str = "american",
+    sport_key: str = None,
 ) -> List[Dict]:
     """
     Fetch current MLB moneyline odds from The Odds API.
     markets: "h2h" (moneyline) | "spreads" (runline) | "totals" (over/under)
+    sport_key: override sport (e.g. "baseball_mlb_preseason" for spring training)
     """
     if not ODDS_API_KEY:
         raise ValueError(
@@ -63,8 +65,9 @@ def fetch_mlb_odds(
             "and add it to your .env file."
         )
 
+    sport = sport_key or MLB_SPORT_KEY
     resp = requests.get(
-        f"{ODDS_API_BASE}/sports/{MLB_SPORT_KEY}/odds",
+        f"{ODDS_API_BASE}/sports/{sport}/odds",
         params={
             "apiKey":     ODDS_API_KEY,
             "regions":    regions,
@@ -95,6 +98,7 @@ def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
         best_home_odds, best_away_odds = None, None
         best_home_book, best_away_book = None, None
         pin_home, pin_away = None, None
+        books_home, books_away = {}, {}
 
         for bm in game.get("bookmakers", []):
             key = bm["key"]
@@ -104,11 +108,13 @@ def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
                 for oc in mkt["outcomes"]:
                     price = oc["price"]
                     if oc["name"] == home:
+                        books_home[key] = price
                         if best_home_odds is None or price > best_home_odds:
                             best_home_odds, best_home_book = price, key
                         if key == "pinnacle":
                             pin_home = price
                     elif oc["name"] == away:
+                        books_away[key] = price
                         if best_away_odds is None or price > best_away_odds:
                             best_away_odds, best_away_book = price, key
                         if key == "pinnacle":
@@ -137,6 +143,8 @@ def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
             "pinnacle_home":     pin_home,
             "pinnacle_away":     pin_away,
             "vig":               (h_imp + a_imp) - 1.0,
+            "books_home":        books_home,
+            "books_away":        books_away,
         })
 
     return pd.DataFrame(rows)

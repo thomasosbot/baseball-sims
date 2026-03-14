@@ -67,6 +67,11 @@ def compute_pa_probabilities(
         for outcome in ("HR", "3B", "2B", "1B"):
             if outcome in park_factors:
                 raw[outcome] *= park_factors[outcome]
+        # BB and K park factors (new — BHQ data)
+        if "bb" in park_factors:
+            raw["BB"] *= park_factors["bb"]
+        if "k" in park_factors:
+            raw["K"] *= park_factors["k"]
 
     total = sum(raw.values())
     return {k: v / total for k, v in raw.items()}

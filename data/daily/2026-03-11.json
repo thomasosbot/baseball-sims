@@ -1,0 +1,143 @@
+{
+  "date": "2026-03-11",
+  "generated_at": "2026-03-12T18:40:03.016322",
+  "games": [
+    {
+      "away": "PIT",
+      "home": "BAL",
+      "away_pitcher": "Noah Davis",
+      "home_pitcher": "Kyle Bradish",
+      "model_home_wp": 0.5171,
+      "model_away_wp": 0.4829,
+      "avg_total_runs": 9.42,
+      "elo_home_wp": 0.5452,
+      "sim_home_wp": 0.489
+    },
+    {
+      "away": "STL",
+      "home": "WSN",
+      "away_pitcher": "Dustin May",
+      "home_pitcher": "Cade Cavalli",
+      "model_home_wp": 0.5106,
+      "model_away_wp": 0.4894,
+      "avg_total_runs": 8.83,
+      "elo_home_wp": 0.5141,
+      "sim_home_wp": 0.507
+    },
+    {
+      "away": "DET",
+      "home": "MIN",
+      "away_pitcher": "Tanner Rainey",
+      "home_pitcher": "Taj Bradley",
+      "model_home_wp": 0.5038,
+      "model_away_wp": 0.4962,
+      "avg_total_runs": 8.87,
+      "elo_home_wp": 0.5015,
+      "sim_home_wp": 0.506
+    },
+    {
+      "away": "TBR",
+      "home": "ATL",
+      "away_pitcher": "Nick Martinez",
+      "home_pitcher": "Spencer Strider",
+      "model_home_wp": 0.5986,
+      "model_away_wp": 0.4014,
+      "avg_total_runs": 8.46,
+      "elo_home_wp": 0.5922,
+      "sim_home_wp": 0.605
+    },
+    {
+      "away": "HOU",
+      "home": "MIA",
+      "away_pitcher": "Tatsuya Imai",
+      "home_pitcher": "Max Meyer",
+      "model_home_wp": 0.5474,
+      "model_away_wp": 0.4526,
+      "avg_total_runs": 9.18,
+      "elo_home_wp": 0.5618,
+      "sim_home_wp": 0.533
+    },
+    {
+      "away": "KCR",
+      "home": "CHC",
+      "away_pitcher": "Mitch Spence",
+      "home_pitcher": "Colin Rea",
+      "model_home_wp": 0.5618,
+      "model_away_wp": 0.4382,
+      "avg_total_runs": 7.9,
+      "elo_home_wp": 0.5386,
+      "sim_home_wp": 0.585
+    },
+    {
+      "away": "SFG",
+      "home": "KCR",
+      "away_pitcher": "Tyler Mahle",
+      "home_pitcher": "Bailey Falter",
+      "model_home_wp": 0.5744,
+      "model_away_wp": 0.4256,
+      "avg_total_runs": 9.37,
+      "elo_home_wp": 0.5709,
+      "sim_home_wp": 0.578
+    },
+    {
+      "away": "LAA",
+      "home": "CWS",
+      "away_pitcher": "Alek Manoah",
+      "home_pitcher": "Anthony Kay",
+      "model_home_wp": 0.5639,
+      "model_away_wp": 0.4361,
+      "avg_total_runs": 7.6,
+      "elo_home_wp": 0.5598,
+      "sim_home_wp": 0.568
+    },
+    {
+      "away": "MIL",
+      "home": "CIN",
+      "away_pitcher": "Robert Gasser",
+      "home_pitcher": "Andrew Abbott",
+      "model_home_wp": 0.5065,
+      "model_away_wp": 0.4935,
+      "avg_total_runs": 9.39,
+      "elo_home_wp": 0.5069,
+      "sim_home_wp": 0.506
+    },
+    {
+      "away": "Athletics",
+      "home": "ARI",
+      "away_pitcher": "Luis Morales",
+      "home_pitcher": "Ryne Nelson",
+      "model_home_wp": 0.5087,
+      "model_away_wp": 0.4913,
+      "avg_total_runs": 8.79,
+      "elo_home_wp": 0.5204,
+      "sim_home_wp": 0.497
+    },
+    {
+      "away": "COL",
+      "home": "SEA",
+      "away_pitcher": "Chase Dollander",
+      "home_pitcher": "Luis Castillo",
+      "model_home_wp": 0.6433,
+      "model_away_wp": 0.3567,
+      "avg_total_runs": 6.61,
+      "elo_home_wp": 0.7697,
+      "sim_home_wp": 0.517
+    },
+    {
+      "away": "TOR",
+      "home": "NYY",
+      "away_pitcher": "Eric Lauer",
+      "home_pitcher": "Cam Schlittler",
+      "model_home_wp": 0.5546,
+      "model_away_wp": 0.4454,
+      "avg_total_runs": 10.01,
+      "elo_home_wp": 0.5872,
+      "sim_home_wp": 0.522
+    }
+  ],
+  "picks": [],
+  "bankroll": {
+    "current": 10000.0,
+    "today_wagered": 0.0
+  }
+}

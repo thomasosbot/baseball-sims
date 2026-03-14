@@ -1,0 +1,99 @@
+name: Daily Picks Pipeline
+
+on:
+  schedule:
+    # 1 PM ET / 5 PM UTC — lineups usually confirmed by then
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Date to run (YYYY-MM-DD, blank=today)'
+        required: false
+        type: string
+
+jobs:
+  daily-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up environment
+        run: |
+          echo "ODDS_API_KEY=${{ secrets.ODDS_API_KEY }}" >> .env
+          echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+          echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
+
+      - name: Restore state from repo
+        run: |
+          # State pickles are committed to data/state/
+          if ls data/state/state_*.pkl 1>/dev/null 2>&1; then
+            echo "State files found"
+            ls -la data/state/
+          else
+            echo "No state files found — run init_season.py first"
+            exit 1
+          fi
+
+      - name: Update yesterday's results
+        run: python3 scripts/update_results.py
+        continue-on-error: true
+
+      - name: Run daily pipeline
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            python3 scripts/run_daily.py --date "${{ inputs.date }}"
+          else
+            python3 scripts/run_daily.py
+          fi
+
+      - name: Generate website
+        run: python3 site/generate.py
+
+      - name: Send newsletter
+        run: |
+          python3 -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from pathlib import Path
+          from src.newsletter.sender import send_daily_picks
+
+          # Find today's picks file
+          daily_dir = Path('data/daily')
+          files = sorted(daily_dir.glob('*.json'))
+          picks_files = [f for f in files if f.name != 'results.json']
+          if picks_files:
+              with open(picks_files[-1]) as f:
+                  picks = json.load(f)
+              if picks.get('picks'):
+                  send_daily_picks(picks)
+              else:
+                  print('No picks today, skipping newsletter')
+          "
+        continue-on-error: true
+
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/state/ data/daily/ site/public/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            DATE=$(date +%Y-%m-%d)
+            git commit -m "Daily pipeline: ${DATE}"
+            git push
+          fi

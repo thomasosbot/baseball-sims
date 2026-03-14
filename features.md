@@ -161,16 +161,21 @@ This is the numerator of the full log5 formula. The full log5 formula adds a den
 
 **Why multiplicative**: The simpler formula avoids the systematic compression on the OUT rate without sacrificing accuracy on the skill-based outcomes. It also preserves the correct behavior: when both batter and pitcher are league-average, the result is league-average. When one is above and the other below, the result is between them. The distribution is re-normalised after park factor adjustments, so the probabilities always sum to 1.
 
-## Park Factors
+## Park Factors (v1.0 — BHQ)
 
-Multiplicative adjustments applied to HR, 3B, 2B, and 1B rates after log5 blending.
+Multiplicative adjustments applied to PA outcome rates and total runs distribution. Source: Baseball HQ park factor table (replaces FanGraphs component-only factors in v1.0).
 
 | Feature | Source | Why included |
 |---------|--------|--------------|
-| **HR park factor** | FanGraphs 5-year regressed | Coors (+22%) vs. Oracle Park (-5%) is a massive difference in HR production |
+| **HR park factor** | BHQ (blended LHB/RHB) | Coors, CIN (+31-35% LHB HR), PNC Park (-22% RHB HR). Massive HR production variance. |
 | **2B park factor** | FanGraphs 5-year regressed | Fenway's wall generates +10% more doubles |
 | **3B park factor** | FanGraphs 5-year regressed | Large outfields (e.g. old Coors) produce more triples |
-| **1B park factor** | FanGraphs 5-year regressed | Smaller effect but still measurable |
+| **1B park factor** | BHQ (blended LHB/RHB BA) | Derived from BHQ BA factors; parks with high BA boost singles |
+| **BB park factor** (v1.0) | BHQ | KC +10%, Oracle Park -14%. Walk-friendly parks produce more baserunners → more runs. Previously ignored. |
+| **K park factor** (v1.0) | BHQ | Seattle +14%, KC -7%. High-K parks suppress run scoring. Previously ignored. |
+| **Runs park factor** (v1.0) | BHQ | Coors +30%, Seattle -17%. Scales total_runs_dist before computing P(over)/P(under) for totals betting. Captures residual park effects (altitude, dimensions, weather) that component factors alone miss. |
+| **Platoon HR factors** (v1.0) | BHQ (LHB HR, RHB HR) | Yankee Stadium +17% LHB / +16% RHB; ARI -28% LHB / -13% RHB. Stored in data, blended factor used in PA model. |
+| **Platoon BA factors** (v1.0) | BHQ (LHB BA, RHB BA) | Fenway +10% LHB, Seattle -9% LHB / -14% RHB. Stored in data for future per-PA platoon application. |
 
 ## Bullpen Modelling (v0.6)
 
@@ -207,10 +212,112 @@ These are not player features but rather game-state parameters that affect the s
 
 | Feature | Value | Source |
 |---------|-------|--------|
-| Sac fly probability | 30% (runner on 3B, fly out, < 2 outs) | Historical Retrosheet data |
+| Sac fly probability | **13%** (runner on 3B, any out, < 2 outs) | MLB avg ~0.33 SF/team/game ÷ ~2.5 opportunities. Fixed from 30% in v1.0 (was 4x too high). |
 | Double play probability | 12% (runner on 1B, ground ball, < 2 outs) | Historical DP rates |
 | Ground ball fraction of outs | 45% | League average GB/FB split |
+| Error rate | **1.4%** of outs become reached-on-error (v1.0) | 2024 MLB: ~0.55 errors/team/game |
+| Productive out: 2B→3B | **18%** on non-sac-fly, non-DP outs (v1.0) | Statcast BsR 2022-2024 (0.45 GB × 0.40 advance) |
+| Productive out: 1B→2B | **11%** on non-sac-fly, non-DP outs (v1.0) | Statcast BsR 2022-2024 (0.45 GB × 0.25 advance) |
 | Starter batter limit | 21 batters faced | ~7 innings; proxy for when bullpen takes over |
+
+### Stolen Bases (v1.0)
+
+Pre-PA stolen base attempts, calibrated to 2024 MLB averages (~0.70 SB per team per game, ~78% success rate).
+
+**Implementation** (`game_sim.py`):
+- Checked before each PA when runners are on base
+- **Steal of 2B**: runner on 1B, 2B empty, < 2 outs → 7% attempt rate per PA
+- **Steal of 3B**: runner on 2B, 3B empty, < 2 outs → 1.5% attempt rate per PA (~20% of all SB attempts)
+- Success rate: 78% baseline, adjusted by team speed: `success = 0.78 + 0.008 * (team_SPD - 100)`, clipped to 50-95%
+- Caught stealing removes the runner and adds an out
+- Team speed = mean BHQ SPD of lineup (default 100 for players without BHQ data)
+
+**Constants** (`constants.py`): `SB_ATTEMPT_RATE_1B=0.07`, `SB_ATTEMPT_RATE_2B=0.015`, `SB_SUCCESS_RATE=0.78`, `SB_SPEED_FACTOR=0.008`, `LEAGUE_AVG_SPEED=100`
+
+**Why included:** The model was underpredicting runs scored by ~0.5 runs/game. Stolen bases create extra scoring opportunities (runner in scoring position without requiring a hit) that were previously absent from the simulation.
+
+### Wild Pitches / Passed Balls (v1.0)
+
+Pre-PA wild pitch and passed ball events that advance runners.
+
+**Implementation** (`game_sim.py`):
+- Checked before each PA when runners are on base (after SB check)
+- 0.8% probability per PA (~0.30 WP+PB per team per game)
+- All runners advance one base; runner on 3B scores
+
+**Constants** (`constants.py`): `WILD_PITCH_RATE=0.008`
+
+**Why included:** Another source of "free" runs the model was missing. WP/PB events are independent of batter quality and contribute ~0.15 runs/team/game.
+
+### Base Advancement Probabilities (updated v1.0)
+
+Updated from Statcast/FanGraphs BsR data (2022-2024 average). Key changes from prior version:
+
+| Situation | Old | New | Source |
+|-----------|-----|-----|--------|
+| Runner on 1B, single → 3B | 0% | **28%** | Gap hits, aggressive baserunning |
+| Runner on 1B, single → 2B | 100% | **72%** | Complement of above |
+| Runner on 1B, double → scores | 45% | **56%** | Statcast BsR data |
+| Runner on 1B, double → 3B | 55% | **44%** | Complement of above |
+
+**Why updated:** The old probabilities assumed runners on 1B always stopped at 2B on singles. In reality, ~28% of runners advance to 3B on singles (gap hits to the outfield, aggressive running). This was another contributor to the model underpredicting runs.
+
+### Errors / Reached on Error (v1.0)
+
+Errors convert outs into baserunners — a run-scoring mechanism completely absent from the model prior to v1.0.
+
+**Implementation** (`game_sim.py`):
+- Checked first in `_handle_out()` — 1.4% of outs become reached-on-error
+- Batter goes to 1B, all existing runners advance one base, runner on 3B scores
+- Returns `-1` for extra_outs to signal no out was recorded
+- The half-inning loop skips the out increment when it sees `-1`
+
+**Constants** (`constants.py`): `ERROR_RATE=0.014`
+
+**Why included:** MLB teams average ~0.55 errors/game and ~0.35 unearned runs/team/game. The model had zero errors — every out was a clean out. This was the single largest contributor to the ~0.5 run/game underprediction gap. Adding errors accounts for ~0.30-0.35 extra runs/team/game.
+
+### Productive Outs (v1.0)
+
+On regular outs (non-sac-fly, non-DP), runners can advance on groundball outs to the right side.
+
+**Implementation** (`game_sim.py`):
+- Checked at the end of `_handle_out()` after sac fly and DP checks
+- Runner on 2B → 3B: 18% probability (when 3B is empty)
+- Runner on 1B → 2B: 11% probability (when 2B is empty)
+- Both can trigger on the same out
+
+**Constants** (`constants.py`): `PRODUCTIVE_OUT_2B_TO_3B=0.18`, `PRODUCTIVE_OUT_1B_TO_2B=0.11`
+
+**Why included:** Previously, all runners stayed frozen on regular outs. In reality, groundouts to the right side frequently advance runners into scoring position. This adds ~0.10-0.15 runs/team/game.
+
+### Sac Fly Fix (v1.0)
+
+`SAC_FLY_PROB` reduced from 0.30 to **0.13**.
+
+**Why:** The old value (0.30) was calibrated assuming only fly ball outs reached the sac fly code path. But in the simulation, ALL outs pass through `_handle_out()`, so the effective sac fly rate was 0.30 × all outs ≈ 1.35 sac flies/team/game — 4x higher than MLB reality (~0.33). The corrected value: ~0.33 SF/game ÷ ~2.5 opportunities/game ≈ 0.13.
+
+## Per-Sportsbook Odds Display (v1.1)
+
+The daily pipeline now collects and displays odds from every available sportsbook, not just the best line.
+
+**Data flow:**
+1. `parse_odds_response()` in `odds.py` collects `books_home` / `books_away` dicts with each sportsbook's American odds
+2. `run_daily.py` attaches `sportsbook_odds` dict to each pick in the daily JSON
+3. The website renders color-coded badges per sportsbook on each pick card
+
+**Sportsbook color scheme:**
+| Book | CSS Class | Color |
+|------|-----------|-------|
+| FanDuel | `.fanduel` | Blue (#1877F2) |
+| DraftKings | `.draftkings` | Green (#1B8A3E) |
+| BetMGM | `.betmgm` | Gold (#9E7C1F) |
+| Caesars | `.williamhill_us` | Burgundy (#8E243C) |
+| BetRivers | `.betrivers` | Purple (#6B3FA0) |
+| ESPN BET | `.espnbet` | Red (#C93426) |
+| Fanatics | `.fanatics` | Teal (#007A72) |
+| Pinnacle | `.pinnacle` | Dark gray (#444950) |
+
+The best available odds get a ring highlight (`.best-odds` class). This helps users quickly identify where to place their bet for maximum value.
 
 ## Betting Features
 
@@ -285,13 +392,32 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Odds QC: total line range** | `fetch.py` | Done — 5.5-14.0 plausible MLB range |
 | **Odds QC: ML coherence** | `fetch.py` | Done — rejects both-positive American odds pairs |
 
+### v1.0 — BHQ Park Factors + Run Scoring Fixes (DONE)
+
+| Change | Module | Status |
+|--------|--------|--------|
+| **BHQ park factors** | `park_factors.py` | Done — replaces FanGraphs with BHQ BB/K/platoon HR/BA |
+| **BB/K in PA model** | `pa_model.py` | Done — BB and K rates now park-adjusted |
+| **Runs factor removed from totals** | `runner.py` | Done — was double-counting with component factors |
+| **Stolen bases** | `constants.py`, `game_sim.py`, `runner.py` | Done — pre-PA SB attempts, speed-adjusted, calibrated to 2024 MLB |
+| **Wild pitches / passed balls** | `constants.py`, `game_sim.py` | Done — 0.8% per PA with runners on, advances all runners |
+| **Improved base advancement** | `constants.py` | Done — 1B→3B on singles (28%), 1B→score on doubles (56%) |
+| **Errors / reached on error** | `constants.py`, `game_sim.py` | Done — 1.4% of outs, batter reaches 1B, runners advance |
+| **Productive outs** | `constants.py`, `game_sim.py` | Done — 2B→3B (18%), 1B→2B (11%) on regular outs |
+| **Sac fly fix** | `constants.py` | Done — 0.30→0.13 (was 4x overcounting) |
+| **Speed scores in lineups** | `runner.py` | Done — BHQ SPD extracted and passed through lineup builder |
+| **2024 backtest** | — | Complete — Brier 0.2436, ML +1.6% ROI |
+| **2025 OOS validation** | — | **Complete — ML +16.2% ROI, $20K→$45.2K. Best result yet.** |
+
 ### v1.0+ — Additional features
 
 | Feature | Expected impact |
 |---------|-----------------|
-| **Sprint speed** | Affects base advancement probabilities (fast runner on 2B scores on a single more often) |
+| **Platoon-split HR in PA model** | Per-PA LHB/RHB HR adjustment (data available, not yet wired into per-PA calc) |
+| **Per-player speed in base advancement** | Individual runner speed affecting advancement probs (currently team-avg for SB only) |
 | **Catcher framing** | Shifts K/BB rates by ~1-2% for elite/poor framers |
 | **Umpire tendencies** | Some umps have measurably larger/smaller strike zones |
 | **Weather (wind, temp)** | Wind out at Wrigley can add 1-2 runs to expected total |
 | **Bullpen availability** | Back-to-back usage degrades reliever quality; bullpen games vs. traditional starts |
+| **Lineup-order weighting** | Top of order gets more PA; currently all 9 cycle equally |
 | **Batter vs specific pitcher history** | Only useful with 50+ PA sample (rare); mostly noise |

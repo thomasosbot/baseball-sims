@@ -40,10 +40,10 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `src/features/marcel.py` | Marcel projection system: 3-year weighted history (5/4/3), regression to league average (1200 PA batters, 450 BF pitchers), age adjustment (+0.6%/yr under 29, -0.3%/yr over 29). Produces per-player projected PA outcome rates with platoon splits. `blend_bhq_marcel()` combines Marcel and BHQ skills-based rates at `BHQ_BLEND_WEIGHT=0.50`. Used to seed `CumulativeStats` on day 1 of each season. |
 | `src/data/bhq.py` | Loader for Baseball HQ CSV files from `data/raw/bhq/`. Reads hitter stats, pitcher-advanced, and pitcher-bb files by year. Joins on MLBAMID (same player ID used in Statcast). |
 | `src/features/bhq_rates.py` | Converts BHQ skills-based metrics into PA outcome rates compatible with the simulation model. Hitter: Ct%→K, BB%→BB, Brl%→HR, SPD→3B, H%/LD%/FB%/GB%→hit distribution. Pitcher: K%→K, BB%→BB, xHR/FB+FB%→HR, GB%/LD%/FB%→batted ball distribution, H%→hit rate. |
-| `src/features/park_factors.py` | Hardcoded 5-year regressed FanGraphs park factors by team. Multiplicative adjustments for HR, 1B, 2B, 3B. |
-| `src/simulation/constants.py` | League average rates, wOBA weights, base advancement probability tables, DP/sac-fly rates, starter usage limits, TTO hit boost multipliers. |
-| `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors, normalises to a probability distribution over 8 PA outcomes. |
-| `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
+| `src/features/park_factors.py` | BHQ park factor table by team. Multiplicative adjustments for HR, 1B, 2B, 3B, BB, K, plus runs factor and platoon splits. |
+| `src/simulation/constants.py` | League average rates, wOBA weights, base advancement probability tables, DP/sac-fly rates, starter usage limits, TTO hit boost multipliers, stolen base rates, wild pitch rate. |
+| `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors (including BB/K), normalises to a probability distribution over 8 PA outcomes. |
+| `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. **Stolen base attempts** checked before each PA (calibrated to 2024 MLB: ~0.70 SB/team/game, 78% success rate, speed-adjusted). **Wild pitches/passed balls** (~0.30/team/game) advance runners. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
 | `src/features/elo.py` | Elo team-strength layer: K=20, HFA=24, regression=1/4 toward 1500 between seasons. Produces per-game Elo-based win probabilities. Blended 50/50 with simulation probabilities via `ELO_BLEND_WEIGHT=0.50`. |
 | `src/betting/odds.py` | Fetches live moneylines from The Odds API. Converts between American / decimal / implied probability. Strips vig. |
 | `src/betting/edge.py` | Compares model probability to no-vig market probability. Applies alpha + confidence shrinkage: `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha controls how much to trust the model vs market (ML=0.4, Totals=0.3). `compute_game_confidence()` combines season depth and model-market agreement. Separate edge/confidence thresholds for moneyline and totals. |
@@ -67,7 +67,13 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Split regression scales** (v0.7) | Separate `BATTER_REGRESSION_SCALE=0.20` and `PITCHER_REGRESSION_SCALE=0.08` (was single 0.40). Pitchers get much less regression because starters face ~21 BF and are the primary game differentiator. Effective batter weights: K=40, BB=50, HR=80. Effective pitcher weights: K=24, BB=32, HR=48. |
 | **Prior-year weight 0.70** (v0.6, replaced by Marcel in v0.9) | Was 0.50→0.70 for stronger early-season priors. Replaced by Marcel 3-year weighted projections which provide much better day-1 profiles. |
 | **FanDuel single-book odds** (v0.6) | Uses FanDuel as the single book for closing lines, with median-consensus fallback when FanDuel is missing. Eliminates cross-book cherry-picking of best odds per side. |
-| **Park factors hardcoded (2024)** | FanGraphs 5-year regressed factors are stable year-to-year. |
+| **BHQ park factors** (v1.0) | Replaces FanGraphs component-only factors with BHQ park factor table. Now includes BB (walk rate), K (strikeout rate), and platoon-split HR/BA factors. BB and K are applied in the PA model alongside HR/1B/2B/3B. Runs factor stored but NOT applied to totals (component factors already capture park effects — applying runs factor was double-counting). |
+| **Stolen bases** (v1.0) | Pre-PA stolen base attempts calibrated to 2024 MLB (~0.70 SB/team/game, 78% success rate). Attempt rate adjusted by team average BHQ SPD score. Steal of 2B (7% per PA with runner on 1B, 2B empty) and steal of 3B (1.5%, rarer). Caught stealing adds an out. Addresses model underpredicting runs by ~0.5/game — SBs create extra scoring opportunities. |
+| **Wild pitches / passed balls** (v1.0) | 0.8% chance per PA with runners on base (~0.30 WP+PB/team/game). All runners advance one base, runner on 3B scores. Another source of "free" runs the model was previously missing. |
+| **Improved base advancement** (v1.0) | Updated base advancement probabilities from Statcast/FanGraphs BsR data (2022-2024 avg). Runner on 1B now has 28% chance of reaching 3B on a single (was 0% — aggressive running, gap hits). Runner on 1B scores 56% on doubles (was 45%). These changes increase expected runs per baserunner. |
+| **Errors / reached on error** (v1.0) | 1.4% of outs become reached-on-error (~0.55 errors/team/game). Batter goes to 1B, all runners advance one base, runner on 3B scores. No out recorded. The model previously had zero errors — every out was clean, which systematically underpredicted runs by ~0.3-0.4/team/game. |
+| **Productive outs** (v1.0) | On non-sac-fly, non-DP outs, runners can advance: 2B→3B (18%) and 1B→2B (11%), representing groundouts to the right side. Previously all runners stayed frozen on regular outs. |
+| **Sac fly fix** (v1.0) | SAC_FLY_PROB reduced from 0.30 to 0.13. The old value assumed only fly ball outs reached the sac fly check, but ALL outs do — was producing 4x too many sac fly runs (~1.35/team/game vs MLB reality of ~0.33). |
 | **Lineups from Statcast** | Reconstructed from pitch data (first 9 unique batters by `at_bat_number` per side). Avoids 2,400+ API calls per season. |
 | **Switch-hitter handling** | Switch hitters (`bats="S"`) bat from the opposite side of the pitcher, selecting the correct platoon split. |
 | **FanGraphs replaced by Statcast** | pybaseball's FanGraphs endpoint is broken (403). All player stats derived directly from Statcast pitch data instead. |
@@ -87,21 +93,48 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Totals from simulation distribution** (v0.4) | `P(over) = count(total > line) / count(total ≠ line)` from the raw `total_runs_dist` array. Pushes (total == line) are excluded. More accurate than fitting a parametric distribution. |
 | **Rolling backtest with prior-year seeding** (v0.4) | `CumulativeStats` tracks running PA counts. Originally seeded with prior-year Statcast at configurable weight. Replaced by Marcel projections in v0.9. |
 
+## Operationalization (v1.1)
+
+| Component | Module | Purpose |
+|-----------|--------|---------|
+| `src/data/state.py` | State persistence | Saves/loads CumulativeStats, Elo, batter speeds, bankroll between daily runs as pickles in `data/state/` |
+| `scripts/init_season.py` | Preseason setup | One-time: builds Marcel+BHQ projections, seeds Elo from prior seasons, saves initial state |
+| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds, runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json` |
+| `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L |
+| `site/generate.py` | Static site generator | Reads daily JSON files, renders Jinja2 templates to `site/public/` (Netlify) |
+| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + games), `history.html` (chart + results), `about.html` (model info) |
+| `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges |
+| `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
+| `site/netlify.toml` | Netlify config | Build settings, publish dir, functions dir |
+| `src/newsletter/sender.py` | Email newsletter | Sends daily picks to subscribers via Resend API |
+| `.github/workflows/daily_picks.yml` | Automation | Cron at 5 PM UTC: update results → run pipeline → generate site → send newsletter → commit + push |
+
+**Daily pipeline flow:**
+```
+[1 PM ET] Lineups confirmed
+    → update_results.py (grade yesterday, update state)
+    → run_daily.py (fetch odds, simulate, find edges)
+    → site/generate.py (rebuild website)
+    → newsletter/sender.py (email subscribers)
+    → git commit + push (state + picks + site)
+```
+
 ## Deployment
 
 - **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
 - **Live dashboard:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app) (Streamlit Community Cloud, auto-deploys from `main`)
+- **Picks website:** "Ozzy Analytics" — static HTML in `site/public/`, deployed via Netlify (free tier). Meta-inspired pastel + glassmorphism design with per-sportsbook odds badges on pick cards. Newsletter subscription via Netlify serverless function → Resend Contacts API.
 
 ## Validation Status
 
-**2025 out-of-sample backtest (params tuned on 2024, zero adjustments):**
-- Brier 0.2428 (improved from 0.2441 on training year)
-- ML: 250 bets, **+12.0% ROI** (+$18,853 profit)
-- Totals: 36 bets, -5.7% ROI (edge didn't generalize)
-- Combined: **+9.9% ROI**, $20K → $37.6K bankroll
-- Conclusion: **Model is not overfit. Moneyline edge is real.**
+**2025 out-of-sample backtest (v1.0, params tuned on 2024, zero adjustments):**
+- Brier 0.2428
+- ML: 247 bets, **+16.2% ROI** (+$25,224 profit), 50.2% win rate at avg +102 odds
+- Totals: 36 bets, -16.9% ROI (edge doesn't generalize — market is too sharp on totals)
+- ML only: **$20K → $45,224** (+126% bankroll growth)
+- Conclusion: **Moneyline edge is real and strengthened by v1.0 simulation improvements.**
 
-## Current Limitations (v0.9)
+## Current Limitations (v1.0)
 
 - **Structural simulation compression** — PA-by-PA MC simulation is compressed by the law of large numbers over ~35 PA/team. Model std=0.057 before Elo blending vs market std=0.110. Elo blend (50/50) and alpha shrinkage compensate at the betting layer.
 - **BHQ coverage is regulars only** — ~530 batters and ~650 pitchers have BHQ data. Bench players, callups, and September roster expansions fall back to pure Marcel projections.

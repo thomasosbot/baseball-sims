@@ -1,0 +1,9 @@
+[build]
+  publish = "site/public"
+  command = "echo 'Static site pre-built by CI'"
+  functions = "site/netlify/functions"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

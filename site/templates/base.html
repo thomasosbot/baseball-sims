@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ozzy Analytics{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">Ozzy Analytics</a>
+            <div class="nav-links">
+                <a href="index.html" class="{% if active == 'picks' %}active{% endif %}">Today's Picks</a>
+                <a href="history.html" class="{% if active == 'history' %}active{% endif %}">History</a>
+                <a href="about.html" class="{% if active == 'about' %}active{% endif %}">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <section class="subscribe-section">
+        <div class="container">
+            <div class="subscribe-inner glass">
+                <h3>Get daily picks in your inbox</h3>
+                <p>Free email with every day's model picks before first pitch.</p>
+                <form class="subscribe-form" id="subscribe-form">
+                    <input type="email" name="email" placeholder="you@email.com" required>
+                    <button type="submit" class="subscribe-btn">Subscribe</button>
+                </form>
+                <div class="subscribe-msg" id="subscribe-msg"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
+            <p>{{ generated_at if generated_at else "" }}</p>
+        </div>
+    </footer>
+
+    <script>
+    // Fade-in on scroll
+    document.addEventListener('DOMContentLoaded', () => {
+        const els = document.querySelectorAll('.fade-in');
+        if (!els.length) return;
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+        }, { threshold: 0.1 });
+        els.forEach(el => observer.observe(el));
+    });
+
+    // Newsletter subscribe
+    document.getElementById('subscribe-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('.subscribe-btn');
+        const msg = document.getElementById('subscribe-msg');
+        const email = e.target.email.value;
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        msg.textContent = '';
+        msg.className = 'subscribe-msg';
+        try {
+            const res = await fetch('/.netlify/functions/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                msg.textContent = 'You\'re in! Watch for picks in your inbox.';
+                msg.classList.add('success');
+                e.target.email.value = '';
+            } else {
+                msg.textContent = data.error || 'Something went wrong. Try again.';
+                msg.classList.add('error');
+            }
+        } catch {
+            msg.textContent = 'Could not connect. Try again later.';
+            msg.classList.add('error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+    });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
