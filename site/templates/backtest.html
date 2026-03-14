@@ -10,10 +10,157 @@
 {% block content %}
 <section class="hero">
     <h1>Backtest Results</h1>
-    <p class="hero-sub">Rolling backtests on historical seasons — no look-ahead, only data available before each game.</p>
+    <p class="hero-sub">Rolling backtests on historical seasons — no look-ahead, only data available before each game. $10K starting bankroll with quarter-Kelly sizing.</p>
 </section>
 
-<!-- Year selector tabs -->
+{% if combined_data %}
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- COMBINED OVERVIEW -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section">
+    <h2 class="section-title">Two-Year Combined Results (2024–2025)</h2>
+
+    <!-- Bankroll headline -->
+    <div class="about-card glass fade-in highlight-card" style="margin-bottom:1.5rem">
+        <div class="about-stats-row">
+            <div class="about-stat">
+                <span class="about-stat-value">${{ "{:,.0f}".format(10000) }}</span>
+                <span class="about-stat-label">Starting Bankroll</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value {% if combined_data.total_profit > 0 %}profit{% else %}loss{% endif %}">
+                    ${{ "{:,.0f}".format(10000 + combined_data.total_profit) }}
+                </span>
+                <span class="about-stat-label">Ending Bankroll</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value {% if combined_data.total_roi > 0 %}profit{% else %}loss{% endif %}">
+                    {{ "%+.1f"|format(combined_data.total_roi) }}%
+                </span>
+                <span class="about-stat-label">Overall ROI</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">{{ combined_data.total_bets }}</span>
+                <span class="about-stat-label">Total Bets</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ML vs O/U vs Combined breakdown -->
+    <div class="backtest-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <!-- Moneyline -->
+        <div class="backtest-result-card glass fade-in">
+            <h3>Moneyline</h3>
+            <div class="result-stats">
+                <div class="result-row">
+                    <span class="result-label">Bets</span>
+                    <span class="result-value">{{ combined_data.ml_bets }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Record</span>
+                    <span class="result-value">{{ combined_data.ml_wins }}-{{ combined_data.ml_bets - combined_data.ml_wins }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Win Rate</span>
+                    <span class="result-value">{{ "%.1f"|format(combined_data.ml_win_rate) }}%</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Profit</span>
+                    <span class="result-value {% if combined_data.ml_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(combined_data.ml_profit) }}</span>
+                </div>
+                <div class="result-row highlight">
+                    <span class="result-label">ROI</span>
+                    <span class="result-value {% if combined_data.ml_roi > 0 %}profit{% else %}loss{% endif %}">{{ "%+.1f"|format(combined_data.ml_roi) }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Totals -->
+        <div class="backtest-result-card glass fade-in">
+            <h3>Over/Under</h3>
+            <div class="result-stats">
+                <div class="result-row">
+                    <span class="result-label">Bets</span>
+                    <span class="result-value">{{ combined_data.totals_bets }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Record</span>
+                    <span class="result-value">{{ combined_data.totals_wins }}-{{ combined_data.totals_bets - combined_data.totals_wins }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Win Rate</span>
+                    <span class="result-value">{{ "%.1f"|format(combined_data.totals_win_rate) }}%</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Profit</span>
+                    <span class="result-value {% if combined_data.totals_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(combined_data.totals_profit) }}</span>
+                </div>
+                <div class="result-row highlight">
+                    <span class="result-label">ROI</span>
+                    <span class="result-value {% if combined_data.totals_roi > 0 %}profit{% else %}loss{% endif %}">{{ "%+.1f"|format(combined_data.totals_roi) }}%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combined -->
+        <div class="backtest-result-card glass fade-in">
+            <h3>All Bets Combined</h3>
+            <div class="result-stats">
+                <div class="result-row">
+                    <span class="result-label">Bets</span>
+                    <span class="result-value">{{ combined_data.total_bets }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Staked</span>
+                    <span class="result-value">${{ "{:,.0f}".format(combined_data.total_staked) }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Brier Score</span>
+                    <span class="result-value">{{ "%.4f"|format(combined_data.brier) }}</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Profit</span>
+                    <span class="result-value {% if combined_data.total_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(combined_data.total_profit) }}</span>
+                </div>
+                <div class="result-row highlight">
+                    <span class="result-label">ROI</span>
+                    <span class="result-value {% if combined_data.total_roi > 0 %}profit{% else %}loss{% endif %}">{{ "%+.1f"|format(combined_data.total_roi) }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined bankroll chart -->
+    <div class="chart-card glass fade-in" style="margin-top:1.5rem">
+        <h3 style="margin-bottom:0.5rem; font-size:1rem; font-weight:600;">Bankroll Growth — $10K Starting (2024–2025)</h3>
+        <div class="chart-container">
+            <canvas id="combined-bankroll-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Combined P&L chart -->
+    <div class="chart-card glass fade-in" style="margin-top:1.5rem">
+        <h3 style="margin-bottom:0.5rem; font-size:1rem; font-weight:600;">Cumulative P&L by Bet Type</h3>
+        <div class="chart-container">
+            <canvas id="combined-pnl-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Combined calibration -->
+    <div class="chart-card glass fade-in" style="margin-top:1.5rem">
+        <h3 style="margin-bottom:0.5rem; font-size:1rem; font-weight:600;">Win Probability Calibration (Combined)</h3>
+        <div class="chart-container">
+            <canvas id="combined-cal-chart"></canvas>
+        </div>
+    </div>
+</section>
+
+<div class="about-divider"><span>Individual Seasons</span></div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PER-YEAR TABS -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div class="year-tabs">
     {% for year in years %}
     <button class="year-tab glass {% if loop.first %}active{% endif %}" data-year="{{ year }}">{{ year }}</button>
@@ -49,12 +196,12 @@
         </div>
     </section>
 
-    <!-- ML and Totals side by side -->
+    <!-- ML / Totals / Combined cards -->
     <section class="section">
-        <div class="backtest-grid">
+        <div class="backtest-grid" style="grid-template-columns: repeat(3, 1fr);">
             <!-- Moneyline card -->
             <div class="backtest-result-card glass fade-in">
-                <h3>Moneyline Betting</h3>
+                <h3>Moneyline</h3>
                 <div class="result-stats">
                     <div class="result-row">
                         <span class="result-label">Bets</span>
@@ -69,7 +216,7 @@
                         <span class="result-value">{{ "%+.0f"|format(data.ml_avg_odds) }}</span>
                     </div>
                     <div class="result-row">
-                        <span class="result-label">Total Profit</span>
+                        <span class="result-label">Profit</span>
                         <span class="result-value {% if data.ml_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.ml_profit) }}</span>
                     </div>
                     <div class="result-row highlight">
@@ -81,7 +228,7 @@
 
             <!-- Totals card -->
             <div class="backtest-result-card glass fade-in">
-                <h3>Totals (Over/Under)</h3>
+                <h3>Over/Under</h3>
                 <div class="result-stats">
                     <div class="result-row">
                         <span class="result-label">Bets</span>
@@ -96,12 +243,35 @@
                         <span class="result-value">{{ "%+.0f"|format(data.totals_avg_odds) }}</span>
                     </div>
                     <div class="result-row">
-                        <span class="result-label">Total Profit</span>
+                        <span class="result-label">Profit</span>
                         <span class="result-value {% if data.totals_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.totals_profit) }}</span>
                     </div>
                     <div class="result-row highlight">
                         <span class="result-label">ROI</span>
                         <span class="result-value {% if data.totals_roi > 0 %}profit{% else %}loss{% endif %}">{{ "%+.1f"|format(data.totals_roi) }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combined card -->
+            <div class="backtest-result-card glass fade-in">
+                <h3>All Bets</h3>
+                <div class="result-stats">
+                    <div class="result-row">
+                        <span class="result-label">Total Bets</span>
+                        <span class="result-value">{{ data.total_bets }}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Total Staked</span>
+                        <span class="result-value">${{ "{:,.0f}".format(data.total_staked) }}</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Total Profit</span>
+                        <span class="result-value {% if data.total_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.total_profit) }}</span>
+                    </div>
+                    <div class="result-row highlight">
+                        <span class="result-label">ROI</span>
+                        <span class="result-value {% if data.total_roi > 0 %}profit{% else %}loss{% endif %}">{{ "%+.1f"|format(data.total_roi) }}%</span>
                     </div>
                 </div>
             </div>
@@ -114,6 +284,16 @@
         <div class="chart-card glass fade-in">
             <div class="chart-container">
                 <canvas id="pnl-chart-{{ year }}"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bankroll chart -->
+    <section class="section">
+        <h2 class="section-title">Bankroll Over Time</h2>
+        <div class="chart-card glass fade-in">
+            <div class="chart-container">
+                <canvas id="bankroll-chart-{{ year }}"></canvas>
             </div>
         </div>
     </section>
@@ -174,124 +354,152 @@ document.querySelectorAll('.year-tab').forEach(tab => {
     });
 });
 
-// Chart data passed from generator
+// Chart styling constants
+const CHART_COLORS = {
+    ml: '#1877F2',
+    mlBg: 'rgba(24, 119, 242, 0.05)',
+    totals: '#31A24C',
+    totalsBg: 'rgba(49, 162, 76, 0.05)',
+    combined: '#8B5CF6',
+    combinedBg: 'rgba(139, 92, 246, 0.05)',
+    bankroll: '#1877F2',
+    bankrollBg: 'rgba(24, 119, 242, 0.08)',
+    grid: 'rgba(0,0,0,0.04)',
+    perfect: 'rgba(0,0,0,0.15)',
+};
+const FONT = { family: 'Inter', size: 11 };
+const LEGEND = { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Inter', size: 12 } } };
+
+function makePnlChart(ctx, d) {
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: d.pnl_dates,
+            datasets: [
+                { label: 'ML P&L', data: d.ml_cumulative, borderColor: CHART_COLORS.ml, backgroundColor: CHART_COLORS.mlBg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                { label: 'Totals P&L', data: d.totals_cumulative, borderColor: CHART_COLORS.totals, backgroundColor: CHART_COLORS.totalsBg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: LEGEND, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString() } } },
+            scales: {
+                x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 8, font: FONT } },
+                y: { display: true, grid: { color: CHART_COLORS.grid }, ticks: { callback: v => '$' + v.toLocaleString(), font: FONT } }
+            }
+        }
+    });
+}
+
+function makeBankrollChart(ctx, brl, label) {
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: brl.dates,
+            datasets: [{
+                label: label || 'Bankroll',
+                data: brl.values,
+                borderColor: CHART_COLORS.bankroll,
+                backgroundColor: CHART_COLORS.bankrollBg,
+                fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toLocaleString() } }
+            },
+            scales: {
+                x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 10, font: FONT } },
+                y: { display: true, grid: { color: CHART_COLORS.grid }, ticks: { callback: v => '$' + v.toLocaleString(), font: FONT } }
+            }
+        }
+    });
+}
+
+function makeCalChart(ctx, d) {
+    return new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: 'Model calibration', data: d.cal_predicted.map((p, i) => ({ x: p, y: d.cal_actual[i] })), backgroundColor: CHART_COLORS.ml, pointRadius: 5, pointHoverRadius: 7 },
+                { label: 'Perfect', data: [{ x: 0.2, y: 0.2 }, { x: 0.8, y: 0.8 }], type: 'line', borderColor: CHART_COLORS.perfect, borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0, fill: false },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? 'Predicted: ' + (ctx.parsed.x * 100).toFixed(0) + '%, Actual: ' + (ctx.parsed.y * 100).toFixed(1) + '% (' + d.cal_counts[ctx.dataIndex] + ' games)' : '' } }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Model Win Probability', font: { family: 'Inter', size: 12 } }, min: 0.2, max: 0.8, ticks: { callback: v => (v * 100) + '%', font: FONT }, grid: { color: CHART_COLORS.grid } },
+                y: { title: { display: true, text: 'Actual Win Rate', font: { family: 'Inter', size: 12 } }, min: 0.2, max: 0.8, ticks: { callback: v => (v * 100) + '%', font: FONT }, grid: { color: CHART_COLORS.grid } }
+            }
+        }
+    });
+}
+
+// --- Per-year charts ---
 const chartData = {{ chart_data_json|safe }};
 
-// Render charts for each year
 Object.keys(chartData).forEach(year => {
     const d = chartData[year];
-
-    // P&L chart
     const pnlCtx = document.getElementById('pnl-chart-' + year);
-    if (pnlCtx) {
-        new Chart(pnlCtx, {
-            type: 'line',
-            data: {
-                labels: d.pnl_dates,
-                datasets: [
-                    {
-                        label: 'ML Cumulative P&L',
-                        data: d.ml_cumulative,
-                        borderColor: '#1877F2',
-                        backgroundColor: 'rgba(24, 119, 242, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        borderWidth: 2,
-                    },
-                    {
-                        label: 'Totals Cumulative P&L',
-                        data: d.totals_cumulative,
-                        borderColor: '#31A24C',
-                        backgroundColor: 'rgba(49, 162, 76, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        borderWidth: 2,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Inter', size: 12 } } },
-                    tooltip: {
-                        callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString() }
-                    }
-                },
-                scales: {
-                    x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 11, family: 'Inter' } } },
-                    y: {
-                        display: true,
-                        grid: { color: 'rgba(0,0,0,0.04)' },
-                        ticks: { callback: v => '$' + v.toLocaleString(), font: { size: 11, family: 'Inter' } }
-                    }
-                }
-            }
-        });
-    }
+    if (pnlCtx) makePnlChart(pnlCtx, d);
 
-    // Calibration chart
     const calCtx = document.getElementById('cal-chart-' + year);
-    if (calCtx) {
-        new Chart(calCtx, {
-            type: 'scatter',
-            data: {
-                datasets: [
-                    {
-                        label: 'Model calibration',
-                        data: d.cal_predicted.map((p, i) => ({ x: p, y: d.cal_actual[i] })),
-                        backgroundColor: '#1877F2',
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                    },
-                    {
-                        label: 'Perfect calibration',
-                        data: [{ x: 0.2, y: 0.2 }, { x: 0.8, y: 0.8 }],
-                        type: 'line',
-                        borderColor: 'rgba(0,0,0,0.15)',
-                        borderDash: [5, 5],
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        fill: false,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => {
-                                if (ctx.datasetIndex === 0) {
-                                    return 'Predicted: ' + (ctx.parsed.x * 100).toFixed(0) + '%, Actual: ' + (ctx.parsed.y * 100).toFixed(1) + '% (' + d.cal_counts[ctx.dataIndex] + ' games)';
-                                }
-                                return '';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Model Win Probability', font: { family: 'Inter', size: 12 } },
-                        min: 0.2, max: 0.8,
-                        ticks: { callback: v => (v * 100) + '%', font: { size: 11, family: 'Inter' } },
-                        grid: { color: 'rgba(0,0,0,0.04)' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Actual Win Rate', font: { family: 'Inter', size: 12 } },
-                        min: 0.2, max: 0.8,
-                        ticks: { callback: v => (v * 100) + '%', font: { size: 11, family: 'Inter' } },
-                        grid: { color: 'rgba(0,0,0,0.04)' }
-                    }
-                }
-            }
-        });
+    if (calCtx) makeCalChart(calCtx, d);
+
+    if (d.bankroll_series) {
+        const brlCtx = document.getElementById('bankroll-chart-' + year);
+        if (brlCtx) makeBankrollChart(brlCtx, d.bankroll_series, year + ' Bankroll');
     }
 });
+
+// --- Combined charts ---
+{% if combined_data %}
+const combinedData = {{ combined_chart_json|safe }};
+if (combinedData) {
+    // Combined P&L
+    const cPnl = document.getElementById('combined-pnl-chart');
+    if (cPnl) {
+        // Add a combined total line
+        const totalCum = combinedData.ml_cumulative.map((v, i) => v + combinedData.totals_cumulative[i]);
+        new Chart(cPnl, {
+            type: 'line',
+            data: {
+                labels: combinedData.pnl_dates,
+                datasets: [
+                    { label: 'ML P&L', data: combinedData.ml_cumulative, borderColor: CHART_COLORS.ml, backgroundColor: CHART_COLORS.mlBg, fill: false, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Totals P&L', data: combinedData.totals_cumulative, borderColor: CHART_COLORS.totals, backgroundColor: CHART_COLORS.totalsBg, fill: false, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Combined P&L', data: totalCum, borderColor: CHART_COLORS.combined, backgroundColor: CHART_COLORS.combinedBg, fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5 },
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: LEGEND, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString() } } },
+                scales: {
+                    x: { display: true, grid: { display: false }, ticks: { maxTicksLimit: 12, font: FONT } },
+                    y: { display: true, grid: { color: CHART_COLORS.grid }, ticks: { callback: v => '$' + v.toLocaleString(), font: FONT } }
+                }
+            }
+        });
+    }
+
+    // Combined bankroll
+    if (combinedData.bankroll_series) {
+        const cBrl = document.getElementById('combined-bankroll-chart');
+        if (cBrl) makeBankrollChart(cBrl, combinedData.bankroll_series, 'Bankroll');
+    }
+
+    // Combined calibration
+    const cCal = document.getElementById('combined-cal-chart');
+    if (cCal) makeCalChart(cCal, combinedData);
+}
+{% endif %}
 </script>
 {% endblock %}

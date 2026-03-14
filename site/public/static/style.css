@@ -762,6 +762,8 @@ body {
     .picks-grid { grid-template-columns: 1fr; }
     .subscribe-form { flex-direction: column; }
     .subscribe-btn { width: 100%; }
+    .backtest-grid { grid-template-columns: 1fr !important; }
+    .about-stats-row { flex-wrap: wrap; }
 }
 
 @media (max-width: 480px) {

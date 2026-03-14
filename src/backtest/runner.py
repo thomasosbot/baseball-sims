@@ -206,6 +206,7 @@ def run_rolling_backtest(
     max_games_per_year: Optional[int] = None,
     output_path: Optional[Path] = None,
     bankroll: float = 10_000.0,
+    rolling_bankroll: bool = False,
 ) -> pd.DataFrame:
     """
     Rolling-window backtest: builds player profiles cumulatively so each
@@ -327,8 +328,11 @@ def run_rolling_backtest(
             print(f"  Elo starting fresh (all teams at 1500)")
 
         games_simulated = 0
+        current_bankroll = bankroll
 
         print(f"  Simulating {game_count} games across {len(dates)} dates ({n_sims} sims each)...")
+        if rolling_bankroll:
+            print(f"  Rolling bankroll: starting at ${current_bankroll:,.2f}")
         for date in tqdm(dates, desc=f"  {year} dates"):
             date_str = str(date)[:10]
 
@@ -344,6 +348,10 @@ def run_rolling_backtest(
             team_bullpen_profiles = {
                 team: build_tiered_bullpen_profiles(df) for team, df in team_reliever_rates.items()
             }
+
+            # Use day's bankroll snapshot for all bets placed today
+            day_bankroll = current_bankroll if rolling_bankroll else bankroll
+            day_pnl = 0.0
 
             # 2. Simulate all games on this date
             todays_games = games_by_date.get(date_str, [])
@@ -365,12 +373,19 @@ def run_rolling_backtest(
                     pred["year"] = year
                     pred["cumulative_batters"] = cumulative.num_batters
                     pred["cumulative_pitchers"] = cumulative.num_pitchers
-                    _attach_odds(pred, closing_lines, bankroll)
-                    _attach_totals(pred, closing_totals, pred.pop("_total_runs_dist", None), bankroll)
+                    _attach_odds(pred, closing_lines, day_bankroll)
+                    _attach_totals(pred, closing_totals, pred.pop("_total_runs_dist", None), day_bankroll)
+                    if rolling_bankroll:
+                        pred["bankroll"] = day_bankroll
                     all_results.append(pred)
+                    day_pnl += pred.get("bet_profit", 0) + pred.get("totals_bet_profit", 0)
                     games_simulated += 1
                 except Exception:
                     continue
+
+            # Update rolling bankroll at end of day
+            if rolling_bankroll:
+                current_bankroll += day_pnl
 
             if max_games_per_year and games_simulated >= max_games_per_year:
                 break
@@ -406,8 +421,11 @@ def run_rolling_backtest(
                             if i > 0 and away_team:
                                 cumulative.register_reliever(int(pid), away_team)
 
-        print(f"  Completed: {games_simulated} games, "
-              f"{cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers tracked")
+        if rolling_bankroll:
+            print(f"  Completed: {games_simulated} games, bankroll ${current_bankroll:,.2f}")
+        else:
+            print(f"  Completed: {games_simulated} games, "
+                  f"{cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers tracked")
 
     df = pd.DataFrame(all_results)
     if output_path and not df.empty:
@@ -417,6 +435,8 @@ def run_rolling_backtest(
         df.to_csv(output_path, index=False)
         print(f"\nSaved {len(df)} predictions to {output_path}")
 
+    # Attach ending bankroll as attribute for chaining years
+    df.attrs["ending_bankroll"] = current_bankroll if rolling_bankroll else bankroll
     return df
 
 

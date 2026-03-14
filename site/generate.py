@@ -75,13 +75,15 @@ def generate_site():
     (OUTPUT_DIR / "history.html").write_text(html)
 
     # Backtest
-    backtest_data, chart_data = _load_backtest_data()
+    backtest_data, chart_data, combined_data, combined_chart = _load_backtest_data()
     if backtest_data:
         template = env.get_template("backtest.html")
         html = template.render(
             years=sorted(backtest_data.keys()),
             backtest_data=backtest_data,
             chart_data_json=json.dumps(chart_data),
+            combined_data=combined_data,
+            combined_chart_json=json.dumps(combined_chart) if combined_chart else "null",
         )
         (OUTPUT_DIR / "backtest.html").write_text(html)
         print(f"  backtest.html ({', '.join(str(y) for y in sorted(backtest_data.keys()))})")
@@ -107,6 +109,7 @@ def _load_backtest_data():
     """Load backtest CSVs and compute metrics for the backtest page."""
     backtest_data = {}
     chart_data = {}
+    all_dfs = []
 
     for year in range(2024, 2030):
         csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
@@ -122,8 +125,29 @@ def _load_backtest_data():
 
         backtest_data[year] = metrics
         chart_data[str(year)] = charts
+        all_dfs.append(df)
 
-    return backtest_data, chart_data
+    # Combined metrics across all years
+    combined_data = None
+    combined_chart = None
+    if len(all_dfs) >= 2:
+        combined_df = pd.concat(all_dfs, ignore_index=True)
+        combined_data = _compute_backtest_metrics(combined_df, "combined")
+        combined_chart = _compute_chart_data(combined_df)
+        # Add bankroll tracking to combined chart
+        combined_chart["bankroll_series"] = _compute_bankroll_series(combined_df, 10_000.0)
+
+    # Add bankroll tracking to each year's chart data
+    starting = 10_000.0
+    for year in sorted(backtest_data.keys()):
+        csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
+        df = pd.read_csv(csv_path)
+        brl = _compute_bankroll_series(df, starting)
+        chart_data[str(year)]["bankroll_series"] = brl
+        if brl["values"]:
+            starting = brl["values"][-1]  # roll into next year
+
+    return backtest_data, chart_data, combined_data, combined_chart
 
 
 def _compute_backtest_metrics(df, year):
@@ -210,6 +234,13 @@ def _compute_backtest_metrics(df, year):
             "totals_roi": m_tot_roi,
         })
 
+    # Combined (all bets) stats
+    total_profit = ml_profit + totals_profit
+    total_staked = (float(ml_bets["bet_stake"].sum()) if ml_count > 0 else 0) + \
+                   (float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0)
+    total_bets_count = ml_count + totals_count
+    total_roi = total_profit / total_staked * 100 if total_staked > 0 else 0
+
     return {
         "games": len(df),
         "brier": brier,
@@ -217,15 +248,23 @@ def _compute_backtest_metrics(df, year):
         "actual_avg_total": avg_actual_total,
         "run_gap": run_gap,
         "ml_bets": ml_count,
+        "ml_wins": ml_wins if ml_count > 0 else 0,
         "ml_win_rate": ml_win_rate,
         "ml_profit": ml_profit,
+        "ml_staked": float(ml_bets["bet_stake"].sum()) if ml_count > 0 else 0,
         "ml_roi": ml_roi,
         "ml_avg_odds": ml_avg_odds,
         "totals_bets": totals_count,
+        "totals_wins": totals_wins if totals_count > 0 else 0,
         "totals_win_rate": totals_win_rate,
         "totals_profit": totals_profit,
+        "totals_staked": float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0,
         "totals_roi": totals_roi,
         "totals_avg_odds": totals_avg_odds,
+        "total_bets": total_bets_count,
+        "total_profit": total_profit,
+        "total_staked": total_staked,
+        "total_roi": total_roi,
         "monthly": monthly,
     }
 
@@ -282,6 +321,38 @@ def _compute_chart_data(df):
         "cal_predicted": cal_predicted,
         "cal_actual": cal_actual,
         "cal_counts": cal_counts,
+    }
+
+
+def _compute_bankroll_series(df, starting_bankroll):
+    """Compute daily bankroll values from bet profits."""
+    df = df.sort_values("date").copy()
+    df["_date"] = pd.to_datetime(df["date"]).dt.strftime("%b %d")
+
+    bankroll = starting_bankroll
+    dates = []
+    values = []
+
+    for date_str, day_df in df.groupby("date", sort=True):
+        day_pnl = day_df["bet_profit"].fillna(0).sum()
+        if "totals_bet_profit" in day_df.columns:
+            day_pnl += day_df["totals_bet_profit"].fillna(0).sum()
+        bankroll += day_pnl
+        display_date = pd.to_datetime(date_str).strftime("%b %d")
+        dates.append(display_date)
+        values.append(round(bankroll, 2))
+
+    # Downsample if too many points
+    if len(dates) > 200:
+        step = len(dates) // 200
+        dates = dates[::step]
+        values = values[::step]
+
+    return {
+        "dates": dates,
+        "values": values,
+        "starting": starting_bankroll,
+        "ending": values[-1] if values else starting_bankroll,
     }
 
 
