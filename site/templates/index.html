@@ -100,18 +100,23 @@
             </thead>
             <tbody>
                 {% for game in today.games %}
-                <tr>
+                <tr class="{% if game.status == 'lineups_pending' %}pending-row{% endif %}">
                     <td>
                         <span class="team">{{ game.away }}</span>
                         <span class="at">@</span>
                         <span class="team">{{ game.home }}</span>
                     </td>
+                    {% if game.status == 'lineups_pending' %}
+                    <td colspan="3" class="pending-label">Lineups pending</td>
+                    <td>—</td>
+                    {% else %}
                     <td>{{ "%.1f"|format(game.model_home_wp * 100) }}%</td>
                     <td>{{ "%.1f"|format(game.market_home_wp * 100) if game.market_home_wp else "—" }}%</td>
                     <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
                         {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
                     </td>
                     <td>{{ game.pick if game.pick else "—" }}</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

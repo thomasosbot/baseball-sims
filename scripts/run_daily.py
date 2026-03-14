@@ -138,9 +138,16 @@ def run_daily(
         home_lineup = g.get("home_lineup", [])
         away_lineup = g.get("away_lineup", [])
 
-        # Skip games without lineups
+        # Games without lineups: include in output but don't simulate
         if len(home_lineup) < 9 or len(away_lineup) < 9:
-            print(f"  {away_abbr} @ {home_abbr}: skipping (lineups not confirmed)")
+            print(f"  {away_abbr} @ {home_abbr}: lineups pending")
+            output_games.append({
+                "away": away_abbr,
+                "home": home_abbr,
+                "away_pitcher": g.get("away_starter", "TBD"),
+                "home_pitcher": g.get("home_starter", "TBD"),
+                "status": "lineups_pending",
+            })
             continue
 
         # Resolve starter IDs from the schedule data

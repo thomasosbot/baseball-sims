@@ -1,124 +1,130 @@
 {
   "date": "2026-03-14",
-  "generated_at": "2026-03-14T11:00:00",
+  "generated_at": "2026-03-14T14:08:26.488681",
   "games": [
     {
-      "away": "NYM",
-      "home": "HOU",
-      "away_pitcher": "Sean Manaea",
-      "home_pitcher": "Framber Valdez",
-      "model_home_wp": 0.5821,
-      "model_away_wp": 0.4179,
-      "market_home_wp": 0.52,
-      "market_away_wp": 0.48,
-      "edge_pct": 8.7,
-      "pick": "HOU ML",
-      "odds": "-118",
-      "confidence": 0.812
+      "away": "MIA",
+      "home": "WSN",
+      "away_pitcher": "",
+      "home_pitcher": "Alex Clemmey",
+      "status": "lineups_pending"
     },
     {
-      "away": "BOS",
-      "home": "ATL",
-      "away_pitcher": "Brayan Bello",
-      "home_pitcher": "Chris Sale",
-      "model_home_wp": 0.545,
-      "model_away_wp": 0.455,
-      "market_home_wp": 0.59,
-      "market_away_wp": 0.41,
-      "edge_pct": 0,
-      "pick": null,
-      "confidence": 0.7
+      "away": "BAL",
+      "home": "PIT",
+      "away_pitcher": "Trevor Rogers",
+      "home_pitcher": "Carmen Mlodzinski",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "TBR",
+      "home": "MIN",
+      "away_pitcher": "Jake Woodford",
+      "home_pitcher": "Simeon Woods Richardson",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "PHI",
+      "home": "NYY",
+      "away_pitcher": "Bryse Wilson",
+      "home_pitcher": "Max Fried",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "DET",
+      "home": "TOR",
+      "away_pitcher": "Tarik Skubal",
+      "home_pitcher": "Max Scherzer",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "STL",
+      "home": "MIA",
+      "away_pitcher": "Andre Pallante",
+      "home_pitcher": "",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "KCR",
+      "home": "Athletics",
+      "away_pitcher": "Ryan Bergert",
+      "home_pitcher": "Jacob Lopez",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "ARI",
+      "home": "SFG",
+      "away_pitcher": "Zac Gallen",
+      "home_pitcher": "Adrian Houser",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "TEX",
+      "home": "CIN",
+      "away_pitcher": "Austin Gomber",
+      "home_pitcher": "Rhett Lowder",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "SDP",
+      "home": "TEX",
+      "away_pitcher": "",
+      "home_pitcher": "Nathan Eovaldi",
+      "status": "lineups_pending"
     },
     {
       "away": "LAD",
       "home": "CWS",
-      "away_pitcher": "Yoshinobu Yamamoto",
-      "home_pitcher": "Garrett Crochet",
-      "model_home_wp": 0.31,
-      "model_away_wp": 0.69,
-      "market_home_wp": 0.33,
-      "market_away_wp": 0.67,
-      "edge_pct": 0,
-      "pick": null,
-      "confidence": 0.65
+      "away_pitcher": "Justin Wrobleski",
+      "home_pitcher": "Mike Vasil",
+      "status": "lineups_pending"
     },
     {
       "away": "CHC",
       "home": "COL",
-      "away_pitcher": "Justin Steele",
+      "away_pitcher": "Ben Brown",
       "home_pitcher": "Kyle Freeland",
-      "model_home_wp": 0.38,
-      "model_away_wp": 0.62,
-      "market_home_wp": 0.44,
-      "market_away_wp": 0.56,
-      "edge_pct": 9.1,
-      "pick": "CHC ML",
-      "odds": "+138",
-      "confidence": 0.78
+      "status": "lineups_pending"
+    },
+    {
+      "away": "CLE",
+      "home": "SDP",
+      "away_pitcher": "Logan Allen",
+      "home_pitcher": "",
+      "status": "lineups_pending"
     },
     {
       "away": "SEA",
       "home": "LAA",
       "away_pitcher": "Logan Gilbert",
-      "home_pitcher": "Tyler Anderson",
-      "model_home_wp": 0.42,
-      "model_away_wp": 0.58,
-      "market_home_wp": 0.45,
-      "market_away_wp": 0.55,
-      "edge_pct": 0,
-      "pick": null,
-      "confidence": 0.69
-    }
-  ],
-  "picks": [
-    {
-      "pick": "HOU ML",
-      "side": "home",
-      "team": "HOU",
-      "opponent": "NYM",
-      "edge_pct": 8.7,
-      "confidence": 0.812,
-      "odds": "-118",
-      "kelly_fraction": 0.035,
-      "wager": 35.0,
-      "type": "moneyline",
-      "explanation": "Framber Valdez vs Sean Manaea. Elo favors HOU (58%). 8.7% edge at -125 market.",
-      "sportsbook_odds": {
-        "fanduel": -118,
-        "draftkings": -122,
-        "betmgm": -115,
-        "williamhill_us": -120,
-        "pinnacle": -119,
-        "espnbet": -121,
-        "betrivers": -117,
-        "fanatics": -120
-      }
+      "home_pitcher": "Walbert Urena",
+      "status": "lineups_pending"
     },
     {
-      "pick": "CHC ML",
-      "side": "away",
-      "team": "CHC",
-      "opponent": "COL",
-      "edge_pct": 9.1,
-      "confidence": 0.78,
-      "odds": "+138",
-      "kelly_fraction": 0.032,
-      "wager": 32.0,
-      "type": "moneyline",
-      "explanation": "Justin Steele vs Kyle Freeland. 9.1% edge at +130 market. Hitter-friendly park.",
-      "sportsbook_odds": {
-        "fanduel": 132,
-        "draftkings": 138,
-        "betmgm": 130,
-        "williamhill_us": 128,
-        "pinnacle": 135,
-        "espnbet": 131,
-        "fanatics": 134
-      }
+      "away": "COL",
+      "home": "MIL",
+      "away_pitcher": "Zach Agnos",
+      "home_pitcher": "Jacob Misiorowski",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "NYM",
+      "home": "HOU",
+      "away_pitcher": "",
+      "home_pitcher": "Ryan Weiss",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "BOS",
+      "home": "ATL",
+      "away_pitcher": "Brayan Bello",
+      "home_pitcher": "Bryce Elder",
+      "status": "lineups_pending"
     }
   ],
+  "picks": [],
   "bankroll": {
     "current": 1000.0,
-    "today_wagered": 67.0
+    "today_wagered": 0.0
   }
 }

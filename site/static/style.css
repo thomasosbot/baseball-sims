@@ -379,6 +379,12 @@ body {
 }
 .team { font-weight: 600; }
 .at { color: var(--text-muted); margin: 0 0.25rem; font-size: 0.8rem; }
+.pending-row { opacity: 0.5; }
+.pending-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
 
 /* ── Chart ── */
 .chart-card {
