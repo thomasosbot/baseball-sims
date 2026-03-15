@@ -1,125 +1,193 @@
 {
   "date": "2026-03-14",
-  "generated_at": "2026-03-14T14:08:26.488681",
+  "generated_at": "2026-03-15T09:42:51.497716",
   "games": [
     {
       "away": "MIA",
       "home": "WSN",
       "away_pitcher": "",
       "home_pitcher": "Alex Clemmey",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4606,
+      "model_away_wp": 0.5394,
+      "avg_total_runs": 9.17,
+      "elo_home_wp": 0.4503,
+      "sim_home_wp": 0.4709
     },
     {
       "away": "BAL",
       "home": "PIT",
       "away_pitcher": "Trevor Rogers",
       "home_pitcher": "Carmen Mlodzinski",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5387,
+      "model_away_wp": 0.4613,
+      "avg_total_runs": 8.72,
+      "elo_home_wp": 0.5375,
+      "sim_home_wp": 0.5398
     },
     {
       "away": "TBR",
       "home": "MIN",
       "away_pitcher": "Jake Woodford",
       "home_pitcher": "Simeon Woods Richardson",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5266,
+      "model_away_wp": 0.4734,
+      "avg_total_runs": 8.36,
+      "elo_home_wp": 0.5208,
+      "sim_home_wp": 0.5325
     },
     {
       "away": "PHI",
       "home": "NYY",
       "away_pitcher": "Bryse Wilson",
       "home_pitcher": "Max Fried",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5747,
+      "model_away_wp": 0.4253,
+      "avg_total_runs": 9.48,
+      "elo_home_wp": 0.5804,
+      "sim_home_wp": 0.569
     },
     {
       "away": "DET",
       "home": "TOR",
       "away_pitcher": "Tarik Skubal",
       "home_pitcher": "Max Scherzer",
-      "status": "lineups_pending"
+      "model_home_wp": 0.6043,
+      "model_away_wp": 0.3957,
+      "avg_total_runs": 9.04,
+      "elo_home_wp": 0.66,
+      "sim_home_wp": 0.5486
     },
     {
       "away": "STL",
       "home": "MIA",
       "away_pitcher": "Andre Pallante",
       "home_pitcher": "",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5857,
+      "model_away_wp": 0.4143,
+      "avg_total_runs": 9.19,
+      "elo_home_wp": 0.6009,
+      "sim_home_wp": 0.5705
     },
     {
       "away": "KCR",
       "home": "Athletics",
       "away_pitcher": "Ryan Bergert",
       "home_pitcher": "Jacob Lopez",
-      "status": "lineups_pending"
+      "model_home_wp": 0.563,
+      "model_away_wp": 0.437,
+      "avg_total_runs": 9.44,
+      "elo_home_wp": 0.5,
+      "sim_home_wp": 0.6259
     },
     {
       "away": "ARI",
       "home": "SFG",
       "away_pitcher": "Zac Gallen",
       "home_pitcher": "Adrian Houser",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5555,
+      "model_away_wp": 0.4445,
+      "avg_total_runs": 8.72,
+      "elo_home_wp": 0.5367,
+      "sim_home_wp": 0.5743
     },
     {
       "away": "TEX",
       "home": "CIN",
       "away_pitcher": "Austin Gomber",
       "home_pitcher": "Rhett Lowder",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5519,
+      "model_away_wp": 0.4481,
+      "avg_total_runs": 9.38,
+      "elo_home_wp": 0.5542,
+      "sim_home_wp": 0.5496
     },
     {
       "away": "SDP",
       "home": "TEX",
-      "away_pitcher": "",
+      "away_pitcher": "Marco Gonzales",
       "home_pitcher": "Nathan Eovaldi",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5292,
+      "model_away_wp": 0.4708,
+      "avg_total_runs": 9.25,
+      "elo_home_wp": 0.5141,
+      "sim_home_wp": 0.5442
     },
     {
       "away": "LAD",
       "home": "CWS",
       "away_pitcher": "Justin Wrobleski",
       "home_pitcher": "Mike Vasil",
-      "status": "lineups_pending"
+      "model_home_wp": 0.3918,
+      "model_away_wp": 0.6082,
+      "avg_total_runs": 8.56,
+      "elo_home_wp": 0.3585,
+      "sim_home_wp": 0.4251
     },
     {
       "away": "CHC",
       "home": "COL",
       "away_pitcher": "Ben Brown",
       "home_pitcher": "Kyle Freeland",
-      "status": "lineups_pending"
+      "model_home_wp": 0.3986,
+      "model_away_wp": 0.6014,
+      "avg_total_runs": 11.04,
+      "elo_home_wp": 0.3287,
+      "sim_home_wp": 0.4685
     },
     {
       "away": "CLE",
       "home": "SDP",
       "away_pitcher": "Logan Allen",
-      "home_pitcher": "",
-      "status": "lineups_pending"
+      "home_pitcher": "Nick Pivetta",
+      "model_home_wp": 0.5061,
+      "model_away_wp": 0.4939,
+      "avg_total_runs": 8.88,
+      "elo_home_wp": 0.4617,
+      "sim_home_wp": 0.5504
     },
     {
       "away": "SEA",
       "home": "LAA",
       "away_pitcher": "Logan Gilbert",
       "home_pitcher": "Walbert Urena",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4598,
+      "model_away_wp": 0.5402,
+      "avg_total_runs": 8.75,
+      "elo_home_wp": 0.3725,
+      "sim_home_wp": 0.547
     },
     {
       "away": "COL",
       "home": "MIL",
       "away_pitcher": "Zach Agnos",
       "home_pitcher": "Jacob Misiorowski",
-      "status": "lineups_pending"
+      "model_home_wp": 0.6253,
+      "model_away_wp": 0.3747,
+      "avg_total_runs": 8.34,
+      "elo_home_wp": 0.7314,
+      "sim_home_wp": 0.5192
     },
     {
       "away": "NYM",
       "home": "HOU",
-      "away_pitcher": "",
+      "away_pitcher": "Freddy Peralta",
       "home_pitcher": "Ryan Weiss",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5603,
+      "model_away_wp": 0.4397,
+      "avg_total_runs": 8.86,
+      "elo_home_wp": 0.5713,
+      "sim_home_wp": 0.5493
     },
     {
       "away": "BOS",
       "home": "ATL",
       "away_pitcher": "Brayan Bello",
       "home_pitcher": "Bryce Elder",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5201,
+      "model_away_wp": 0.4799,
+      "avg_total_runs": 9.04,
+      "elo_home_wp": 0.4805,
+      "sim_home_wp": 0.5597
     }
   ],
   "picks": [],
