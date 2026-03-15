@@ -18,6 +18,7 @@ from config import (
     PRIOR_YEAR_WEIGHT, MARCEL_EFFECTIVE_PA,
     ML_ALPHA, ML_MIN_EDGE, ML_MAX_EDGE, ML_MIN_CONFIDENCE,
     TOTALS_ALPHA, TOTALS_MIN_EDGE, TOTALS_MAX_EDGE, TOTALS_MIN_CONFIDENCE,
+    SPREAD_ALPHA, SPREAD_MIN_EDGE, SPREAD_MAX_EDGE, SPREAD_MIN_CONFIDENCE,
     HOME_FIELD_ADVANTAGE, ELO_BLEND_WEIGHT,
 )
 from src.data.fetch import (
@@ -112,6 +113,10 @@ def run_backtest(
         if closing_totals is not None:
             print(f"  Loaded {len(closing_totals)} closing totals lines")
 
+        closing_spreads = _load_closing_spreads(year)
+        if closing_spreads is not None:
+            print(f"  Loaded {len(closing_spreads)} closing spread lines")
+
         weather_df = _load_weather(year)
         weather_lookup = {}
         if weather_df is not None:
@@ -128,6 +133,7 @@ def run_backtest(
                     pred["year"] = year
                     _attach_odds(pred, closing_lines, bankroll)
                     _attach_totals(pred, closing_totals, pred.pop("_total_runs_dist", None), bankroll)
+                    _attach_spreads(pred, closing_spreads, pred.pop("_margin_dist", None), bankroll)
                     all_results.append(pred)
                 except Exception:
                     continue
@@ -184,13 +190,14 @@ def run_backtest(
                 pred["year"] = year
                 _attach_odds(pred, closing_lines, bankroll)
                 _attach_totals(pred, closing_totals, pred.pop("_total_runs_dist", None), bankroll)
+                _attach_spreads(pred, closing_spreads, pred.pop("_margin_dist", None), bankroll)
                 all_results.append(pred)
             except Exception:
                 continue
 
     df = pd.DataFrame(all_results)
     if output_path and not df.empty:
-        for col in ("bet_won", "totals_bet_won"):
+        for col in ("bet_won", "totals_bet_won", "spread_bet_won"):
             if col in df.columns:
                 df[col] = df[col].apply(lambda x: int(x) if x is not None and not pd.isna(x) else x)
         df.to_csv(output_path, index=False)
@@ -236,6 +243,10 @@ def run_rolling_backtest(
         closing_totals = _load_closing_totals(year)
         if closing_totals is not None:
             print(f"  Loaded {len(closing_totals)} closing totals lines")
+
+        closing_spreads = _load_closing_spreads(year)
+        if closing_spreads is not None:
+            print(f"  Loaded {len(closing_spreads)} closing spread lines")
 
         weather_df = _load_weather(year)
         weather_lookup = {}
@@ -375,10 +386,11 @@ def run_rolling_backtest(
                     pred["cumulative_pitchers"] = cumulative.num_pitchers
                     _attach_odds(pred, closing_lines, day_bankroll)
                     _attach_totals(pred, closing_totals, pred.pop("_total_runs_dist", None), day_bankroll)
+                    _attach_spreads(pred, closing_spreads, pred.pop("_margin_dist", None), day_bankroll)
                     if rolling_bankroll:
                         pred["bankroll"] = day_bankroll
                     all_results.append(pred)
-                    day_pnl += pred.get("bet_profit", 0) + pred.get("totals_bet_profit", 0)
+                    day_pnl += pred.get("bet_profit", 0) + pred.get("totals_bet_profit", 0) + pred.get("spread_bet_profit", 0)
                     games_simulated += 1
                 except Exception:
                     continue
@@ -429,7 +441,7 @@ def run_rolling_backtest(
 
     df = pd.DataFrame(all_results)
     if output_path and not df.empty:
-        for col in ("bet_won", "totals_bet_won"):
+        for col in ("bet_won", "totals_bet_won", "spread_bet_won"):
             if col in df.columns:
                 df[col] = df[col].apply(lambda x: int(x) if x is not None and not pd.isna(x) else x)
         df.to_csv(output_path, index=False)
@@ -576,6 +588,7 @@ def _sim_with_lineups(
         "home_starter_id":     lineup_data.get("home_starter_id"),
         "away_starter_id":     lineup_data.get("away_starter_id"),
         "_total_runs_dist":    result["total_runs_dist"],  # temp, stripped before CSV
+        "_margin_dist":        result["margin_dist"],      # temp, stripped before CSV
     }
 
 
@@ -653,6 +666,7 @@ def _sim_league_avg(game: dict, n_sims: int) -> dict:
         "home_real_profiles":  0,
         "away_real_profiles":  0,
         "_total_runs_dist":    result["total_runs_dist"],
+        "_margin_dist":        result["margin_dist"],
     }
 
 
@@ -693,6 +707,14 @@ def _load_closing_lines(year: int) -> Optional[pd.DataFrame]:
 def _load_closing_totals(year: int) -> Optional[pd.DataFrame]:
     """Load pre-built closing totals for a season, if available."""
     path = CACHE_DIR / f"closing_totals_{year}.pkl"
+    if path.exists():
+        return pd.read_pickle(path)
+    return None
+
+
+def _load_closing_spreads(year: int) -> Optional[pd.DataFrame]:
+    """Load pre-built closing spreads for a season, if available."""
+    path = CACHE_DIR / f"closing_spreads_{year}.pkl"
     if path.exists():
         return pd.read_pickle(path)
     return None
@@ -981,3 +1003,146 @@ def _attach_totals(
                 pred["totals_bet_stake"] = sizing["bet_dollars"]
                 pred["totals_bet_profit"] = round(profit, 2)
                 pred["totals_bet_won"] = won
+
+
+def _match_spreads(pred: dict, closing_spreads: pd.DataFrame) -> Optional[pd.Series]:
+    """Match a game prediction to its closing spread line."""
+    if closing_spreads is None or closing_spreads.empty:
+        return None
+
+    date = str(pred.get("date", ""))[:10]
+    home_full = pred.get("home_name", "")
+    away_full = pred.get("away_name", "")
+
+    mask = (
+        (closing_spreads["game_date"] == date)
+        & (closing_spreads["home_team_full"] == home_full)
+        & (closing_spreads["away_team_full"] == away_full)
+    )
+    matches = closing_spreads[mask]
+
+    if matches.empty:
+        home_abbrev = pred.get("home_team", "")
+        away_abbrev = pred.get("away_team", "")
+        mask = closing_spreads["game_date"] == date
+        day_games = closing_spreads[mask]
+        for _, row in day_games.iterrows():
+            if (TEAM_NAME_TO_ABBREV.get(row["home_team_full"]) == home_abbrev
+                    and TEAM_NAME_TO_ABBREV.get(row["away_team_full"]) == away_abbrev):
+                return row
+        return None
+
+    return matches.iloc[0]
+
+
+def _attach_spreads(
+    pred: dict,
+    closing_spreads: Optional[pd.DataFrame],
+    margin_dist,
+    bankroll: float,
+):
+    """
+    If historical spread odds are available, compute cover probabilities
+    from the simulation margin distribution and simulate spread bets.
+    """
+    if closing_spreads is None or margin_dist is None:
+        return
+
+    spread_row = _match_spreads(pred, closing_spreads)
+    if spread_row is None:
+        return
+
+    import numpy as np
+
+    home_spread = spread_row["home_spread"]      # e.g. -1.5 or +1.5
+    away_spread = spread_row["away_spread"]
+    home_spread_odds = spread_row["best_home_spread_odds"]
+    away_spread_odds = spread_row["best_away_spread_odds"]
+    home_cover_nv = spread_row["home_cover_nv_prob"]
+    away_cover_nv = spread_row["away_cover_nv_prob"]
+
+    # Compute model cover probabilities from sim margin distribution
+    # margin_dist = home_runs - away_runs (positive = home wins by)
+    # Home covers -1.5: margin > 1.5 (wins by 2+)
+    # Home covers +1.5: margin > -1.5 (wins or loses by 1)
+    home_cover_count = np.sum(margin_dist > -home_spread)  # margin > -spread for cover
+    # Wait — home covers when margin + home_spread > 0
+    # If home_spread = -1.5: margin must be > 1.5 to cover
+    # If home_spread = +1.5: margin must be > -1.5 to cover
+    home_cover_count = np.sum(margin_dist + home_spread > 0)
+    away_cover_count = np.sum(-margin_dist + away_spread > 0)
+    n = len(margin_dist)
+
+    model_home_cover = float(home_cover_count / n)
+    model_away_cover = float(away_cover_count / n)
+
+    # Store spread market data
+    pred["home_spread"] = home_spread
+    pred["away_spread"] = away_spread
+    pred["model_home_cover_prob"] = model_home_cover
+    pred["model_away_cover_prob"] = model_away_cover
+    pred["market_home_cover_nv"] = home_cover_nv
+    pred["market_away_cover_nv"] = away_cover_nv
+    pred["best_home_spread_odds"] = home_spread_odds
+    pred["best_away_spread_odds"] = away_spread_odds
+
+    # Calculate edges
+    confidence = pred.get("confidence", 1.0)
+    home_edge_info = calculate_edge(model_home_cover, home_cover_nv, home_spread_odds, confidence, alpha=SPREAD_ALPHA)
+    away_edge_info = calculate_edge(model_away_cover, away_cover_nv, away_spread_odds, confidence, alpha=SPREAD_ALPHA)
+
+    pred["home_spread_edge"] = home_edge_info["edge"]
+    pred["away_spread_edge"] = away_edge_info["edge"]
+
+    # Spread bet defaults
+    pred["spread_bet_side"] = None
+    pred["spread_bet_odds"] = None
+    pred["spread_bet_edge"] = None
+    pred["spread_bet_fraction"] = 0.0
+    pred["spread_bet_stake"] = 0.0
+    pred["spread_bet_profit"] = 0.0
+    pred["spread_bet_won"] = None
+
+    # Actual margin for grading
+    home_score = pred.get("actual_home_score", 0) or 0
+    away_score = pred.get("actual_away_score", 0) or 0
+    actual_margin = home_score - away_score
+
+    # Check home spread
+    if (SPREAD_MIN_EDGE <= home_edge_info["edge"] <= SPREAD_MAX_EDGE
+            and home_edge_info["ev_per_unit"] > 0
+            and confidence >= SPREAD_MIN_CONFIDENCE):
+        sizing = size_bet(home_edge_info["adjusted_prob"], american_to_decimal(home_spread_odds),
+                          bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
+        if sizing["bet_dollars"] > 0:
+            won = (actual_margin + home_spread) > 0
+            decimal_odds = american_to_decimal(home_spread_odds)
+            profit = sizing["bet_dollars"] * (decimal_odds - 1) if won else -sizing["bet_dollars"]
+
+            pred["spread_bet_side"] = f"home {home_spread}"
+            pred["spread_bet_odds"] = home_spread_odds
+            pred["spread_bet_edge"] = home_edge_info["edge"]
+            pred["spread_bet_fraction"] = sizing["bet_fraction"]
+            pred["spread_bet_stake"] = sizing["bet_dollars"]
+            pred["spread_bet_profit"] = round(profit, 2)
+            pred["spread_bet_won"] = won
+
+    # Check away spread (only if no home bet)
+    if pred["spread_bet_side"] is None:
+        if (SPREAD_MIN_EDGE <= away_edge_info["edge"] <= SPREAD_MAX_EDGE
+                and away_edge_info["ev_per_unit"] > 0
+                and confidence >= SPREAD_MIN_CONFIDENCE):
+            sizing = size_bet(away_edge_info["adjusted_prob"], american_to_decimal(away_spread_odds),
+                              bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
+            if sizing["bet_dollars"] > 0:
+                won = (-actual_margin + away_spread) > 0
+                decimal_odds = american_to_decimal(away_spread_odds)
+                profit = sizing["bet_dollars"] * (decimal_odds - 1) if won else -sizing["bet_dollars"]
+
+                pred["spread_bet_side"] = f"away {away_spread}"
+                pred["spread_bet_odds"] = away_spread_odds
+                pred["spread_bet_edge"] = away_edge_info["edge"]
+                pred["spread_bet_fraction"] = sizing["bet_fraction"]
+                pred["spread_bet_stake"] = sizing["bet_dollars"]
+                pred["spread_bet_profit"] = round(profit, 2)
+                pred["spread_bet_won"] = won

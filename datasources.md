@@ -132,7 +132,7 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 |-----------|-------|
 | `apiKey` | From `.env` file (`ODDS_API_KEY`) |
 | `regions` | `us` (DraftKings, FanDuel, BetMGM, etc.) |
-| `markets` | `h2h` (moneyline), `totals` (over/under) |
+| `markets` | `h2h` (moneyline), `totals` (over/under), `spreads` (run line ±1.5) |
 | `oddsFormat` | `american` |
 
 **Rate limits:** 500 requests/month on the free tier. The response header `x-requests-remaining` tells you how many are left. Check current balance before large fetches.
@@ -141,6 +141,7 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 - `home_team`, `away_team`, `commence_time`
 - `bookmakers[].markets[].outcomes[].price` — the American odds for each side at each book
 - For totals: `bookmakers[].markets[].outcomes[].point` — the total line (e.g. 8.5)
+- For spreads: `bookmakers[].markets[].outcomes[].point` — the spread (e.g. -1.5 / +1.5)
 
 **Sportsbooks available (~13):** FanDuel, DraftKings, BetMGM, Caesars, BetRivers, PointsBet, WynnBET, Bovada, BetUS, ESPN BET, Fanatics, Pinnacle, etc.
 
@@ -171,10 +172,10 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 | Parameter | Value |
 |-----------|-------|
 | `date` | ISO 8601 timestamp, e.g. `2024-07-01T22:00:00Z` |
-| `markets` | `h2h,totals` (both fetched in same request) |
+| `markets` | `h2h,totals` or `spreads` (fetched separately to avoid re-fetching cached data) |
 | Other params | Same as live endpoint (`apiKey`, `regions`, `oddsFormat`) |
 
-**Strategy:** For each game day, we fetch the snapshot at 22:00 UTC (~6pm ET). Most MLB games start 7-8pm ET, so this captures near-closing lines. Costs ~180 API requests per full season (one per game day).
+**Strategy:** For each game day, we fetch the snapshot at 22:00 UTC (~6pm ET). Most MLB games start 7-8pm ET, so this captures near-closing lines. Costs ~180 API requests per full season per market (one per game day).
 
 ### Processing Pipeline — Moneyline (h2h)
 
@@ -204,6 +205,19 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 - No-vig probability computed from the single book's over/under pair
 
 **2024 data stats:** 30,976 raw totals rows → 2,641 games with closing totals.
+
+### Processing Pipeline — Spreads (run line)
+
+1. `fetch_spread_odds(year)` in `scripts/analyze_run_lines.py` → raw spread odds by book per game per day → cached as `historical_spreads_{year}.pkl`
+2. `build_closing_spreads(spreads_df)` → consensus spread + best odds → cached as `closing_spreads_{year}.pkl`
+
+**Spread closing line construction:**
+- Only standard ±1.5 run lines are kept (alternate lines like ±2.5 are filtered out)
+- Filter: |American odds| ≤ 600, per-book vig 0-12%, minimum 3 books per game
+- **Use FanDuel** if available, else median odds across books
+- No-vig probability computed from the single book's home/away pair
+
+**2025 data stats:** 25,125 raw spread rows → 2,116 games with closing spreads.
 
 **Team name mapping:** The Odds API uses full names ("New York Yankees") which match our `TEAM_NAME_TO_ABBREV` dict. All-Star Game entries ("American League" / "National League") are ignored.
 

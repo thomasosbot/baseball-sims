@@ -524,6 +524,7 @@ def monte_carlo_win_probability(
 
     home_wp = home_wins / n_simulations
     total_runs = home_runs_list + away_runs_list
+    margin_dist = home_runs_list - away_runs_list  # positive = home wins by
 
     return {
         "home_win_prob": home_wp,
@@ -533,5 +534,6 @@ def monte_carlo_win_probability(
         "avg_total_runs": float(np.mean(total_runs)),
         "std_total_runs": float(np.std(total_runs)),
         "total_runs_dist": total_runs,
+        "margin_dist": margin_dist,
         "n_simulations": n_simulations,
     }

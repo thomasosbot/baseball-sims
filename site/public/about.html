@@ -178,6 +178,8 @@
         <h2>Edge Detection & Bet Sizing</h2>
         <p>Finding edges isn't enough &mdash; you need to size them correctly and filter out noise. The model uses a multi-layer approach:</p>
         <ul>
+            <li><strong>Three markets</strong> &mdash; moneyline (straight win), run line (&pm;1.5 spread), and over/under totals. Each market has its own edge parameters tuned via grid search.</li>
+            <li><strong>Simulation-derived probabilities</strong> &mdash; cover probabilities for run lines come directly from 10,000 margin distributions, not heuristics. The model knows exactly how often each team wins by 2+ runs.</li>
             <li><strong>Alpha shrinkage</strong> &mdash; model probabilities are blended toward market consensus. The market is usually right; we only bet when the disagreement is significant and justified.</li>
             <li><strong>Confidence gating</strong> &mdash; early-season bets with thin data are down-weighted. Model-market agreement adds confidence; large disagreements are penalized.</li>
             <li><strong>7% minimum edge</strong> &mdash; small edges are more likely to be noise than signal. This threshold was optimized via grid search across multiple seasons.</li>
@@ -196,20 +198,20 @@
         <p>The ultimate test of any model is performance on data it has never seen. The model was developed on 2021&ndash;2024 data and validated on the complete 2025 MLB season with zero parameter adjustments:</p>
         <div class="about-stats-row">
             <div class="about-stat">
-                <span class="about-stat-value profit">+16.2%</span>
-                <span class="about-stat-label">ML ROI (247 bets)</span>
+                <span class="about-stat-value profit">+8.2%</span>
+                <span class="about-stat-label">ML ROI (234 bets)</span>
             </div>
             <div class="about-stat">
-                <span class="about-stat-value">50.2%</span>
-                <span class="about-stat-label">Win rate at avg +102</span>
+                <span class="about-stat-value">48.7%</span>
+                <span class="about-stat-label">Win rate at avg +97</span>
             </div>
             <div class="about-stat">
-                <span class="about-stat-value">0.2428</span>
+                <span class="about-stat-value">0.2429</span>
                 <span class="about-stat-label">Brier score</span>
             </div>
         </div>
-        <p class="about-footnote">The model performed <em>better</em> on unseen 2025 data than on its 2024 training set &mdash; the opposite of overfitting. This suggests the underlying signal is real.</p>
-        <p class="about-footnote"><a href="backtest.html">View full backtest results &rarr;</a></p>
+        <p class="about-footnote">Moneyline bets were profitable out-of-sample on the full 2025 season. The model performed <em>better</em> on unseen 2025 data than on its 2024 training set &mdash; the opposite of overfitting.</p>
+        <p class="about-footnote"><a href="backtest.html">View full backtest results with every bet &rarr;</a></p>
     </div>
 
     <!-- What it's built on -->

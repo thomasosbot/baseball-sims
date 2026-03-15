@@ -37,6 +37,12 @@ ML_MIN_EDGE = 0.07        # minimum edge to bet — 7% filters noise, 3-5% sweet
 ML_MAX_EDGE = 0.15        # cap: edges above this are market-is-right territory
 ML_MIN_CONFIDENCE = 0.5   # minimum game confidence — filters weak early-season bets
 
+# --- Spread (run line) betting parameters ---
+SPREAD_ALPHA = 0.9            # same as ML — spread edge comes from our sim margin dist
+SPREAD_MIN_EDGE = 0.07
+SPREAD_MAX_EDGE = 0.15
+SPREAD_MIN_CONFIDENCE = 0.5
+
 # --- Totals betting parameters ---
 TOTALS_ALPHA = 0.3        # heavy market deference — totals market is efficient
 TOTALS_MIN_EDGE = 0.07    # 7% threshold — grid search optimal

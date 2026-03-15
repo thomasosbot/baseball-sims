@@ -379,6 +379,22 @@ body {
 }
 .team { font-weight: 600; }
 .at { color: var(--text-muted); margin: 0 0.25rem; font-size: 0.8rem; }
+/* ── Bet Log ── */
+.bet-log-table td { font-size: 0.82rem; padding: 0.5rem 0.65rem; }
+.bet-log-table th { padding: 0.65rem; }
+.bet-type-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.badge-ml { background: rgba(24, 119, 242, 0.12); color: #1877F2; }
+.badge-rl { background: rgba(249, 115, 22, 0.12); color: #F97316; }
+.result-win { color: #16a34a; font-weight: 700; }
+.result-loss { color: #dc2626; font-weight: 700; }
+
 .pending-row { opacity: 0.5; }
 .pending-label {
     font-size: 0.8rem;

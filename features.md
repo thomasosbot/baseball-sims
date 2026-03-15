@@ -357,6 +357,12 @@ The best available odds get a ring highlight (`.best-odds` class). This helps us
 - **Sizing**: Quarter-Kelly with 5% hard cap
 - **Max edge cap**: Edges above 15% filtered out (market is right when disagreement is that large)
 
+### Run Line (spread ±1.5)
+
+- **Source**: The Odds API historical endpoint, spreads market. FanDuel as single book (consensus fallback). Only standard ±1.5 lines kept (alternate lines filtered out).
+- **Model probability**: From MC simulation margin distribution — `P(home covers -1.5) = count(margin > 1.5) / N`. This correctly captures the home/away asymmetry: home teams win by exactly 1 run 34.3% of the time (don't bat in bottom 9th, walk-offs) vs 23.9% for away teams.
+- **Edge & sizing**: Spread: α=0.9, edge 7-15%, min confidence 0.5 (same as ML). Quarter-Kelly with 5% hard cap.
+
 ### Totals (over/under)
 
 - **Source**: Same API, totals market. Consensus line = mode across books, FanDuel odds on that line (median fallback).

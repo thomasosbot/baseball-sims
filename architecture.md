@@ -2,7 +2,7 @@
 
 ## Overview
 
-Monte Carlo baseball simulation that predicts game outcomes by modelling each plate appearance bottom-up using a multiplicative odds-ratio blending method, then compares model win probabilities to sportsbook lines to find +EV bets. Includes both moneyline and totals (over/under) betting.
+Monte Carlo baseball simulation that predicts game outcomes by modelling each plate appearance bottom-up using a multiplicative odds-ratio blending method, then compares model win probabilities to sportsbook lines to find +EV bets. Supports three bet types: moneyline, run line (±1.5 spread), and totals (over/under).
 
 ## Pipeline
 
@@ -15,8 +15,9 @@ BHQ CSVs            →   regression, age)                        →  ML edge c
 MLB Stats API          batter profiles        (MC engine)       →  quarter-Kelly sizing
   (schedules/lineups)  pitcher profiles                            moneyline bets
 The Odds API        →  park factors                             →  ROI / CLV / P&L
-  (h2h + totals)       closing lines      →  total runs dist   →  totals edge calc
-                        (FanDuel single-bk)                        over/under bets
+  (h2h + spreads       closing lines      →  total runs dist   →  totals edge calc
+   + totals)            (FanDuel single-bk)   margin dist       →  spread edge calc
+                                                                    (run line ±1.5)
                                                                     │
                                               ┌─────────────────────┘
                                               ▼
@@ -32,7 +33,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 
 | Module | Purpose |
 |--------|---------|
-| `src/data/fetch.py` | Pulls data from Statcast (pybaseball), MLB Stats API (schedules/lineups), and The Odds API (historical + live odds, h2h + totals). All results cached to `data/cache/` as pickle files. Includes `build_closing_lines()` and `build_closing_totals()` — both with quality filters: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. |
+| `src/data/fetch.py` | Pulls data from Statcast (pybaseball), MLB Stats API (schedules/lineups), and The Odds API (historical + live odds, h2h + totals + spreads). All results cached to `data/cache/` as pickle files. Includes `build_closing_lines()`, `build_closing_totals()`, and `build_closing_spreads()` — all with quality filters: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. Spread lines filtered to standard ±1.5 only. |
 | `src/data/process.py` | Aggregates pitch-level Statcast data into per-player PA outcome rates (K%, BB%, HR rate, etc.) with platoon splits. `extract_team_relievers()` identifies relievers per game (first pitcher per side = starter, rest = relievers). `aggregate_team_bullpen_rates()` builds per-team reliever rate DataFrames. `prepare_for_rolling()` sorts PAs chronologically for cumulative tracking (includes `home_team`, `away_team`, `inning_topbot`). |
 | `src/data/cumulative.py` | `CumulativeStats` class for rolling-window backtests. Tracks running PA counts per player, snapshots profiles before each game date. Supports Marcel projection seeding via `init_from_marcel()` (preferred) or legacy `init_from_prior_year()`. Also tracks team relievers via `register_reliever()` / `get_team_reliever_rates()` for rolling bullpen profiles. |
 | `src/features/batting.py` | Builds batter profiles: regresses observed rates toward league mean based on sample size (Bayesian shrinkage). Outputs rates by platoon split (vs LHP / vs RHP). |
@@ -44,12 +45,12 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `src/features/weather.py` | Weather adjustments for PA outcome probabilities (v1.2). Temperature and wind factors on HR/2B/3B rates, merged into park_factors. Dome/roof detection. Park CF bearing table for compass→field-relative wind conversion. |
 | `src/simulation/constants.py` | League average rates, wOBA weights, base advancement probability tables, DP/sac-fly rates, starter usage limits, TTO hit boost multipliers, stolen base rates, wild pitch rate. |
 | `src/simulation/pa_model.py` | Combines batter + pitcher profiles via **multiplicative odds-ratio method** (`b*p/l`), applies park factors (including BB/K), normalises to a probability distribution over 8 PA outcomes. |
-| `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. **Stolen base attempts** checked before each PA (calibrated to 2024 MLB: ~0.70 SB/team/game, 78% success rate, speed-adjusted). **Wild pitches/passed balls** (~0.30/team/game) advance runners. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, and `total_runs_dist` (raw array for over/under probability). |
+| `src/simulation/game_sim.py` | Simulates full 9-inning games PA-by-PA. Tracks baserunners, handles walks, sac flies, double plays, extra innings with ghost runner. Applies times-through-order (TTO) penalty: hit rates boosted +10% on 2nd pass, +20% on 3rd+ pass through the lineup vs the starter. **Stolen base attempts** checked before each PA (calibrated to 2024 MLB: ~0.70 SB/team/game, 78% success rate, speed-adjusted). **Wild pitches/passed balls** (~0.30/team/game) advance runners. `monte_carlo_win_probability()` runs N games and returns win%, score distributions, `total_runs_dist` (raw array for over/under probability), and `margin_dist` (home-away run margin array for spread/run line probability). |
 | `src/features/elo.py` | Elo team-strength layer: K=20, HFA=24, regression=1/4 toward 1500 between seasons. Produces per-game Elo-based win probabilities. Blended 50/50 with simulation probabilities via `ELO_BLEND_WEIGHT=0.50`. |
 | `src/betting/odds.py` | Fetches live moneylines from The Odds API. Converts between American / decimal / implied probability. Strips vig. |
 | `src/betting/edge.py` | Compares model probability to no-vig market probability. Applies alpha + confidence shrinkage: `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha controls how much to trust the model vs market (ML=0.4, Totals=0.3). `compute_game_confidence()` combines season depth and model-market agreement. Separate edge/confidence thresholds for moneyline and totals. |
 | `src/betting/kelly.py` | Quarter-Kelly bet sizing with a hard cap (default 5% of bankroll). Used for both moneyline and totals. |
-| `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline and totals bets when historical odds are available. |
+| `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline, run line (spread), and totals bets when historical odds are available. `_attach_spreads()` computes cover probabilities directly from the simulation margin distribution (no heuristics). |
 | `src/backtest/metrics.py` | Brier score, log loss, ROI, CLV, calibration tables, bankroll growth tracking. |
 | `dashboard/` | **v1 (`app.py`):** Streamlit app with 5 pages: Performance, How It Works, Predictions, Betting, Diagnostics. Custom Plotly template and CSS. **v2 (`v2.py`):** Single-page dashboard with ROI chart + bet tables ($20K bankroll). Deployed at [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app). Run locally with `streamlit run dashboard/app.py` or `streamlit run dashboard/v2.py`. |
 
@@ -84,6 +85,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Per-book no-vig consensus** (v0.3.1) | Previous approach cherry-picked best home odds from one book and best away odds from another, creating impossible pairs (e.g. -106 / +400). Fix: compute no-vig probability per book (each book's pair is coherent), then take the median across books. Filters: \|American odds\| ≤ 600, vig 0-12%, minimum 3 books per game. |
 | **Totals quality controls** (v0.8) | `build_closing_totals()` now mirrors moneyline QC: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. Previously had no vig/min-books filters, causing 20+ games with negative vig and consensus fallback producing garbage odds (-6.5, -0.5). |
 | **Confidence-gated edge detection** (v0.8) | Raw model probabilities are shrunk toward market via `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha is per-bet-type (ML=0.4, Totals=0.3). Confidence combines (1) season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0, and (2) model-market agreement: penalises when model and market disagree on the favourite. |
+| **Run line (spread) betting** (v1.2) | Cover probabilities computed directly from the 10,000-simulation margin distribution (`P(cover -1.5) = count(margin > 1.5) / N`). No heuristic conversion from win probability — this correctly captures the structural asymmetry where home teams win by exactly 1 run 34% of the time vs 24% for away teams (due to not batting in bottom 9th). Uses same alpha (0.9) and edge thresholds (7-15%) as moneyline. |
 | **Separate ML/Totals betting params** (v0.9) | Moneyline and totals use independent alpha, min_edge, max_edge, and min_confidence settings. Grid search on v0.9+BHQ CSV found optimal: **ML: α=0.9, edge 7-15%, conf≥0.5** (+1.3% ROI, 232 bets). **Totals: α=0.3, edge 7-15%, conf≥0.0** (+5.1% ROI, 51 bets). High ML alpha works because BHQ improves projections enough to trust model-market disagreements. |
 | **Max edge cap** (v0.9) | Edges above 15% are filtered out. Large model-market disagreements (15-20%+) were almost always losers in v0.8 — the market is right when disagreement is that large. Applies to both moneyline and totals via `ML_MAX_EDGE` / `TOTALS_MAX_EDGE`. |
 | **Home field advantage** (v0.9) | Additive +2.5% boost to home win probability post-simulation. Model avg home prob was 0.501 vs actual 0.526 — HFA closes this gap. Applied in `_sim_with_lineups()` and `_sim_league_avg()`. Does not affect total runs distribution. |
@@ -130,12 +132,13 @@ The Odds API        →  park factors                             →  ROI / CLV
 
 ## Validation Status
 
-**2025 out-of-sample backtest (v1.0, params tuned on 2024, zero adjustments):**
-- Brier 0.2428
-- ML: 247 bets, **+16.2% ROI** (+$25,224 profit), 50.2% win rate at avg +102 odds
-- Totals: 36 bets, -16.9% ROI (edge doesn't generalize — market is too sharp on totals)
-- ML only: **$20K → $45,224** (+126% bankroll growth)
-- Conclusion: **Moneyline edge is real and strengthened by v1.0 simulation improvements.**
+**2025 out-of-sample backtest (v1.2, rolling backtest with weather + tiered bullpen + spreads, $7,753 starting bankroll from 2024):**
+- Brier 0.2429
+- ML: 234 bets, **+8.2% ROI** (+$8,503 profit), 48.7% win rate at avg +97 odds
+- Run Line: 303 bets, -3.6% ROI overall. Underdog +1.5 is +2.8% ROI (228 bets), but favorite -1.5 is -25.9% (75 bets). Sim-derived cover probs are accurate but edge is thin.
+- Totals: 37 bets, -10.1% ROI — market is too sharp on totals
+- Ending bankroll: $8,991 (+16.0% from $7,753)
+- Conclusion: **Moneyline edge is real and the primary profit driver. Run line underdog +1.5 shows a small edge. Totals market too efficient.**
 
 ## Current Limitations (v1.0)
 

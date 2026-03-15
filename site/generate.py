@@ -106,13 +106,18 @@ def generate_site():
 # ---------------------------------------------------------------------------
 
 def _load_backtest_data():
-    """Load backtest CSVs and compute metrics for the backtest page."""
+    """Load backtest CSVs and compute metrics for the backtest page.
+
+    Only loads the 2025 season (with spreads if available).
+    """
     backtest_data = {}
     chart_data = {}
-    all_dfs = []
 
-    for year in range(2024, 2030):
-        csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
+    # Prefer the spreads CSV if it exists, otherwise fall back to weather CSV
+    for year in [2025]:
+        csv_path = DATA_DIR / f"backtest_rolling_{year}_spreads.csv"
+        if not csv_path.exists():
+            csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
         if not csv_path.exists():
             continue
 
@@ -125,27 +130,20 @@ def _load_backtest_data():
 
         backtest_data[year] = metrics
         chart_data[str(year)] = charts
-        all_dfs.append(df)
 
-    # Combined metrics across all years
+    # No combined view needed for single year
     combined_data = None
     combined_chart = None
-    if len(all_dfs) >= 2:
-        combined_df = pd.concat(all_dfs, ignore_index=True)
-        combined_data = _compute_backtest_metrics(combined_df, "combined")
-        combined_chart = _compute_chart_data(combined_df)
-        # Add bankroll tracking to combined chart
-        combined_chart["bankroll_series"] = _compute_bankroll_series(combined_df, 10_000.0)
 
-    # Add bankroll tracking to each year's chart data
-    starting = 10_000.0
+    # Add bankroll tracking
+    starting = 7_753.0  # 2024 ending bankroll carried into 2025
     for year in sorted(backtest_data.keys()):
-        csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
+        csv_path = DATA_DIR / f"backtest_rolling_{year}_spreads.csv"
+        if not csv_path.exists():
+            csv_path = DATA_DIR / BACKTEST_CSV_PATTERN.format(year=year)
         df = pd.read_csv(csv_path)
         brl = _compute_bankroll_series(df, starting)
         chart_data[str(year)]["bankroll_series"] = brl
-        if brl["values"]:
-            starting = brl["values"][-1]  # roll into next year
 
     return backtest_data, chart_data, combined_data, combined_chart
 
@@ -204,6 +202,30 @@ def _compute_backtest_metrics(df, year):
         totals_roi = 0
         totals_avg_odds = 0
 
+    # --- Spread (run line) betting ---
+    spread_col = "spread_bet_side"
+    if spread_col in df.columns:
+        spread_bets = df[df[spread_col].notna()].copy()
+    else:
+        spread_bets = pd.DataFrame()
+
+    spread_count = len(spread_bets)
+    if spread_count > 0:
+        spread_won_col = spread_bets["spread_bet_won"].dropna()
+        spread_wins = int(spread_won_col.sum())
+        spread_decided = len(spread_won_col)
+        spread_win_rate = spread_wins / spread_decided * 100 if spread_decided > 0 else 0
+        spread_profit = float(spread_bets["spread_bet_profit"].sum())
+        spread_staked = float(spread_bets["spread_bet_stake"].sum())
+        spread_roi = spread_profit / spread_staked * 100 if spread_staked > 0 else 0
+        spread_avg_odds = float(spread_bets["spread_bet_odds"].mean())
+    else:
+        spread_wins = 0
+        spread_win_rate = 0
+        spread_profit = 0
+        spread_roi = 0
+        spread_avg_odds = 0
+
     # --- Monthly breakdown ---
     df["month"] = pd.to_datetime(df["date"]).dt.strftime("%B")
     df["month_num"] = pd.to_datetime(df["date"]).dt.month
@@ -225,6 +247,14 @@ def _compute_backtest_metrics(df, year):
         m_tot_profit = float(m_tot["totals_bet_profit"].sum()) if len(m_tot) > 0 else 0
         m_tot_roi = m_tot_profit / m_tot_staked * 100 if m_tot_staked > 0 else 0
 
+        if spread_col in mdf.columns:
+            m_sp = mdf[mdf[spread_col].notna()]
+        else:
+            m_sp = pd.DataFrame()
+        m_sp_staked = float(m_sp["spread_bet_stake"].sum()) if len(m_sp) > 0 else 0
+        m_sp_profit = float(m_sp["spread_bet_profit"].sum()) if len(m_sp) > 0 else 0
+        m_sp_roi = m_sp_profit / m_sp_staked * 100 if m_sp_staked > 0 else 0
+
         monthly.append({
             "month": month_name,
             "games": len(mdf),
@@ -232,14 +262,20 @@ def _compute_backtest_metrics(df, year):
             "ml_roi": m_ml_roi,
             "totals_bets": len(m_tot),
             "totals_roi": m_tot_roi,
+            "spread_bets": len(m_sp),
+            "spread_roi": m_sp_roi,
         })
 
     # Combined (all bets) stats
-    total_profit = ml_profit + totals_profit
+    total_profit = ml_profit + totals_profit + spread_profit
     total_staked = (float(ml_bets["bet_stake"].sum()) if ml_count > 0 else 0) + \
-                   (float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0)
-    total_bets_count = ml_count + totals_count
+                   (float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0) + \
+                   (float(spread_bets["spread_bet_stake"].sum()) if spread_count > 0 else 0)
+    total_bets_count = ml_count + totals_count + spread_count
     total_roi = total_profit / total_staked * 100 if total_staked > 0 else 0
+
+    # --- Bet log (every individual ML and spread bet) ---
+    bet_log = _compute_bet_log(df)
 
     return {
         "games": len(df),
@@ -261,12 +297,82 @@ def _compute_backtest_metrics(df, year):
         "totals_staked": float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0,
         "totals_roi": totals_roi,
         "totals_avg_odds": totals_avg_odds,
+        "spread_bets": spread_count,
+        "spread_wins": spread_wins if spread_count > 0 else 0,
+        "spread_win_rate": spread_win_rate,
+        "spread_profit": spread_profit,
+        "spread_staked": float(spread_bets["spread_bet_stake"].sum()) if spread_count > 0 else 0,
+        "spread_roi": spread_roi,
+        "spread_avg_odds": spread_avg_odds,
         "total_bets": total_bets_count,
         "total_profit": total_profit,
         "total_staked": total_staked,
         "total_roi": total_roi,
         "monthly": monthly,
+        "bet_log": bet_log,
     }
+
+
+def _compute_bet_log(df):
+    """Build a list of every individual ML and spread bet for display."""
+    log = []
+    df = df.sort_values("date")
+
+    for _, row in df.iterrows():
+        date = str(row["date"])[:10]
+        away = row.get("away_team", "")
+        home = row.get("home_team", "")
+        home_score = row.get("actual_home_score", "")
+        away_score = row.get("actual_away_score", "")
+
+        # ML bet
+        if pd.notna(row.get("bet_side")):
+            side = row["bet_side"]
+            team = home if side == "home" else away
+            odds = row["bet_odds"]
+            edge = row["bet_edge"]
+            stake = row["bet_stake"]
+            profit = row["bet_profit"]
+            won = row["bet_won"]
+            log.append({
+                "date": date,
+                "matchup": f"{away} @ {home}",
+                "score": f"{int(away_score)}-{int(home_score)}",
+                "type": "ML",
+                "pick": team,
+                "odds": odds,
+                "edge": round(edge * 100, 1),
+                "stake": round(stake, 2),
+                "profit": round(profit, 2),
+                "won": bool(won) if pd.notna(won) else None,
+            })
+
+        # Spread bet
+        if pd.notna(row.get("spread_bet_side")):
+            side_str = row["spread_bet_side"]  # e.g. "home 1.5" or "away -1.5"
+            parts = side_str.split()
+            side = parts[0]
+            spread_val = parts[1] if len(parts) > 1 else ""
+            team = home if side == "home" else away
+            odds = row["spread_bet_odds"]
+            edge = row["spread_bet_edge"]
+            stake = row["spread_bet_stake"]
+            profit = row["spread_bet_profit"]
+            won = row["spread_bet_won"]
+            log.append({
+                "date": date,
+                "matchup": f"{away} @ {home}",
+                "score": f"{int(away_score)}-{int(home_score)}",
+                "type": f"RL {spread_val}",
+                "pick": team,
+                "odds": odds,
+                "edge": round(edge * 100, 1),
+                "stake": round(stake, 2),
+                "profit": round(profit, 2),
+                "won": bool(won) if pd.notna(won) else None,
+            })
+
+    return log
 
 
 def _compute_chart_data(df):
@@ -278,7 +384,6 @@ def _compute_chart_data(df):
     dates = pd.to_datetime(df["date"]).dt.strftime("%b %d").tolist()
 
     # ML cumulative
-    ml_mask = df["bet_side"].notna()
     ml_cum = []
     running = 0.0
     for _, row in df.iterrows():
@@ -294,12 +399,21 @@ def _compute_chart_data(df):
             running += row["totals_bet_profit"]
         totals_cum.append(round(running, 2))
 
+    # Spread cumulative
+    spread_cum = []
+    running = 0.0
+    for _, row in df.iterrows():
+        if pd.notna(row.get("spread_bet_side")):
+            running += row["spread_bet_profit"]
+        spread_cum.append(round(running, 2))
+
     # Downsample for chart performance (max 200 points)
     if len(dates) > 200:
         step = len(dates) // 200
         dates = dates[::step]
         ml_cum = ml_cum[::step]
         totals_cum = totals_cum[::step]
+        spread_cum = spread_cum[::step]
 
     # --- Calibration ---
     bins = [(0.2, 0.3), (0.3, 0.4), (0.4, 0.5), (0.5, 0.6), (0.6, 0.7), (0.7, 0.8)]
@@ -318,6 +432,7 @@ def _compute_chart_data(df):
         "pnl_dates": dates,
         "ml_cumulative": ml_cum,
         "totals_cumulative": totals_cum,
+        "spread_cumulative": spread_cum,
         "cal_predicted": cal_predicted,
         "cal_actual": cal_actual,
         "cal_counts": cal_counts,
@@ -337,6 +452,8 @@ def _compute_bankroll_series(df, starting_bankroll):
         day_pnl = day_df["bet_profit"].fillna(0).sum()
         if "totals_bet_profit" in day_df.columns:
             day_pnl += day_df["totals_bet_profit"].fillna(0).sum()
+        if "spread_bet_profit" in day_df.columns:
+            day_pnl += day_df["spread_bet_profit"].fillna(0).sum()
         bankroll += day_pnl
         display_date = pd.to_datetime(date_str).strftime("%b %d")
         dates.append(display_date)
