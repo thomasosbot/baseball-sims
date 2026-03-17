@@ -97,73 +97,48 @@
 
 {% if today and today.games %}
 <section class="section fade-in">
-    <h2 class="section-title">All Games</h2>
+    <h2 class="section-title">All Games ({{ today.games|length }})</h2>
     <p class="section-hint">Click a game to see simulation details</p>
-    <div class="games-list">
-        {% for game in today.games %}
-        <div class="game-row-card glass {% if game.pick %}has-pick{% endif %} {% if game.status == 'lineups_pending' %}pending-card{% endif %}" data-game-idx="{{ loop.index0 }}">
-            <div class="game-row-main">
-                <div class="game-teams-col">
-                    <span class="game-team away-team">{{ game.away }}</span>
-                    <span class="game-vs">@</span>
-                    <span class="game-team home-team">{{ game.home }}</span>
-                    {% if game.lineup_status == 'projected' %}
-                    <span class="lineup-badge projected">projected</span>
-                    {% endif %}
-                </div>
-
-                <div class="game-pitchers-col">
-                    {{ game.away_pitcher|default('TBD') }} vs {{ game.home_pitcher|default('TBD') }}
-                </div>
-
-                {% if game.status == 'lineups_pending' %}
-                <div class="game-odds-col pending-label">Lineups pending</div>
-                <div class="game-model-col"></div>
-                <div class="game-pick-col">—</div>
-                {% else %}
-                <div class="game-odds-col">
-                    {% if game.market_home_wp %}
-                    {% set market_home_american = ((100 / game.market_home_wp - 100) * -1) if game.market_home_wp > 0.5 else (100 / (1 - game.market_home_wp) * (1 - game.market_home_wp) / game.market_home_wp)|round|int %}
-                    <span class="odds-label">Market</span>
-                    <span class="odds-line">
-                        {{ game.away }} {% if game.market_home_wp <= 0.5 %}<strong>{{ "+%.0f"|format(100 * (1 - game.market_home_wp) / game.market_home_wp) }}</strong>{% else %}{{ "%+.0f"|format(-100 * game.market_home_wp / (1 - game.market_home_wp)) }}{% endif %}
-                        /
-                        {{ game.home }} {% if game.market_home_wp > 0.5 %}<strong>{{ "%+.0f"|format(-100 * game.market_home_wp / (1 - game.market_home_wp)) }}</strong>{% else %}{{ "+%.0f"|format(100 * (1 - game.market_home_wp) / game.market_home_wp) }}{% endif %}
-                    </span>
+    <div class="table-card glass">
+        <table class="games-table">
+            <thead>
+                <tr>
+                    <th>Matchup</th>
+                    <th>Model</th>
+                    <th>Market</th>
+                    <th>Edge</th>
+                    <th>Pick</th>
+                    <th class="expand-col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in today.games %}
+                <tr class="game-row {% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' %}projected-row{% endif %}" data-game-idx="{{ loop.index0 }}">
+                    <td>
+                        <span class="team">{{ game.away }}</span>
+                        <span class="at">@</span>
+                        <span class="team">{{ game.home }}</span>
+                        {% if game.lineup_status == 'projected' %}
+                        <span class="lineup-badge projected">projected</span>
+                        {% endif %}
+                    </td>
+                    {% if game.status == 'lineups_pending' %}
+                    <td colspan="3" class="pending-label">Lineups pending</td>
+                    <td>—</td>
                     {% else %}
-                    <span class="odds-label">No odds</span>
+                    <td>{{ "%.1f"|format(game.model_home_wp * 100) }}%</td>
+                    <td>{{ "%.1f"|format(game.market_home_wp * 100) if game.market_home_wp else "—" }}%</td>
+                    <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
+                        {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
+                    </td>
+                    <td>{{ game.pick if game.pick else "—" }}</td>
                     {% endif %}
-                </div>
-
-                <div class="game-model-col">
-                    <span class="odds-label">Model</span>
-                    <span class="odds-line model-line">
-                        {{ game.away }} {% if game.model_home_wp <= 0.5 %}<strong>{{ "+%.0f"|format(100 * game.model_away_wp / game.model_home_wp) }}</strong>{% else %}{{ "%+.0f"|format(-100 * game.model_home_wp / game.model_away_wp) }}{% endif %}
-                        /
-                        {{ game.home }} {% if game.model_home_wp > 0.5 %}<strong>{{ "%+.0f"|format(-100 * game.model_home_wp / game.model_away_wp) }}</strong>{% else %}{{ "+%.0f"|format(100 * game.model_away_wp / game.model_home_wp) }}{% endif %}
-                    </span>
-                </div>
-
-                <div class="game-pick-col">
-                    {% if game.pick %}
-                    <div class="game-pick-badge">
-                        {{ game.pick }}
-                        <span class="game-edge">+{{ "%.0f"|format(game.edge_pct) }}%</span>
-                    </div>
-                    {% else %}
-                    <span class="no-pick">—</span>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                <div class="game-expand-col">
-                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </div>
-            </div>
-
-            {# Expandable detail panel #}
-            {% if game.status != 'lineups_pending' and game.sim_detail %}
-            <div class="game-detail-panel" id="detail-{{ loop.index0 }}">
+                    <td class="expand-toggle"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></td>
+                </tr>
+                {% if game.status != 'lineups_pending' and game.sim_detail %}
+                <tr class="game-detail" id="detail-{{ loop.index0 }}">
+                    <td colspan="6">
+                        <div class="detail-panel">
                 <div class="detail-grid">
                     {# ── Column 1: Lineups ── #}
                     <div class="detail-col">
@@ -334,10 +309,13 @@
                         {% endif %}
                     </div>
                 </div>
-            </div>
-            {% endif %}
-        </div>
-        {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </section>
 {% endif %}
@@ -346,21 +324,21 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.game-row-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const idx = card.dataset.gameIdx;
+    document.querySelectorAll('.game-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const idx = row.dataset.gameIdx;
             const detail = document.getElementById('detail-' + idx);
             if (!detail) return;
 
-            const isOpen = card.classList.contains('expanded');
+            const isOpen = detail.style.display === 'table-row';
 
             // Close all
-            document.querySelectorAll('.game-detail-panel').forEach(d => d.style.display = 'none');
-            document.querySelectorAll('.game-row-card').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('.game-detail').forEach(d => d.style.display = 'none');
+            document.querySelectorAll('.game-row').forEach(r => r.classList.remove('expanded'));
 
             if (!isOpen) {
-                detail.style.display = 'block';
-                card.classList.add('expanded');
+                detail.style.display = 'table-row';
+                row.classList.add('expanded');
             }
         });
     });

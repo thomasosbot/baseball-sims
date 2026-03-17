@@ -33,7 +33,7 @@ KELLY_FRACTION = 0.25   # quarter Kelly — full Kelly is theoretically optimal 
 MAX_BET_FRACTION = 0.05  # hard cap: never more than 5% of bankroll on one game
 # --- Moneyline betting parameters ---
 ML_ALPHA = 0.9            # shrinkage toward market (0=pure market, 1=pure model) — grid search optimal
-ML_MIN_EDGE = 0.07        # minimum edge to bet — 7% filters noise, 3-5% sweet spot unreliable
+ML_MIN_EDGE = 0.06        # minimum edge to bet — 6% optimal (50% W, +12.7% ROI on 366 bets)
 ML_MAX_EDGE = 0.15        # cap: edges above this are market-is-right territory
 ML_MIN_CONFIDENCE = 0.5   # minimum game confidence — filters weak early-season bets
 
