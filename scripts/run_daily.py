@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
 import pandas as pd
+import statsapi
 
 from config import (
     N_SIMULATIONS,
@@ -45,6 +46,33 @@ from src.simulation.game_sim import monte_carlo_win_probability
 
 DAILY_DIR = DATA_DIR / "daily"
 DAILY_DIR.mkdir(parents=True, exist_ok=True)
+
+# Cache for player name lookups via statsapi
+_player_name_cache = {}
+
+
+def _resolve_player_name(pid, cumulative=None):
+    """Resolve a player MLBAM ID to a display name."""
+    pid = int(pid)
+    # 1. Check cumulative state (fastest, from Statcast data)
+    if cumulative:
+        name = cumulative._batter_names.get(pid) or cumulative._pitcher_names.get(pid)
+        if name and not name.replace(" ", "").isdigit():
+            return name
+    # 2. Check local cache
+    if pid in _player_name_cache:
+        return _player_name_cache[pid]
+    # 3. Look up via statsapi
+    try:
+        results = statsapi.lookup_player(pid)
+        if results:
+            name = results[0].get("fullName", str(pid))
+            _player_name_cache[pid] = name
+            return name
+    except Exception:
+        pass
+    return str(pid)
+
 
 _DEFAULT_PITCHER = {
     "throws": "R",
@@ -234,8 +262,8 @@ def run_daily(
         model_away = 1.0 - model_home
 
         # Resolve lineup names for display
-        home_lineup_names = [cumulative._batter_names.get(pid, str(pid)) for pid in home_lineup[:9]]
-        away_lineup_names = [cumulative._batter_names.get(pid, str(pid)) for pid in away_lineup[:9]]
+        home_lineup_names = [_resolve_player_name(pid, cumulative) for pid in home_lineup[:9]]
+        away_lineup_names = [_resolve_player_name(pid, cumulative) for pid in away_lineup[:9]]
 
         # Build margin distribution histogram (home margin -10 to +10)
         margin_dist = result["margin_dist"]
