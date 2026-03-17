@@ -1,102 +1,447 @@
 {
   "date": "2026-03-17",
-  "generated_at": "2026-03-17T10:30:23.454633",
+  "generated_at": "2026-03-17T10:47:20.469304",
+  "run_mode": "early",
   "games": [
     {
       "away": "BAL",
       "home": "DET",
       "away_pitcher": "Chris Bassitt",
       "home_pitcher": "Justin Verlander",
-      "status": "lineups_pending"
+      "model_home_wp": 0.514,
+      "model_away_wp": 0.486,
+      "avg_total_runs": 9.07,
+      "elo_home_wp": 0.5051,
+      "sim_home_wp": 0.5228,
+      "lineup_status": "projected",
+      "market_home_wp": 0.5385,
+      "market_away_wp": 0.4615,
+      "books_home": {
+        "draftkings": -130,
+        "bovada": -131,
+        "betonlineag": -125,
+        "lowvig": -125,
+        "williamhill_us": -125,
+        "fanduel": -132,
+        "mybookieag": -130
+      },
+      "books_away": {
+        "draftkings": 110,
+        "bovada": 109,
+        "betonlineag": 105,
+        "lowvig": 105,
+        "williamhill_us": 105,
+        "fanduel": 108,
+        "mybookieag": 107
+      },
+      "confidence": 1.0
     },
     {
       "away": "HOU",
       "home": "PIT",
       "away_pitcher": "Lance McCullers Jr.",
       "home_pitcher": "Mitch Keller",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5347,
+      "model_away_wp": 0.4653,
+      "avg_total_runs": 8.24,
+      "elo_home_wp": 0.5217,
+      "sim_home_wp": 0.5477,
+      "lineup_status": "projected",
+      "market_home_wp": 0.506,
+      "market_away_wp": 0.494,
+      "books_home": {
+        "draftkings": -112,
+        "bovada": -120,
+        "betonlineag": -105,
+        "lowvig": -105,
+        "fanduel": -115,
+        "williamhill_us": -105,
+        "mybookieag": -117
+      },
+      "books_away": {
+        "draftkings": -108,
+        "bovada": 100,
+        "betonlineag": -115,
+        "lowvig": -115,
+        "fanduel": -105,
+        "williamhill_us": -115,
+        "mybookieag": -105
+      },
+      "confidence": 1.0
     },
     {
       "away": "STL",
       "home": "WSN",
       "away_pitcher": "Dustin May",
       "home_pitcher": "Jake Irvin",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5402,
+      "model_away_wp": 0.4598,
+      "avg_total_runs": 9.02,
+      "elo_home_wp": 0.5477,
+      "sim_home_wp": 0.5327,
+      "lineup_status": "projected",
+      "market_home_wp": 0.4807,
+      "market_away_wp": 0.5193,
+      "books_home": {
+        "draftkings": -105,
+        "bovada": 101,
+        "betonlineag": 102,
+        "lowvig": 102,
+        "fanduel": -105,
+        "williamhill_us": 100,
+        "mybookieag": -105
+      },
+      "books_away": {
+        "draftkings": -115,
+        "bovada": -121,
+        "betonlineag": -122,
+        "lowvig": -122,
+        "fanduel": -115,
+        "williamhill_us": -120,
+        "mybookieag": -116
+      },
+      "confidence": 0.881
     },
     {
       "away": "MIN",
       "home": "PHI",
       "away_pitcher": "Bailey Ober",
       "home_pitcher": "Jes\u00fas Luzardo",
-      "status": "lineups_pending"
+      "model_home_wp": 0.561,
+      "model_away_wp": 0.439,
+      "avg_total_runs": 8.89,
+      "elo_home_wp": 0.6214,
+      "sim_home_wp": 0.5005,
+      "lineup_status": "projected",
+      "market_home_wp": 0.5537,
+      "market_away_wp": 0.4463,
+      "books_home": {
+        "draftkings": -135,
+        "bovada": -136,
+        "betonlineag": -135,
+        "lowvig": -135,
+        "fanduel": -142,
+        "williamhill_us": -135,
+        "mybookieag": -140
+      },
+      "books_away": {
+        "draftkings": 114,
+        "bovada": 114,
+        "betonlineag": 115,
+        "lowvig": 115,
+        "fanduel": 116,
+        "williamhill_us": 115,
+        "mybookieag": 114
+      },
+      "confidence": 1.0
     },
     {
       "away": "ATL",
       "home": "BOS",
       "away_pitcher": "Reynaldo L\u00f3pez",
       "home_pitcher": "Sonny Gray",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5523,
+      "model_away_wp": 0.4477,
+      "avg_total_runs": 8.83,
+      "elo_home_wp": 0.5647,
+      "sim_home_wp": 0.5399,
+      "lineup_status": "projected",
+      "market_home_wp": 0.5272,
+      "market_away_wp": 0.4728,
+      "books_home": {
+        "draftkings": -122,
+        "bovada": -126,
+        "betonlineag": -118,
+        "lowvig": -118,
+        "fanduel": -130,
+        "williamhill_us": -120,
+        "mybookieag": -128
+      },
+      "books_away": {
+        "draftkings": 102,
+        "bovada": 106,
+        "betonlineag": -102,
+        "lowvig": -102,
+        "fanduel": 106,
+        "williamhill_us": 100,
+        "mybookieag": 105
+      },
+      "confidence": 1.0
     },
     {
       "away": "NYY",
       "home": "TBR",
       "away_pitcher": "Will Warren",
       "home_pitcher": "Ryan Pepiot",
-      "status": "lineups_pending"
+      "model_home_wp": 0.3984,
+      "model_away_wp": 0.6016,
+      "avg_total_runs": 8.11,
+      "elo_home_wp": 0.3313,
+      "sim_home_wp": 0.4654,
+      "lineup_status": "projected",
+      "market_home_wp": 0.489,
+      "market_away_wp": 0.511,
+      "books_home": {
+        "draftkings": -112,
+        "bovada": 104,
+        "betonlineag": 100,
+        "lowvig": 100,
+        "fanduel": -115,
+        "mybookieag": -116
+      },
+      "books_away": {
+        "draftkings": -108,
+        "bovada": -124,
+        "betonlineag": -120,
+        "lowvig": -120,
+        "fanduel": -105,
+        "mybookieag": -105
+      },
+      "confidence": 1.0,
+      "pick": "NYY ML",
+      "edge_pct": 8.2,
+      "odds": "-105",
+      "kelly_fraction": 0.0412,
+      "explanation": "Will Warren vs Ryan Pepiot. Elo favors NYY (67%). 8.2% edge at -104 market."
     },
     {
       "away": "NYM",
       "home": "MIA",
       "away_pitcher": "Sean Manaea",
       "home_pitcher": "",
-      "status": "lineups_pending"
+      "model_home_wp": 0.6034,
+      "model_away_wp": 0.3966,
+      "avg_total_runs": 8.74,
+      "elo_home_wp": 0.6427,
+      "sim_home_wp": 0.564,
+      "lineup_status": "projected",
+      "market_home_wp": 0.4746,
+      "market_away_wp": 0.5254,
+      "books_home": {
+        "draftkings": 105,
+        "bovada": -105,
+        "betonlineag": 107,
+        "lowvig": 107,
+        "fanduel": 102,
+        "williamhill_us": 105,
+        "mybookieag": 102
+      },
+      "books_away": {
+        "draftkings": -125,
+        "bovada": -115,
+        "betonlineag": -127,
+        "lowvig": -127,
+        "fanduel": -124,
+        "williamhill_us": -125,
+        "mybookieag": -125
+      },
+      "confidence": 0.742,
+      "pick": "MIA ML",
+      "edge_pct": 8.6,
+      "odds": "+107",
+      "kelly_fraction": 0.0375,
+      "explanation": "Elo favors MIA (64%). 8.6% edge at +111 market."
     },
     {
       "away": "Athletics",
       "home": "CWS",
       "away_pitcher": "Luis Morales",
       "home_pitcher": "Anthony Kay",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4251,
+      "model_away_wp": 0.5749,
+      "avg_total_runs": 8.49,
+      "elo_home_wp": 0.4104,
+      "sim_home_wp": 0.4398,
+      "lineup_status": "projected",
+      "market_home_wp": 0.4878,
+      "market_away_wp": 0.5122,
+      "books_home": {
+        "draftkings": -115,
+        "betonlineag": -108,
+        "lowvig": -108,
+        "bovada": 105,
+        "fanduel": -114,
+        "williamhill_us": -110,
+        "mybookieag": -114
+      },
+      "books_away": {
+        "draftkings": -105,
+        "betonlineag": -112,
+        "lowvig": -112,
+        "bovada": -125,
+        "fanduel": -106,
+        "williamhill_us": -110,
+        "mybookieag": -108
+      },
+      "confidence": 1.0
     },
     {
       "away": "SEA",
       "home": "COL",
       "away_pitcher": "",
       "home_pitcher": "Chase Dollander",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4053,
+      "model_away_wp": 0.5947,
+      "avg_total_runs": 10.61,
+      "elo_home_wp": 0.3125,
+      "sim_home_wp": 0.4982,
+      "lineup_status": "projected"
     },
     {
       "away": "SDP",
       "home": "SEA",
       "away_pitcher": "Germ\u00e1n M\u00e1rquez",
       "home_pitcher": "",
-      "status": "lineups_pending"
+      "model_home_wp": 0.5242,
+      "model_away_wp": 0.4758,
+      "avg_total_runs": 7.61,
+      "elo_home_wp": 0.5519,
+      "sim_home_wp": 0.4964,
+      "lineup_status": "projected"
     },
     {
       "away": "LAA",
       "home": "CHC",
       "away_pitcher": "Mitch Farris",
       "home_pitcher": "Shota Imanaga",
-      "status": "lineups_pending"
+      "model_home_wp": 0.6346,
+      "model_away_wp": 0.3654,
+      "avg_total_runs": 7.54,
+      "elo_home_wp": 0.718,
+      "sim_home_wp": 0.5512,
+      "lineup_status": "projected",
+      "market_home_wp": 0.5819,
+      "market_away_wp": 0.4181,
+      "books_home": {
+        "draftkings": -155,
+        "betonlineag": -150,
+        "lowvig": -150,
+        "bovada": -158,
+        "fanduel": -162,
+        "williamhill_us": -155
+      },
+      "books_away": {
+        "draftkings": 130,
+        "betonlineag": 130,
+        "lowvig": 130,
+        "bovada": 132,
+        "fanduel": 132,
+        "williamhill_us": 130
+      },
+      "confidence": 1.0
     },
     {
       "away": "CLE",
       "home": "CIN",
       "away_pitcher": "Kolby Allard",
       "home_pitcher": "Nick Lodolo",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4924,
+      "model_away_wp": 0.5076,
+      "avg_total_runs": 9.15,
+      "elo_home_wp": 0.4659,
+      "sim_home_wp": 0.519,
+      "lineup_status": "projected",
+      "market_home_wp": 0.5385,
+      "market_away_wp": 0.4615,
+      "books_home": {
+        "draftkings": -125,
+        "betonlineag": -126,
+        "lowvig": -126,
+        "bovada": -128,
+        "fanduel": -134,
+        "williamhill_us": -125
+      },
+      "books_away": {
+        "draftkings": 105,
+        "betonlineag": 106,
+        "lowvig": 106,
+        "bovada": 107,
+        "fanduel": 110,
+        "williamhill_us": 105
+      },
+      "confidence": 0.908
     },
     {
       "away": "LAD",
       "home": "KCR",
       "away_pitcher": "Roki Sasaki",
       "home_pitcher": "Bailey Falter",
-      "status": "lineups_pending"
+      "model_home_wp": 0.4756,
+      "model_away_wp": 0.5244,
+      "avg_total_runs": 9.63,
+      "elo_home_wp": 0.5051,
+      "sim_home_wp": 0.4461,
+      "lineup_status": "projected",
+      "market_home_wp": 0.4288,
+      "market_away_wp": 0.5712,
+      "books_home": {
+        "draftkings": 120,
+        "betonlineag": 125,
+        "lowvig": 125,
+        "bovada": 127,
+        "fanduel": 118,
+        "williamhill_us": 122
+      },
+      "books_away": {
+        "draftkings": -142,
+        "betonlineag": -145,
+        "lowvig": -145,
+        "bovada": -152,
+        "fanduel": -144,
+        "williamhill_us": -145
+      },
+      "confidence": 1.0
     }
   ],
-  "picks": [],
+  "picks": [
+    {
+      "pick": "NYY ML",
+      "side": "away",
+      "team": "NYY",
+      "opponent": "TBR",
+      "edge_pct": 8.2,
+      "confidence": 1.0,
+      "odds": "-105",
+      "kelly_fraction": 0.0412,
+      "wager": 411.95,
+      "explanation": "Will Warren vs Ryan Pepiot. Elo favors NYY (67%). 8.2% edge at -104 market.",
+      "type": "moneyline",
+      "sportsbook_odds": {
+        "draftkings": -108,
+        "bovada": -124,
+        "betonlineag": -120,
+        "lowvig": -120,
+        "fanduel": -105,
+        "mybookieag": -105
+      },
+      "lineup_status": "projected"
+    },
+    {
+      "pick": "MIA ML",
+      "side": "home",
+      "team": "MIA",
+      "opponent": "NYM",
+      "edge_pct": 8.6,
+      "confidence": 0.742,
+      "odds": "+107",
+      "kelly_fraction": 0.0375,
+      "wager": 374.94,
+      "explanation": "Elo favors MIA (64%). 8.6% edge at +111 market.",
+      "type": "moneyline",
+      "sportsbook_odds": {
+        "draftkings": 105,
+        "bovada": -105,
+        "betonlineag": 107,
+        "lowvig": 107,
+        "fanduel": 102,
+        "williamhill_us": 105,
+        "mybookieag": 102
+      },
+      "lineup_status": "projected"
+    }
+  ],
   "bankroll": {
     "current": 10000.0,
-    "today_wagered": 0.0
+    "today_wagered": 786.89
   }
 }
