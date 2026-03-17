@@ -537,6 +537,10 @@ body {
 .result-win { color: #16a34a; font-weight: 700; }
 .result-loss { color: #dc2626; font-weight: 700; }
 
+.fav-team {
+    font-weight: 700;
+    margin-right: 3px;
+}
 .pending-row { opacity: 0.5; }
 .projected-row { opacity: 0.85; }
 

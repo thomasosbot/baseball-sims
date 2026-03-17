@@ -266,12 +266,11 @@ def _compute_backtest_metrics(df, year):
             "spread_roi": m_sp_roi,
         })
 
-    # Combined (all bets) stats
-    total_profit = ml_profit + totals_profit + spread_profit
+    # Combined (ML + spread only — totals excluded, market too efficient)
+    total_profit = ml_profit + spread_profit
     total_staked = (float(ml_bets["bet_stake"].sum()) if ml_count > 0 else 0) + \
-                   (float(totals_bets["totals_bet_stake"].sum()) if totals_count > 0 else 0) + \
                    (float(spread_bets["spread_bet_stake"].sum()) if spread_count > 0 else 0)
-    total_bets_count = ml_count + totals_count + spread_count
+    total_bets_count = ml_count + spread_count
     total_roi = total_profit / total_staked * 100 if total_staked > 0 else 0
 
     # --- Bet log (every individual ML and spread bet) ---
@@ -450,8 +449,7 @@ def _compute_bankroll_series(df, starting_bankroll):
 
     for date_str, day_df in df.groupby("date", sort=True):
         day_pnl = day_df["bet_profit"].fillna(0).sum()
-        if "totals_bet_profit" in day_df.columns:
-            day_pnl += day_df["totals_bet_profit"].fillna(0).sum()
+        # Totals excluded from P&L (market too efficient)
         if "spread_bet_profit" in day_df.columns:
             day_pnl += day_df["spread_bet_profit"].fillna(0).sum()
         bankroll += day_pnl

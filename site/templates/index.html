@@ -126,8 +126,16 @@
                     <td colspan="3" class="pending-label">Lineups pending</td>
                     <td>—</td>
                     {% else %}
-                    <td>{{ "%.1f"|format(game.model_home_wp * 100) }}%</td>
-                    <td>{{ "%.1f"|format(game.market_home_wp * 100) if game.market_home_wp else "—" }}%</td>
+                    {% set model_fav = game.home if game.model_home_wp > 0.5 else game.away %}
+                    {% set model_fav_pct = [game.model_home_wp, game.model_away_wp]|max * 100 %}
+                    <td><span class="fav-team">{{ model_fav }}</span> {{ "%.0f"|format(model_fav_pct) }}%</td>
+                    {% if game.market_home_wp %}
+                    {% set market_fav = game.home if game.market_home_wp > 0.5 else game.away %}
+                    {% set market_fav_pct = [game.market_home_wp, 1 - game.market_home_wp]|max * 100 %}
+                    <td><span class="fav-team">{{ market_fav }}</span> {{ "%.0f"|format(market_fav_pct) }}%</td>
+                    {% else %}
+                    <td>—</td>
+                    {% endif %}
                     <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
                         {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
                     </td>
