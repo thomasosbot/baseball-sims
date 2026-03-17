@@ -203,7 +203,7 @@ def _handle_out(bases: list, outs: int, rng: np.random.Generator) -> Tuple[list,
     if new[1] and not new[2] and rng.random() < PRODUCTIVE_OUT_2B_TO_3B:
         new[2] = True
         new[1] = False
-    if new[0] and not new[1] and rng.random() < PRODUCTIVE_OUT_1B_TO_2B:
+    elif new[0] and not new[1] and rng.random() < PRODUCTIVE_OUT_1B_TO_2B:
         new[1] = True
         new[0] = False
 

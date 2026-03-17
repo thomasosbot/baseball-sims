@@ -89,7 +89,7 @@
                 <div class="step-num">4</div>
                 <div class="step-content">
                     <strong>Edge Detection</strong>
-                    <p>Compare model probabilities to market lines. Only bet when the edge exceeds 7% and passes confidence filters.</p>
+                    <p>Compare model probabilities to market lines. Only bet when the edge exceeds 6% and passes confidence filters.</p>
                 </div>
             </div>
         </div>
@@ -178,11 +178,11 @@
         <h2>Edge Detection & Bet Sizing</h2>
         <p>Finding edges isn't enough &mdash; you need to size them correctly and filter out noise. The model uses a multi-layer approach:</p>
         <ul>
-            <li><strong>Three markets</strong> &mdash; moneyline (straight win), run line (&pm;1.5 spread), and over/under totals. Each market has its own edge parameters tuned via grid search.</li>
+            <li><strong>Two markets</strong> &mdash; moneyline (straight win) and run line (dog +1.5 spread). Each market has its own edge parameters tuned via grid search.</li>
             <li><strong>Simulation-derived probabilities</strong> &mdash; cover probabilities for run lines come directly from 10,000 margin distributions, not heuristics. The model knows exactly how often each team wins by 2+ runs.</li>
             <li><strong>Alpha shrinkage</strong> &mdash; model probabilities are blended toward market consensus. The market is usually right; we only bet when the disagreement is significant and justified.</li>
             <li><strong>Confidence gating</strong> &mdash; early-season bets with thin data are down-weighted. Model-market agreement adds confidence; large disagreements are penalized.</li>
-            <li><strong>7% minimum edge</strong> &mdash; small edges are more likely to be noise than signal. This threshold was optimized via grid search across multiple seasons.</li>
+            <li><strong>6% minimum edge</strong> &mdash; small edges are more likely to be noise than signal. This threshold was optimized via grid search across multiple seasons.</li>
             <li><strong>15% maximum edge</strong> &mdash; when our model disagrees with the market by more than 15%, the market is almost always right. These bets are filtered out.</li>
             <li><strong>Quarter-Kelly sizing</strong> &mdash; mathematically optimal growth rate, reduced by 75% for safety. No single bet exceeds 5% of bankroll.</li>
         </ul>
@@ -198,15 +198,15 @@
         <p>The ultimate test of any model is performance on data it has never seen. The model was developed on 2021&ndash;2024 data and validated on the complete 2025 MLB season with zero parameter adjustments:</p>
         <div class="about-stats-row">
             <div class="about-stat">
-                <span class="about-stat-value profit">+8.2%</span>
-                <span class="about-stat-label">ML ROI (234 bets)</span>
+                <span class="about-stat-value profit">+8.8%</span>
+                <span class="about-stat-label">ML ROI (366 bets)</span>
             </div>
             <div class="about-stat">
-                <span class="about-stat-value">48.7%</span>
+                <span class="about-stat-value">48.4%</span>
                 <span class="about-stat-label">Win rate at avg +97</span>
             </div>
             <div class="about-stat">
-                <span class="about-stat-value">0.2429</span>
+                <span class="about-stat-value">0.2428</span>
                 <span class="about-stat-label">Brier score</span>
             </div>
         </div>

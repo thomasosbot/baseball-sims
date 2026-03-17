@@ -145,12 +145,8 @@ def run_daily(
         print(f"  Error fetching odds: {e}")
         odds_h2h = pd.DataFrame()
 
-    print("Fetching totals odds...")
-    try:
-        raw_totals = fetch_mlb_odds(markets="totals", sport_key=sport_key)
-        odds_totals = _parse_totals_response(raw_totals)
-    except Exception:
-        odds_totals = pd.DataFrame()
+    # Totals odds fetch disabled for 2026 (totals betting consistently negative)
+    odds_totals = pd.DataFrame()
 
     if odds_h2h.empty:
         print("  No odds available. Simulating without betting analysis.")
@@ -377,19 +373,19 @@ def run_daily(
                 picks.append(pick)
                 total_wagered += pick.get("wager", 0)
 
-        # --- Totals ---
-        totals_row = _match_live_totals(odds_totals, g["home_team"], g["away_team"])
-        if totals_row is not None:
-            total_runs_dist = result["total_runs_dist"]
-            totals_pick = _evaluate_totals_edge(
-                total_runs_dist, totals_row, confidence if odds_row is not None else 0.8,
-                bankroll, home_abbr, away_abbr,
-            )
-            if totals_pick:
-                game_out["totals_pick"] = totals_pick["pick"]
-                game_out["totals_edge_pct"] = totals_pick["edge_pct"]
-                picks.append(totals_pick)
-                total_wagered += totals_pick.get("wager", 0)
+        # --- Totals --- DISABLED for 2026: totals betting consistently negative
+        # totals_row = _match_live_totals(odds_totals, g["home_team"], g["away_team"])
+        # if totals_row is not None:
+        #     total_runs_dist = result["total_runs_dist"]
+        #     totals_pick = _evaluate_totals_edge(
+        #         total_runs_dist, totals_row, confidence if odds_row is not None else 0.8,
+        #         bankroll, home_abbr, away_abbr,
+        #     )
+        #     if totals_pick:
+        #         game_out["totals_pick"] = totals_pick["pick"]
+        #         game_out["totals_edge_pct"] = totals_pick["edge_pct"]
+        #         picks.append(totals_pick)
+        #         total_wagered += totals_pick.get("wager", 0)
 
         output_games.append(game_out)
         _print_game_summary(game_out)
