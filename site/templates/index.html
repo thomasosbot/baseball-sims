@@ -123,8 +123,22 @@
                     <td colspan="3" class="pending-label">Lineups pending</td>
                     <td>—</td>
                     {% else %}
-                    <td>{{ "%.1f"|format(game.model_home_wp * 100) }}%</td>
-                    <td>{{ "%.1f"|format(game.market_home_wp * 100) if game.market_home_wp else "—" }}%</td>
+                    {% set model_fav = game.home if game.model_home_wp > 0.5 else game.away %}
+                    {% set model_fav_pct = [game.model_home_wp, game.model_away_wp]|max * 100 %}
+                    <td>
+                        <span class="model-fav">{{ model_fav }}</span>
+                        <span class="model-pct">{{ "%.0f"|format(model_fav_pct) }}%</span>
+                    </td>
+                    {% if game.market_home_wp %}
+                    {% set market_fav = game.home if game.market_home_wp > 0.5 else game.away %}
+                    {% set market_fav_pct = [game.market_home_wp, 1 - game.market_home_wp]|max * 100 %}
+                    <td>
+                        <span class="market-fav">{{ market_fav }}</span>
+                        <span class="market-pct">{{ "%.0f"|format(market_fav_pct) }}%</span>
+                    </td>
+                    {% else %}
+                    <td>—</td>
+                    {% endif %}
                     <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
                         {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
                     </td>
@@ -209,22 +223,39 @@
                                 <div class="detail-col">
                                     <h4>Game Context</h4>
 
+                                    {# Win probability comparison bar #}
+                                    <div class="wp-comparison">
+                                        <div class="wp-teams">
+                                            <span class="wp-team away">{{ game.away }}</span>
+                                            <span class="wp-team home">{{ game.home }}</span>
+                                        </div>
+                                        <div class="wp-bar">
+                                            <div class="wp-fill away" style="width: {{ "%.1f"|format(game.model_away_wp * 100) }}%;">
+                                                {{ "%.0f"|format(game.model_away_wp * 100) }}%
+                                            </div>
+                                            <div class="wp-fill home" style="width: {{ "%.1f"|format(game.model_home_wp * 100) }}%;">
+                                                {{ "%.0f"|format(game.model_home_wp * 100) }}%
+                                            </div>
+                                        </div>
+                                        <div class="wp-label">Model Win Probability</div>
+                                    </div>
+
                                     <div class="context-section">
                                         <div class="context-row">
-                                            <span class="ctx-label">Sim Win Prob</span>
+                                            <span class="ctx-label">Sim ({{ game.home }})</span>
                                             <span class="ctx-value">{{ "%.1f"|format(game.sim_home_wp * 100) }}%</span>
                                         </div>
                                         <div class="context-row">
-                                            <span class="ctx-label">Elo Win Prob</span>
+                                            <span class="ctx-label">Elo ({{ game.home }})</span>
                                             <span class="ctx-value">{{ "%.1f"|format(game.elo_home_wp * 100) }}%</span>
                                         </div>
                                         <div class="context-row">
-                                            <span class="ctx-label">Final Model</span>
+                                            <span class="ctx-label">Final ({{ game.home }})</span>
                                             <span class="ctx-value" style="font-weight:700;">{{ "%.1f"|format(game.model_home_wp * 100) }}%</span>
                                         </div>
                                         {% if game.market_home_wp %}
                                         <div class="context-row">
-                                            <span class="ctx-label">Market</span>
+                                            <span class="ctx-label">Market ({{ game.home }})</span>
                                             <span class="ctx-value">{{ "%.1f"|format(game.market_home_wp * 100) }}%</span>
                                         </div>
                                         {% endif %}

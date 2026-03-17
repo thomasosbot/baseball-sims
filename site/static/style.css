@@ -623,6 +623,59 @@ body {
 .ctx-label { color: var(--text-secondary); }
 .ctx-value { font-weight: 600; color: var(--text); }
 
+/* Model/Market fav labels in table */
+.model-fav, .market-fav {
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-right: 4px;
+}
+.model-pct, .market-pct {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+/* Win probability comparison bar */
+.wp-comparison {
+    margin-bottom: 1rem;
+}
+.wp-teams {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+}
+.wp-team.away { color: var(--red); }
+.wp-team.home { color: var(--green); }
+.wp-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+}
+.wp-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    transition: width 0.3s ease;
+}
+.wp-fill.away { background: var(--red); opacity: 0.8; }
+.wp-fill.home { background: var(--green); opacity: 0.8; }
+.wp-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
 /* Responsive: collapse to single column on mobile */
 @media (max-width: 768px) {
     .detail-grid {
