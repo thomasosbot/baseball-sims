@@ -1,0 +1,102 @@
+{
+  "date": "2026-03-17",
+  "generated_at": "2026-03-17T10:30:23.454633",
+  "games": [
+    {
+      "away": "BAL",
+      "home": "DET",
+      "away_pitcher": "Chris Bassitt",
+      "home_pitcher": "Justin Verlander",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "HOU",
+      "home": "PIT",
+      "away_pitcher": "Lance McCullers Jr.",
+      "home_pitcher": "Mitch Keller",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "STL",
+      "home": "WSN",
+      "away_pitcher": "Dustin May",
+      "home_pitcher": "Jake Irvin",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "MIN",
+      "home": "PHI",
+      "away_pitcher": "Bailey Ober",
+      "home_pitcher": "Jes\u00fas Luzardo",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "ATL",
+      "home": "BOS",
+      "away_pitcher": "Reynaldo L\u00f3pez",
+      "home_pitcher": "Sonny Gray",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "NYY",
+      "home": "TBR",
+      "away_pitcher": "Will Warren",
+      "home_pitcher": "Ryan Pepiot",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "NYM",
+      "home": "MIA",
+      "away_pitcher": "Sean Manaea",
+      "home_pitcher": "",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "Athletics",
+      "home": "CWS",
+      "away_pitcher": "Luis Morales",
+      "home_pitcher": "Anthony Kay",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "SEA",
+      "home": "COL",
+      "away_pitcher": "",
+      "home_pitcher": "Chase Dollander",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "SDP",
+      "home": "SEA",
+      "away_pitcher": "Germ\u00e1n M\u00e1rquez",
+      "home_pitcher": "",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "LAA",
+      "home": "CHC",
+      "away_pitcher": "Mitch Farris",
+      "home_pitcher": "Shota Imanaga",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "CLE",
+      "home": "CIN",
+      "away_pitcher": "Kolby Allard",
+      "home_pitcher": "Nick Lodolo",
+      "status": "lineups_pending"
+    },
+    {
+      "away": "LAD",
+      "home": "KCR",
+      "away_pitcher": "Roki Sasaki",
+      "home_pitcher": "Bailey Falter",
+      "status": "lineups_pending"
+    }
+  ],
+  "picks": [],
+  "bankroll": {
+    "current": 10000.0,
+    "today_wagered": 0.0
+  }
+}
