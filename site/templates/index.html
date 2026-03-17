@@ -6,8 +6,8 @@
 {% block content %}
 <section class="hero">
     {% if today %}
-    <p class="hero-date">{{ today.date }}</p>
-    <h1>Today's Picks</h1>
+    <h1 class="hero-date-big">{{ today.date }}</h1>
+    <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
     {% if today.run_mode == 'early' %}
     <div class="preliminary-banner glass">
         Preliminary picks using projected lineups. Final picks at 6 PM ET.
@@ -39,12 +39,15 @@
 
 {% if today and today.picks %}
 <section class="section fade-in">
-    <h2 class="section-title">Today's Picks ({{ today.picks|length }})</h2>
+    <h2 class="section-title">Picks</h2>
     <div class="picks-grid">
         {% for pick in today.picks %}
         <div class="pick-card glass">
             <div class="pick-header">
-                <span class="pick-name">{{ pick.pick }}</span>
+                <div class="pick-title-row">
+                    <span class="pick-name">{{ pick.pick }}</span>
+                    <span class="pick-type-badge {{ pick.type|default('moneyline') }}">{{ pick.type|default('ML')|upper }}</span>
+                </div>
                 <span class="pick-odds">{{ pick.odds }}</span>
                 {% if pick.lineup_status == 'projected' %}
                 <span class="lineup-badge projected">projected lineup</span>
@@ -66,6 +69,9 @@
                     <span class="metric-value">${{ "%.0f"|format(pick.wager) if pick.wager else "—" }}</span>
                 </div>
             </div>
+            {% if pick.explanation %}
+            <p class="pick-explanation">{{ pick.explanation }}</p>
+            {% endif %}
             {% if pick.sportsbook_odds %}
             <div class="sportsbook-odds">
                 {% for book, odds in pick.sportsbook_odds.items() %}
@@ -78,9 +84,6 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if pick.explanation %}
-            <p class="pick-explanation">{{ pick.explanation }}</p>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -88,245 +91,235 @@
 {% elif today %}
 <section class="no-picks fade-in">
     <h2>No Edges Found</h2>
-    <p>The model didn't find any bets meeting the minimum 7% edge threshold today.</p>
+    <p>The model didn't find any bets meeting the edge threshold today.</p>
 </section>
 {% endif %}
 
 {% if today and today.games %}
 <section class="section fade-in">
-    <h2 class="section-title">All Games ({{ today.games|length }})</h2>
+    <h2 class="section-title">All Games</h2>
     <p class="section-hint">Click a game to see simulation details</p>
-    <div class="table-card glass">
-        <table class="games-table">
-            <thead>
-                <tr>
-                    <th>Matchup</th>
-                    <th>Model</th>
-                    <th>Market</th>
-                    <th>Edge</th>
-                    <th>Pick</th>
-                    <th class="expand-col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for game in today.games %}
-                <tr class="game-row {% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' %}projected-row{% endif %}" data-game-idx="{{ loop.index0 }}">
-                    <td>
-                        <span class="team">{{ game.away }}</span>
-                        <span class="at">@</span>
-                        <span class="team">{{ game.home }}</span>
-                        {% if game.lineup_status == 'projected' %}
-                        <span class="lineup-badge projected">projected</span>
-                        {% endif %}
-                    </td>
-                    {% if game.status == 'lineups_pending' %}
-                    <td colspan="3" class="pending-label">Lineups pending</td>
-                    <td>—</td>
-                    {% else %}
-                    {% set model_fav = game.home if game.model_home_wp > 0.5 else game.away %}
-                    {% set model_fav_pct = [game.model_home_wp, game.model_away_wp]|max * 100 %}
-                    <td>
-                        <span class="model-fav">{{ model_fav }}</span>
-                        <span class="model-pct">{{ "%.0f"|format(model_fav_pct) }}%</span>
-                    </td>
-                    {% if game.market_home_wp %}
-                    {% set market_fav = game.home if game.market_home_wp > 0.5 else game.away %}
-                    {% set market_fav_pct = [game.market_home_wp, 1 - game.market_home_wp]|max * 100 %}
-                    <td>
-                        <span class="market-fav">{{ market_fav }}</span>
-                        <span class="market-pct">{{ "%.0f"|format(market_fav_pct) }}%</span>
-                    </td>
-                    {% else %}
-                    <td>—</td>
-                    {% endif %}
-                    <td class="{% if game.edge_pct and game.edge_pct > 0 %}edge{% endif %}">
-                        {{ "%.1f"|format(game.edge_pct) if game.edge_pct else "—" }}%
-                    </td>
-                    <td>{{ game.pick if game.pick else "—" }}</td>
-                    {% endif %}
-                    <td class="expand-toggle"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></td>
-                </tr>
-                {% if game.status != 'lineups_pending' and game.sim_detail %}
-                <tr class="game-detail" id="detail-{{ loop.index0 }}">
-                    <td colspan="6">
-                        <div class="detail-panel">
-                            <div class="detail-grid">
-                                {# ── Column 1: Lineups ── #}
-                                <div class="detail-col">
-                                    <h4>Starting Lineups</h4>
-                                    <div class="lineup-columns">
-                                        <div class="lineup-side">
-                                            <h5>{{ game.away }}</h5>
-                                            <div class="lineup-pitcher">SP: {{ game.away_pitcher }}</div>
-                                            {% if game.away_lineup_names %}
-                                            <ol class="batting-order">
-                                                {% for name in game.away_lineup_names %}
-                                                <li>{{ name }}</li>
-                                                {% endfor %}
-                                            </ol>
-                                            {% endif %}
-                                        </div>
-                                        <div class="lineup-side">
-                                            <h5>{{ game.home }}</h5>
-                                            <div class="lineup-pitcher">SP: {{ game.home_pitcher }}</div>
-                                            {% if game.home_lineup_names %}
-                                            <ol class="batting-order">
-                                                {% for name in game.home_lineup_names %}
-                                                <li>{{ name }}</li>
-                                                {% endfor %}
-                                            </ol>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
+    <div class="games-grid">
+        {% for game in today.games %}
+        <div class="game-card glass {% if game.pick %}has-pick{% endif %} {% if game.status == 'lineups_pending' %}pending-card{% endif %}" data-game-idx="{{ loop.index0 }}">
+            <div class="game-card-header">
+                <div class="game-matchup">
+                    <span class="game-team away-team">{{ game.away }}</span>
+                    <span class="game-vs">@</span>
+                    <span class="game-team home-team">{{ game.home }}</span>
+                </div>
+                {% if game.lineup_status == 'projected' %}
+                <span class="lineup-badge projected">projected</span>
+                {% endif %}
+                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
 
-                                {# ── Column 2: Simulation ── #}
-                                <div class="detail-col">
-                                    <h4>Simulation Results</h4>
-                                    <div class="sim-stats-row">
-                                        <div class="sim-stat">
-                                            <span class="sim-label">{{ game.away }} Runs</span>
-                                            <span class="sim-value">{{ game.sim_detail.avg_away_runs }}</span>
-                                        </div>
-                                        <div class="sim-stat">
-                                            <span class="sim-label">{{ game.home }} Runs</span>
-                                            <span class="sim-value">{{ game.sim_detail.avg_home_runs }}</span>
-                                        </div>
-                                        <div class="sim-stat">
-                                            <span class="sim-label">Total</span>
-                                            <span class="sim-value">{{ game.avg_total_runs }}</span>
-                                        </div>
-                                    </div>
+            {% if game.status == 'lineups_pending' %}
+            <div class="game-card-body pending">
+                <span class="pending-label">Lineups pending</span>
+            </div>
+            {% else %}
+            <div class="game-card-body">
+                <div class="game-pitchers">
+                    {{ game.away_pitcher|default('TBD') }} vs {{ game.home_pitcher|default('TBD') }}
+                </div>
+                <div class="game-prob-bar">
+                    <div class="prob-fill away" style="width: {{ "%.1f"|format(game.model_away_wp * 100) }}%;">
+                        {% if game.model_away_wp >= 0.35 %}{{ "%.0f"|format(game.model_away_wp * 100) }}%{% endif %}
+                    </div>
+                    <div class="prob-fill home" style="width: {{ "%.1f"|format(game.model_home_wp * 100) }}%;">
+                        {% if game.model_home_wp >= 0.35 %}{{ "%.0f"|format(game.model_home_wp * 100) }}%{% endif %}
+                    </div>
+                </div>
+                <div class="game-prob-labels">
+                    <span class="prob-label away">{{ game.away }}</span>
+                    <span class="prob-label home">{{ game.home }}</span>
+                </div>
+                {% if game.pick %}
+                <div class="game-pick-badge">
+                    {{ game.pick }} <span class="game-edge">+{{ "%.0f"|format(game.edge_pct) }}% edge</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
 
-                                    <div class="chart-label">Win Margin Distribution</div>
-                                    <div class="bar-chart margin-chart">
-                                        {% for i in range(game.sim_detail.margin_distribution.labels|length) %}
-                                        {% set label = game.sim_detail.margin_distribution.labels[i] %}
-                                        {% set pct = game.sim_detail.margin_distribution.freq[i] %}
-                                        <div class="bar-col" title="{{ game.away if label < 0 else game.home }} by {{ label|abs }}: {{ pct }}%">
-                                            <div class="bar {% if label > 0 %}bar-home{% elif label < 0 %}bar-away{% else %}bar-push{% endif %}" style="height: {{ (pct * 3.5)|round|int }}px;"></div>
-                                            {% if label % 2 == 0 %}
-                                            <span class="bar-label">{{ label }}</span>
-                                            {% else %}
-                                            <span class="bar-label"></span>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    <div class="chart-legend">
-                                        <span class="legend-item"><span class="legend-dot bar-away"></span>{{ game.away }} wins</span>
-                                        <span class="legend-item"><span class="legend-dot bar-home"></span>{{ game.home }} wins</span>
-                                    </div>
-                                </div>
-
-                                {# ── Column 3: Context ── #}
-                                <div class="detail-col">
-                                    <h4>Game Context</h4>
-
-                                    {# Win probability comparison bar #}
-                                    <div class="wp-comparison">
-                                        <div class="wp-teams">
-                                            <span class="wp-team away">{{ game.away }}</span>
-                                            <span class="wp-team home">{{ game.home }}</span>
-                                        </div>
-                                        <div class="wp-bar">
-                                            <div class="wp-fill away" style="width: {{ "%.1f"|format(game.model_away_wp * 100) }}%;">
-                                                {{ "%.0f"|format(game.model_away_wp * 100) }}%
-                                            </div>
-                                            <div class="wp-fill home" style="width: {{ "%.1f"|format(game.model_home_wp * 100) }}%;">
-                                                {{ "%.0f"|format(game.model_home_wp * 100) }}%
-                                            </div>
-                                        </div>
-                                        <div class="wp-label">Model Win Probability</div>
-                                    </div>
-
-                                    <div class="context-section">
-                                        <div class="context-row">
-                                            <span class="ctx-label">Sim ({{ game.home }})</span>
-                                            <span class="ctx-value">{{ "%.1f"|format(game.sim_home_wp * 100) }}%</span>
-                                        </div>
-                                        <div class="context-row">
-                                            <span class="ctx-label">Elo ({{ game.home }})</span>
-                                            <span class="ctx-value">{{ "%.1f"|format(game.elo_home_wp * 100) }}%</span>
-                                        </div>
-                                        <div class="context-row">
-                                            <span class="ctx-label">Final ({{ game.home }})</span>
-                                            <span class="ctx-value" style="font-weight:700;">{{ "%.1f"|format(game.model_home_wp * 100) }}%</span>
-                                        </div>
-                                        {% if game.market_home_wp %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Market ({{ game.home }})</span>
-                                            <span class="ctx-value">{{ "%.1f"|format(game.market_home_wp * 100) }}%</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-
-                                    {% if game.elo_home_rating %}
-                                    <div class="context-section">
-                                        <div class="context-row">
-                                            <span class="ctx-label">{{ game.home }} Elo</span>
-                                            <span class="ctx-value">{{ game.elo_home_rating }}</span>
-                                        </div>
-                                        <div class="context-row">
-                                            <span class="ctx-label">{{ game.away }} Elo</span>
-                                            <span class="ctx-value">{{ game.elo_away_rating }}</span>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-
-                                    {% if game.weather %}
-                                    <div class="context-section">
-                                        {% if game.weather.condition == 'Dome' %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Weather</span>
-                                            <span class="ctx-value">Dome (controlled)</span>
-                                        </div>
-                                        {% else %}
-                                        {% if game.weather.temperature %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Temperature</span>
-                                            <span class="ctx-value">{{ game.weather.temperature }}°F</span>
-                                        </div>
-                                        {% endif %}
-                                        {% if game.weather.wind_speed %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Wind</span>
-                                            <span class="ctx-value">{{ game.weather.wind_speed }} mph {{ game.weather.wind_direction|default('') }}</span>
-                                        </div>
-                                        {% endif %}
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-
-                                    {% if game.park_factors %}
-                                    <div class="context-section">
-                                        <div class="context-row">
-                                            <span class="ctx-label">Park HR</span>
-                                            <span class="ctx-value {% if game.park_factors.HR > 1.05 %}profit{% elif game.park_factors.HR < 0.95 %}loss{% endif %}">{{ game.park_factors.HR }}</span>
-                                        </div>
-                                        {% if game.park_factors.get('BB') %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Park BB</span>
-                                            <span class="ctx-value">{{ game.park_factors.BB }}</span>
-                                        </div>
-                                        {% endif %}
-                                        {% if game.park_factors.get('K') %}
-                                        <div class="context-row">
-                                            <span class="ctx-label">Park K</span>
-                                            <span class="ctx-value">{{ game.park_factors.K }}</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
+            {# Expandable detail panel #}
+            {% if game.status != 'lineups_pending' and game.sim_detail %}
+            <div class="game-detail-panel" id="detail-{{ loop.index0 }}">
+                <div class="detail-grid">
+                    {# ── Column 1: Lineups ── #}
+                    <div class="detail-col">
+                        <h4>Starting Lineups</h4>
+                        <div class="lineup-columns">
+                            <div class="lineup-side">
+                                <h5>{{ game.away }}</h5>
+                                <div class="lineup-pitcher">SP: {{ game.away_pitcher }}</div>
+                                {% if game.away_lineup_names %}
+                                <ol class="batting-order">
+                                    {% for name in game.away_lineup_names %}
+                                    <li>{{ name }}</li>
+                                    {% endfor %}
+                                </ol>
+                                {% endif %}
+                            </div>
+                            <div class="lineup-side">
+                                <h5>{{ game.home }}</h5>
+                                <div class="lineup-pitcher">SP: {{ game.home_pitcher }}</div>
+                                {% if game.home_lineup_names %}
+                                <ol class="batting-order">
+                                    {% for name in game.home_lineup_names %}
+                                    <li>{{ name }}</li>
+                                    {% endfor %}
+                                </ol>
+                                {% endif %}
                             </div>
                         </div>
-                    </td>
-                </tr>
-                {% endif %}
-                {% endfor %}
-            </tbody>
-        </table>
+                    </div>
+
+                    {# ── Column 2: Simulation ── #}
+                    <div class="detail-col">
+                        <h4>Simulation Results</h4>
+                        <div class="sim-stats-row">
+                            <div class="sim-stat">
+                                <span class="sim-label">{{ game.away }} Runs</span>
+                                <span class="sim-value">{{ game.sim_detail.avg_away_runs }}</span>
+                            </div>
+                            <div class="sim-stat">
+                                <span class="sim-label">{{ game.home }} Runs</span>
+                                <span class="sim-value">{{ game.sim_detail.avg_home_runs }}</span>
+                            </div>
+                            <div class="sim-stat">
+                                <span class="sim-label">Total</span>
+                                <span class="sim-value">{{ game.avg_total_runs }}</span>
+                            </div>
+                        </div>
+
+                        <div class="chart-label">Win Margin Distribution</div>
+                        <div class="bar-chart margin-chart">
+                            {% for i in range(game.sim_detail.margin_distribution.labels|length) %}
+                            {% set label = game.sim_detail.margin_distribution.labels[i] %}
+                            {% set pct = game.sim_detail.margin_distribution.freq[i] %}
+                            <div class="bar-col" title="{{ game.away if label < 0 else game.home }} by {{ label|abs }}: {{ pct }}%">
+                                <div class="bar {% if label > 0 %}bar-home{% elif label < 0 %}bar-away{% else %}bar-push{% endif %}" style="height: {{ (pct * 3.5)|round|int }}px;"></div>
+                                {% if label % 2 == 0 %}
+                                <span class="bar-label">{{ label }}</span>
+                                {% else %}
+                                <span class="bar-label"></span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-dot bar-away"></span>{{ game.away }} wins</span>
+                            <span class="legend-item"><span class="legend-dot bar-home"></span>{{ game.home }} wins</span>
+                        </div>
+                    </div>
+
+                    {# ── Column 3: Context ── #}
+                    <div class="detail-col">
+                        <h4>Game Context</h4>
+
+                        {# Win probability comparison bar #}
+                        <div class="wp-comparison">
+                            <div class="wp-teams">
+                                <span class="wp-team away">{{ game.away }}</span>
+                                <span class="wp-team home">{{ game.home }}</span>
+                            </div>
+                            <div class="wp-bar">
+                                <div class="wp-fill away" style="width: {{ "%.1f"|format(game.model_away_wp * 100) }}%;">
+                                    {{ "%.0f"|format(game.model_away_wp * 100) }}%
+                                </div>
+                                <div class="wp-fill home" style="width: {{ "%.1f"|format(game.model_home_wp * 100) }}%;">
+                                    {{ "%.0f"|format(game.model_home_wp * 100) }}%
+                                </div>
+                            </div>
+                            <div class="wp-label">Model Win Probability</div>
+                        </div>
+
+                        <div class="context-section">
+                            <div class="context-row">
+                                <span class="ctx-label">Sim ({{ game.home }})</span>
+                                <span class="ctx-value">{{ "%.1f"|format(game.sim_home_wp * 100) }}%</span>
+                            </div>
+                            <div class="context-row">
+                                <span class="ctx-label">Elo ({{ game.home }})</span>
+                                <span class="ctx-value">{{ "%.1f"|format(game.elo_home_wp * 100) }}%</span>
+                            </div>
+                            <div class="context-row">
+                                <span class="ctx-label">Final ({{ game.home }})</span>
+                                <span class="ctx-value" style="font-weight:700;">{{ "%.1f"|format(game.model_home_wp * 100) }}%</span>
+                            </div>
+                            {% if game.market_home_wp %}
+                            <div class="context-row">
+                                <span class="ctx-label">Market ({{ game.home }})</span>
+                                <span class="ctx-value">{{ "%.1f"|format(game.market_home_wp * 100) }}%</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if game.elo_home_rating %}
+                        <div class="context-section">
+                            <div class="context-row">
+                                <span class="ctx-label">{{ game.home }} Elo</span>
+                                <span class="ctx-value">{{ game.elo_home_rating }}</span>
+                            </div>
+                            <div class="context-row">
+                                <span class="ctx-label">{{ game.away }} Elo</span>
+                                <span class="ctx-value">{{ game.elo_away_rating }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if game.weather %}
+                        <div class="context-section">
+                            {% if game.weather.condition == 'Dome' %}
+                            <div class="context-row">
+                                <span class="ctx-label">Weather</span>
+                                <span class="ctx-value">Dome (controlled)</span>
+                            </div>
+                            {% else %}
+                            {% if game.weather.temperature %}
+                            <div class="context-row">
+                                <span class="ctx-label">Temperature</span>
+                                <span class="ctx-value">{{ game.weather.temperature }}°F</span>
+                            </div>
+                            {% endif %}
+                            {% if game.weather.wind_speed %}
+                            <div class="context-row">
+                                <span class="ctx-label">Wind</span>
+                                <span class="ctx-value">{{ game.weather.wind_speed }} mph {{ game.weather.wind_direction|default('') }}</span>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if game.park_factors %}
+                        <div class="context-section">
+                            <div class="context-row">
+                                <span class="ctx-label">Park HR</span>
+                                <span class="ctx-value {% if game.park_factors.HR > 1.05 %}profit{% elif game.park_factors.HR < 0.95 %}loss{% endif %}">{{ game.park_factors.HR }}</span>
+                            </div>
+                            {% if game.park_factors.get('BB') %}
+                            <div class="context-row">
+                                <span class="ctx-label">Park BB</span>
+                                <span class="ctx-value">{{ game.park_factors.BB }}</span>
+                            </div>
+                            {% endif %}
+                            {% if game.park_factors.get('K') %}
+                            <div class="context-row">
+                                <span class="ctx-label">Park K</span>
+                                <span class="ctx-value">{{ game.park_factors.K }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </section>
 {% endif %}
@@ -335,21 +328,21 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.game-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const idx = row.dataset.gameIdx;
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const idx = card.dataset.gameIdx;
             const detail = document.getElementById('detail-' + idx);
             if (!detail) return;
 
-            const isOpen = detail.style.display === 'table-row';
+            const isOpen = card.classList.contains('expanded');
 
             // Close all
-            document.querySelectorAll('.game-detail').forEach(d => d.style.display = 'none');
-            document.querySelectorAll('.game-row').forEach(r => r.classList.remove('expanded'));
+            document.querySelectorAll('.game-detail-panel').forEach(d => d.style.display = 'none');
+            document.querySelectorAll('.game-card').forEach(c => c.classList.remove('expanded'));
 
             if (!isOpen) {
-                detail.style.display = 'table-row';
-                row.classList.add('expanded');
+                detail.style.display = 'block';
+                card.classList.add('expanded');
             }
         });
     });
