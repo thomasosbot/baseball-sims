@@ -10,6 +10,11 @@ on:
         description: 'Date to run (YYYY-MM-DD, blank=today)'
         required: false
         type: string
+      spring:
+        description: 'Include spring training games'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -51,16 +56,28 @@ jobs:
             exit 1
           fi
 
+      - name: Determine spring training flag
+        id: season
+        run: |
+          # Auto-detect: spring training if before April 1, or if manually set
+          MONTH=$(date +%-m)
+          DAY=$(date +%-d)
+          if [ "${{ inputs.spring }}" = "true" ] || ([ "$MONTH" -eq 3 ] && [ "$DAY" -le 31 ]); then
+            echo "spring_flag=--spring" >> $GITHUB_OUTPUT
+          else
+            echo "spring_flag=" >> $GITHUB_OUTPUT
+          fi
+
       - name: Update yesterday's results
-        run: python3 scripts/update_results.py
+        run: python3 scripts/update_results.py ${{ steps.season.outputs.spring_flag }}
         continue-on-error: true
 
       - name: Run daily pipeline
         run: |
           if [ -n "${{ inputs.date }}" ]; then
-            python3 scripts/run_daily.py --date "${{ inputs.date }}"
+            python3 scripts/run_daily.py --date "${{ inputs.date }}" ${{ steps.season.outputs.spring_flag }}
           else
-            python3 scripts/run_daily.py
+            python3 scripts/run_daily.py ${{ steps.season.outputs.spring_flag }}
           fi
 
       - name: Generate website
