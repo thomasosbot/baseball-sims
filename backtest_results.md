@@ -854,7 +854,24 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 
 2. **Fresh $10K bankroll** (`site/generate.py`) — 2025 backtest now starts at $10,000 instead of carrying over $7,753 from 2024.
 
-### Run Line Analysis (2025)
+### 2025 Backtest Results (v1.3, rolling, fresh $10K)
+
+| Metric | Value |
+|--------|-------|
+| **Brier score** | 0.2428 |
+| **Games simulated** | 2,393 |
+| **Games matched to odds** | 1,722 |
+
+| Bet Type | Bets | Win Rate | Staked | Profit | ROI |
+|----------|------|----------|--------|--------|-----|
+| **Moneyline** | 241 | 48.1% | $75,712 | +$9,884 | **+13.1%** |
+| **Run line (dog +1.5)** | 233 | 57.5% | $81,459 | +$684 | +0.8% |
+| **Totals** | 41 | — | $11,905 | -$1,749 | -14.7% |
+| **Combined** | 515 | — | $169,076 | +$8,819 | +5.2% |
+
+**Starting bankroll: $10,000 → Ending: $18,819 (+88.2%)**
+
+### Prior Run Line Analysis (from v1.2 CSV, before dog-only filter)
 
 | Strategy | Bets | Win Rate | Profit | ROI |
 |----------|------|----------|--------|-----|
@@ -864,15 +881,16 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 | Fav -1.5, all | 75 | 33.3% | -$9,273 | -25.9% |
 
 **Key findings:**
-- ML-aligned dog bets perform *worse* (-6.9% ROI) than independent dog bets (+5.9%). When the model already has an ML edge on a dog, the RL +1.5 is double-dipping on the same signal.
-- The best RL bets are dogs where the model doesn't see enough ML edge but the team is still likely to keep it close.
+- ML is the clear profit driver at +13.1% ROI.
+- Dog +1.5 run line is roughly breakeven (+0.8%) with the rolling bankroll — thin edge gets eaten by Kelly sizing adjustments as bankroll fluctuates.
 - **Never bet fav -1.5** — structurally unprofitable due to home walk-off asymmetry.
+- Totals remain unprofitable. Market is too sharp.
 
 ### 2026 Strategy
 
 - **ML**: Primary profit driver. α=0.9, edge 7-15%, conf≥0.5.
-- **Run line**: Dog +1.5 only. No ML alignment required. α=0.9, edge 7-15%.
-- **Totals**: Disabled (market too efficient, -10.1% ROI).
+- **Run line**: Dog +1.5 only. α=0.9, edge 7-15%. Marginal but keeps us in more games.
+- **Totals**: Disabled (market too efficient).
 
 ---
 

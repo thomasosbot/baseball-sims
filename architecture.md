@@ -138,11 +138,12 @@ The Odds API        →  park factors                             →  ROI / CLV
 ## Validation Status
 
 **2025 out-of-sample backtest (v1.3, rolling backtest with weather + tiered bullpen + dog-only run line, fresh $10K bankroll):**
-- Brier 0.2429
-- ML: 234 bets, **+8.2% ROI** (+$8,503 profit), 48.7% win rate at avg +97 odds
-- Run Line (dog +1.5 only): 228 bets, 59.6% win rate, **+2.8% ROI** (+$3,473). Fav -1.5 removed (-25.9% ROI).
-- Totals: 37 bets, -10.1% ROI — market is too sharp on totals
-- Conclusion: **Moneyline is the primary profit driver. Dog +1.5 run line adds moderate value. Totals market too efficient.**
+- Brier 0.2428
+- ML: 241 bets, **+13.1% ROI** (+$9,884 profit), 48.1% win rate at avg +99 odds
+- Run Line (dog +1.5 only): 233 bets, 57.5% win rate, **+0.8% ROI** (+$684). Marginal but positive.
+- Totals: 41 bets, -14.7% ROI — market is too sharp on totals
+- Ending bankroll: $18,819 (+88.2% from $10K)
+- Conclusion: **Moneyline is the primary profit driver. Dog +1.5 run line is roughly breakeven. Totals market too efficient.**
 
 ## Current Limitations (v1.0)
 
