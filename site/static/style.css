@@ -370,95 +370,75 @@ body {
 .pick-type-badge.moneyline { background: var(--accent-light); color: var(--accent); }
 .pick-type-badge.totals { background: var(--green-light); color: var(--green); }
 
-/* ── Game Cards Grid ── */
-.games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1rem;
+/* ── Game Row Cards ── */
+.games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
-.game-card {
+.game-row-card {
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
     overflow: hidden;
 }
-.game-card:hover {
-    transform: translateY(-2px);
+.game-row-card:hover {
+    transform: translateY(-1px);
     box-shadow: var(--card-shadow-hover);
 }
-.game-card.has-pick {
+.game-row-card.has-pick {
     border-left: 3px solid var(--green);
 }
-.game-card.pending-card {
-    opacity: 0.5;
-}
-.game-card-header {
+.game-row-card.pending-card { opacity: 0.5; }
+
+.game-row-main {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border);
+    gap: 1rem;
 }
-.game-matchup {
+.game-teams-col {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-}
-.game-team {
-    font-weight: 700;
-    font-size: 1rem;
-}
-.game-vs {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
-.game-card .chevron {
-    width: 16px; height: 16px;
-    color: var(--text-muted);
-    transition: transform 0.2s ease;
+    min-width: 130px;
     flex-shrink: 0;
 }
-.game-card.expanded .chevron { transform: rotate(180deg); }
+.game-team { font-weight: 700; font-size: 0.95rem; }
+.game-vs { color: var(--text-muted); font-size: 0.78rem; }
 
-.game-card-body {
-    padding: 0.75rem 1rem;
-}
-.game-card-body.pending {
-    text-align: center;
-    padding: 1rem;
-}
-.game-pitchers {
-    font-size: 0.78rem;
+.game-pitchers-col {
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-bottom: 0.6rem;
+    min-width: 160px;
+    flex-shrink: 0;
 }
-.game-prob-bar {
-    display: flex;
-    height: 24px;
-    border-radius: 6px;
-    overflow: hidden;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.3rem;
+
+.game-odds-col, .game-model-col {
+    flex: 1;
+    min-width: 0;
 }
-.prob-fill {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    transition: width 0.3s ease;
-}
-.prob-fill.away { background: var(--red); opacity: 0.75; }
-.prob-fill.home { background: var(--green); opacity: 0.75; }
-.game-prob-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.65rem;
+.odds-label {
+    display: block;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     color: var(--text-muted);
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.15rem;
+}
+.odds-line {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.odds-line strong { color: var(--text); font-weight: 700; }
+.model-line { color: var(--accent); }
+.model-line strong { color: var(--accent); }
+
+.game-pick-col {
+    min-width: 110px;
+    flex-shrink: 0;
+    text-align: center;
 }
 .game-pick-badge {
     display: inline-block;
@@ -469,12 +449,23 @@ body {
     color: var(--green);
     border-radius: 6px;
 }
-.game-edge {
-    font-weight: 500;
-    opacity: 0.8;
-}
+.game-edge { font-weight: 500; opacity: 0.8; margin-left: 4px; }
+.no-pick { color: var(--text-muted); }
 
-/* Detail panel inside game card */
+.game-expand-col {
+    width: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.game-row-card .chevron {
+    width: 16px; height: 16px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+.game-row-card.expanded .chevron { transform: rotate(180deg); }
+
+/* Detail panel inside game row card */
 .game-detail-panel {
     display: none;
     padding: 1.25rem 1rem;
@@ -484,7 +475,14 @@ body {
 }
 
 @media (max-width: 768px) {
-    .games-grid { grid-template-columns: 1fr; }
+    .game-row-main {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .game-teams-col { min-width: 100%; }
+    .game-pitchers-col { min-width: 100%; }
+    .game-odds-col, .game-model-col { flex: 1; min-width: 40%; }
+    .game-pick-col { min-width: 100%; text-align: left; }
 }
 
 /* ── Tables ── */

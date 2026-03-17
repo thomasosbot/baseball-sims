@@ -801,60 +801,66 @@ def _generate_explanation(team, opponent, side, team_pitcher, opp_pitcher,
     edge_pct = edge_info["edge"] * 100
     market_odds = prob_to_american(edge_info['market_prob'])
 
-    # Lead with the core thesis — why do we like this team?
-    if elo_prob > 0.58:
-        parts.append(f"{team} is the stronger squad by Elo ({elo_prob:.0%}) and the simulation backs it up")
-    elif elo_prob > 0.52:
-        parts.append(f"Simulation and Elo both lean {team} here")
-    elif elo_prob < 0.45 and model_prob > 0.50:
-        parts.append(f"The simulation sees value in {team} that the season-long Elo ratings miss")
+    # --- Lead: core thesis ---
+    if market_odds > 130:
+        parts.append(f"The market has {team} as a {market_odds:+.0f} underdog, but our simulation disagrees")
     elif market_odds > 0:
-        parts.append(f"Market is underrating {team} at {market_odds:+.0f}")
+        parts.append(f"{team} is getting plus-money at {market_odds:+.0f} and the model thinks that's too cheap")
+    elif elo_prob > 0.58:
+        parts.append(f"{team} is the better team by Elo and the sim confirms it — the market isn't giving them enough credit")
+    elif elo_prob < 0.45 and model_prob > 0.50:
+        parts.append(f"Elo has {team} as the weaker club, but the matchup-level simulation tells a different story today")
     else:
-        parts.append(f"Model finds a {edge_pct:.0f}% edge on {team}")
+        parts.append(f"Our model sees a {edge_pct:.0f}% edge on {team} that the books are missing")
 
-    # Pitcher matchup narrative
+    # --- Pitching matchup ---
     if team_pitcher and opp_pitcher:
-        if market_odds > 100:  # underdog
-            parts.append(f"{team_pitcher} on the mound gives {team} a real shot against {opp_pitcher}")
-        elif market_odds < -150:  # heavy favorite
-            parts.append(f"{team_pitcher} is a significant pitching advantage over {opp_pitcher}")
+        if market_odds > 100:
+            parts.append(f"{team_pitcher} keeps {team} competitive on the mound against {opp_pitcher}")
+        elif market_odds < -150:
+            parts.append(f"{team_pitcher} is a big pitching edge over {opp_pitcher}")
         else:
-            parts.append(f"Pitching matchup: {team_pitcher} vs {opp_pitcher}")
+            parts.append(f"{team_pitcher} toes the rubber against {opp_pitcher}")
 
-    # Sim run scoring context
+    # --- Sim run scoring ---
     if sim_detail:
         team_runs = sim_detail.get("avg_home_runs" if side == "home" else "avg_away_runs", 0)
         opp_runs = sim_detail.get("avg_away_runs" if side == "home" else "avg_home_runs", 0)
-        if team_runs >= 5.0:
-            parts.append(f"Simulations project {team} to score {team_runs:.1f} runs — a high-offense game")
-        elif opp_runs <= 3.0:
-            parts.append(f"Model holds {opponent} to just {opp_runs:.1f} projected runs")
         run_diff = team_runs - opp_runs
-        if run_diff >= 1.0:
-            parts.append(f"Projected to outscore {opponent} by {run_diff:.1f} runs on average")
+        if team_runs >= 5.0:
+            parts.append(f"The sim projects {team} to plate {team_runs:.1f} runs — expect some fireworks")
+        elif opp_runs <= 3.0 and team_pitcher:
+            parts.append(f"{team_pitcher} and the pen should hold {opponent} to around {opp_runs:.1f} runs")
+        if run_diff >= 1.5:
+            parts.append(f"Projected to outscore {opponent} by {run_diff:.1f} runs")
+        elif run_diff >= 0.8:
+            parts.append(f"Slight run-scoring edge of {run_diff:.1f} runs in the sim")
 
-    # Weather / park color
+    # --- Environment color ---
     hr_factor = park.get("HR", 1.0)
     if weather and weather.get("temperature") and weather["temperature"] >= 85:
-        parts.append("Hot weather boosts offense")
+        parts.append("Heat cranks up the offense")
     elif weather and weather.get("temperature") and weather["temperature"] <= 50:
-        parts.append("Cold weather suppresses run scoring")
-    if weather and weather.get("wind_direction") == "out_to_cf" and weather.get("wind_speed", 0) >= 10:
-        parts.append("Wind blowing out favors the bats")
+        parts.append("Cold temps suppress the bats")
+    if weather and weather.get("wind_speed", 0) >= 12:
+        wd = weather.get("wind_direction", "")
+        if "out" in wd:
+            parts.append("Wind blowing out — balls are carrying")
+        elif "in" in wd:
+            parts.append("Wind blowing in — pitchers' day")
     if hr_factor >= 1.15:
-        parts.append("Hitter-friendly park inflates power numbers")
+        parts.append("Hitter-friendly yard boosts power")
     elif hr_factor <= 0.88:
-        parts.append("Pitcher-friendly park keeps the scoring down")
+        parts.append("Pitcher's park suppresses the long ball")
 
-    # Elo rating gap
+    # --- Elo gap ---
     if elo_rating and opp_elo_rating:
         gap = elo_rating - opp_elo_rating
-        if abs(gap) >= 50:
-            better = team if gap > 0 else opponent
-            parts.append(f"{better} holds a {abs(gap):.0f}-point Elo advantage")
+        if gap >= 60:
+            parts.append(f"{team} holds a commanding {gap:.0f}-point Elo edge")
+        elif gap <= -60:
+            parts.append(f"{opponent} is the better team on paper — but the matchup favors {team} today")
 
-    # Build the final narrative (pick the best 3 parts)
     return ". ".join(parts[:3]) + "."
 
 

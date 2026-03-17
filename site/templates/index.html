@@ -6,7 +6,7 @@
 {% block content %}
 <section class="hero">
     {% if today %}
-    <h1 class="hero-date-big">{{ today.date }}</h1>
+    <h1 class="hero-date-big">MLB Picks — {{ today.date }}</h1>
     <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
     {% if today.run_mode == 'early' %}
     <div class="preliminary-banner glass">
@@ -99,49 +99,67 @@
 <section class="section fade-in">
     <h2 class="section-title">All Games</h2>
     <p class="section-hint">Click a game to see simulation details</p>
-    <div class="games-grid">
+    <div class="games-list">
         {% for game in today.games %}
-        <div class="game-card glass {% if game.pick %}has-pick{% endif %} {% if game.status == 'lineups_pending' %}pending-card{% endif %}" data-game-idx="{{ loop.index0 }}">
-            <div class="game-card-header">
-                <div class="game-matchup">
+        <div class="game-row-card glass {% if game.pick %}has-pick{% endif %} {% if game.status == 'lineups_pending' %}pending-card{% endif %}" data-game-idx="{{ loop.index0 }}">
+            <div class="game-row-main">
+                <div class="game-teams-col">
                     <span class="game-team away-team">{{ game.away }}</span>
                     <span class="game-vs">@</span>
                     <span class="game-team home-team">{{ game.home }}</span>
+                    {% if game.lineup_status == 'projected' %}
+                    <span class="lineup-badge projected">projected</span>
+                    {% endif %}
                 </div>
-                {% if game.lineup_status == 'projected' %}
-                <span class="lineup-badge projected">projected</span>
-                {% endif %}
-                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
 
-            {% if game.status == 'lineups_pending' %}
-            <div class="game-card-body pending">
-                <span class="pending-label">Lineups pending</span>
-            </div>
-            {% else %}
-            <div class="game-card-body">
-                <div class="game-pitchers">
+                <div class="game-pitchers-col">
                     {{ game.away_pitcher|default('TBD') }} vs {{ game.home_pitcher|default('TBD') }}
                 </div>
-                <div class="game-prob-bar">
-                    <div class="prob-fill away" style="width: {{ "%.1f"|format(game.model_away_wp * 100) }}%;">
-                        {% if game.model_away_wp >= 0.35 %}{{ "%.0f"|format(game.model_away_wp * 100) }}%{% endif %}
-                    </div>
-                    <div class="prob-fill home" style="width: {{ "%.1f"|format(game.model_home_wp * 100) }}%;">
-                        {% if game.model_home_wp >= 0.35 %}{{ "%.0f"|format(game.model_home_wp * 100) }}%{% endif %}
-                    </div>
+
+                {% if game.status == 'lineups_pending' %}
+                <div class="game-odds-col pending-label">Lineups pending</div>
+                <div class="game-model-col"></div>
+                <div class="game-pick-col">—</div>
+                {% else %}
+                <div class="game-odds-col">
+                    {% if game.market_home_wp %}
+                    {% set market_home_american = ((100 / game.market_home_wp - 100) * -1) if game.market_home_wp > 0.5 else (100 / (1 - game.market_home_wp) * (1 - game.market_home_wp) / game.market_home_wp)|round|int %}
+                    <span class="odds-label">Market</span>
+                    <span class="odds-line">
+                        {{ game.away }} {% if game.market_home_wp <= 0.5 %}<strong>{{ "+%.0f"|format(100 * (1 - game.market_home_wp) / game.market_home_wp) }}</strong>{% else %}{{ "%+.0f"|format(-100 * game.market_home_wp / (1 - game.market_home_wp)) }}{% endif %}
+                        /
+                        {{ game.home }} {% if game.market_home_wp > 0.5 %}<strong>{{ "%+.0f"|format(-100 * game.market_home_wp / (1 - game.market_home_wp)) }}</strong>{% else %}{{ "+%.0f"|format(100 * (1 - game.market_home_wp) / game.market_home_wp) }}{% endif %}
+                    </span>
+                    {% else %}
+                    <span class="odds-label">No odds</span>
+                    {% endif %}
                 </div>
-                <div class="game-prob-labels">
-                    <span class="prob-label away">{{ game.away }}</span>
-                    <span class="prob-label home">{{ game.home }}</span>
+
+                <div class="game-model-col">
+                    <span class="odds-label">Model</span>
+                    <span class="odds-line model-line">
+                        {{ game.away }} {% if game.model_home_wp <= 0.5 %}<strong>{{ "+%.0f"|format(100 * game.model_away_wp / game.model_home_wp) }}</strong>{% else %}{{ "%+.0f"|format(-100 * game.model_home_wp / game.model_away_wp) }}{% endif %}
+                        /
+                        {{ game.home }} {% if game.model_home_wp > 0.5 %}<strong>{{ "%+.0f"|format(-100 * game.model_home_wp / game.model_away_wp) }}</strong>{% else %}{{ "+%.0f"|format(100 * game.model_away_wp / game.model_home_wp) }}{% endif %}
+                    </span>
                 </div>
-                {% if game.pick %}
-                <div class="game-pick-badge">
-                    {{ game.pick }} <span class="game-edge">+{{ "%.0f"|format(game.edge_pct) }}% edge</span>
+
+                <div class="game-pick-col">
+                    {% if game.pick %}
+                    <div class="game-pick-badge">
+                        {{ game.pick }}
+                        <span class="game-edge">+{{ "%.0f"|format(game.edge_pct) }}%</span>
+                    </div>
+                    {% else %}
+                    <span class="no-pick">—</span>
+                    {% endif %}
                 </div>
                 {% endif %}
+
+                <div class="game-expand-col">
+                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
             </div>
-            {% endif %}
 
             {# Expandable detail panel #}
             {% if game.status != 'lineups_pending' and game.sim_detail %}
@@ -328,7 +346,7 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.game-card').forEach(card => {
+    document.querySelectorAll('.game-row-card').forEach(card => {
         card.addEventListener('click', () => {
             const idx = card.dataset.gameIdx;
             const detail = document.getElementById('detail-' + idx);
@@ -338,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Close all
             document.querySelectorAll('.game-detail-panel').forEach(d => d.style.display = 'none');
-            document.querySelectorAll('.game-card').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('.game-row-card').forEach(c => c.classList.remove('expanded'));
 
             if (!isOpen) {
                 detail.style.display = 'block';
