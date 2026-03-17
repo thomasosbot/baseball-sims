@@ -359,6 +359,7 @@ def run_daily(
                 home_abbr, away_abbr,
                 g.get("home_starter", ""), g.get("away_starter", ""),
                 elo_prob, park, model_home, sim_home,
+                game_out=game_out,
             )
             if pick:
                 # Attach per-sportsbook odds for the picked side
@@ -663,6 +664,7 @@ def _evaluate_ml_edge(
     home_abbr, away_abbr,
     home_pitcher, away_pitcher,
     elo_prob, park, adj_home, sim_home,
+    game_out=None,
 ):
     """Check for ML edges and return a pick dict if found."""
     home_edge_info = calculate_edge(model_home, market_home_nv, best_home_odds, confidence, alpha=ML_ALPHA)
