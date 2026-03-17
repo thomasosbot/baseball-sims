@@ -136,7 +136,7 @@ def _load_backtest_data():
     combined_chart = None
 
     # Add bankroll tracking
-    starting = 7_753.0  # 2024 ending bankroll carried into 2025
+    starting = 10_000.0  # fresh $10K bankroll for 2025
     for year in sorted(backtest_data.keys()):
         csv_path = DATA_DIR / f"backtest_rolling_{year}_spreads.csv"
         if not csv_path.exists():

@@ -1108,8 +1108,13 @@ def _attach_spreads(
     away_score = pred.get("actual_away_score", 0) or 0
     actual_margin = home_score - away_score
 
-    # Check home spread
-    if (SPREAD_MIN_EDGE <= home_edge_info["edge"] <= SPREAD_MAX_EDGE
+    # Only allow dog (+1.5) spread bets — fav -1.5 is -25.9% ROI historically.
+    allow_home_spread = home_spread > 0   # home is dog (+1.5)
+    allow_away_spread = away_spread > 0   # away is dog (+1.5)
+
+    # Check home spread (dog only)
+    if (allow_home_spread
+            and SPREAD_MIN_EDGE <= home_edge_info["edge"] <= SPREAD_MAX_EDGE
             and home_edge_info["ev_per_unit"] > 0
             and confidence >= SPREAD_MIN_CONFIDENCE):
         sizing = size_bet(home_edge_info["adjusted_prob"], american_to_decimal(home_spread_odds),
@@ -1127,9 +1132,10 @@ def _attach_spreads(
             pred["spread_bet_profit"] = round(profit, 2)
             pred["spread_bet_won"] = won
 
-    # Check away spread (only if no home bet)
+    # Check away spread (dog only, only if no home bet)
     if pred["spread_bet_side"] is None:
-        if (SPREAD_MIN_EDGE <= away_edge_info["edge"] <= SPREAD_MAX_EDGE
+        if (allow_away_spread
+                and SPREAD_MIN_EDGE <= away_edge_info["edge"] <= SPREAD_MAX_EDGE
                 and away_edge_info["ev_per_unit"] > 0
                 and confidence >= SPREAD_MIN_CONFIDENCE):
             sizing = size_bet(away_edge_info["adjusted_prob"], american_to_decimal(away_spread_odds),

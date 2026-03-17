@@ -233,6 +233,35 @@ def run_daily(
             model_home = sim_home
         model_away = 1.0 - model_home
 
+        # Resolve lineup names for display
+        home_lineup_names = [cumulative._batter_names.get(pid, str(pid)) for pid in home_lineup[:9]]
+        away_lineup_names = [cumulative._batter_names.get(pid, str(pid)) for pid in away_lineup[:9]]
+
+        # Build margin distribution histogram (home margin -10 to +10)
+        margin_dist = result["margin_dist"]
+        margin_labels = list(range(-10, 11))
+        margin_freq = []
+        n_sims_total = len(margin_dist)
+        for m in margin_labels:
+            margin_freq.append(round(float(np.sum(margin_dist == m)) / n_sims_total * 100, 1))
+
+        # Build run distribution histograms (0-15 runs)
+        run_labels = list(range(0, 16))
+        total_runs = result["total_runs_dist"]
+        home_runs = ((total_runs + margin_dist) // 2).astype(int)
+        away_runs = ((total_runs - margin_dist) // 2).astype(int)
+        home_run_freq = []
+        away_run_freq = []
+        for r in run_labels:
+            home_run_freq.append(round(float(np.sum(home_runs == r)) / n_sims_total * 100, 1))
+            away_run_freq.append(round(float(np.sum(away_runs == r)) / n_sims_total * 100, 1))
+
+        # Park factors for display (round to 2 decimals)
+        park_display = {k: round(v, 2) for k, v in park.items() if isinstance(v, (int, float))}
+
+        # Weather for display
+        weather_display = weather_info if weather_info else {}
+
         # Build game output
         game_out = {
             "away": away_abbr,
@@ -245,6 +274,26 @@ def run_daily(
             "elo_home_wp": round(elo_prob, 4),
             "sim_home_wp": round(sim_home, 4),
             "lineup_status": lineup_status,
+            "home_lineup_names": home_lineup_names,
+            "away_lineup_names": away_lineup_names,
+            "sim_detail": {
+                "avg_home_runs": round(result["avg_home_runs"], 2),
+                "avg_away_runs": round(result["avg_away_runs"], 2),
+                "std_total_runs": round(result["std_total_runs"], 2),
+                "margin_distribution": {
+                    "labels": margin_labels,
+                    "freq": margin_freq,
+                },
+                "run_distribution": {
+                    "labels": run_labels,
+                    "home_freq": home_run_freq,
+                    "away_freq": away_run_freq,
+                },
+            },
+            "weather": weather_display,
+            "park_factors": park_display,
+            "elo_home_rating": round(elo.get(home_abbr)),
+            "elo_away_rating": round(elo.get(away_abbr)),
         }
 
         # --- Match to odds and find edges ---
