@@ -6,7 +6,7 @@
 {% block content %}
 <section class="hero">
     {% if today %}
-    <h1 class="hero-date-big">MLB Picks — {{ today.date }}</h1>
+    <h1 class="hero-date-big">MLB Picks — {{ display_date }}</h1>
     <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
     {% if today.run_mode == 'early' %}
     <div class="preliminary-banner glass">

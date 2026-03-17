@@ -55,11 +55,20 @@ def generate_site():
     # Latest day's picks (for homepage)
     latest = all_days[-1] if all_days else None
 
+    # Format the display date (e.g. "March 17, 2026")
+    display_date = ""
+    if latest and latest.get("date"):
+        try:
+            display_date = datetime.strptime(latest["date"], "%Y-%m-%d").strftime("%B %-d, %Y")
+        except (ValueError, TypeError):
+            display_date = latest["date"]
+
     # --- Render pages ---
     # Index (today's picks)
     template = env.get_template("index.html")
     html = template.render(
         today=latest,
+        display_date=display_date,
         stats=stats,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M ET"),
     )

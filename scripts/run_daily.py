@@ -686,6 +686,7 @@ def _evaluate_ml_edge(
                 elo_rating=game_out.get("elo_home_rating"),
                 opp_elo_rating=game_out.get("elo_away_rating"),
                 market_prob=market_home_nv,
+                best_odds=best_home_odds,
             )
             return {
                 "pick": f"{home_abbr} ML",
@@ -717,6 +718,7 @@ def _evaluate_ml_edge(
                 elo_rating=game_out.get("elo_away_rating"),
                 opp_elo_rating=game_out.get("elo_home_rating"),
                 market_prob=market_away_nv,
+                best_odds=best_away_odds,
             )
             return {
                 "pick": f"{away_abbr} ML",
@@ -797,11 +799,15 @@ def _evaluate_totals_edge(total_runs_dist, totals_row, confidence, bankroll, hom
 def _generate_explanation(team, opponent, side, team_pitcher, opp_pitcher,
                           edge_info, elo_prob, park, model_prob,
                           sim_detail=None, weather=None, elo_rating=None,
-                          opp_elo_rating=None, market_prob=None):
+                          opp_elo_rating=None, market_prob=None, best_odds=None):
     """Generate a rich, narrative explanation for a pick."""
     parts = []
     edge_pct = edge_info["edge"] * 100
-    market_odds = prob_to_american(edge_info['market_prob'])
+    # Use actual best book odds if available, otherwise derive from market prob
+    if best_odds is not None:
+        market_odds = int(best_odds)
+    else:
+        market_odds = prob_to_american(edge_info['market_prob'])
 
     # --- Lead: core thesis ---
     if market_odds > 130:
