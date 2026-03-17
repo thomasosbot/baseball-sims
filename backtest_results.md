@@ -843,4 +843,37 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 
 ---
 
+## v1.3 — Dog-Only Run Line + Fresh Bankroll
+
+**Date:** 2026-03-17
+**Status:** Complete
+
+**Changes from v1.2:**
+
+1. **Run line restricted to dog +1.5 only** (`src/backtest/runner.py`) — Favorite -1.5 bets removed after analysis showed -25.9% ROI (75 bets). The constraint `home_spread > 0` / `away_spread > 0` ensures only underdog side gets bet.
+
+2. **Fresh $10K bankroll** (`site/generate.py`) — 2025 backtest now starts at $10,000 instead of carrying over $7,753 from 2024.
+
+### Run Line Analysis (2025)
+
+| Strategy | Bets | Win Rate | Profit | ROI |
+|----------|------|----------|--------|-----|
+| Dog +1.5, no ML bet | 167 | 61.1% | +$5,236 | **+5.9%** |
+| Dog +1.5, all | 228 | 59.6% | +$3,473 | +2.8% |
+| Dog +1.5, ML aligned | 58 | 55.2% | -$2,224 | -6.9% |
+| Fav -1.5, all | 75 | 33.3% | -$9,273 | -25.9% |
+
+**Key findings:**
+- ML-aligned dog bets perform *worse* (-6.9% ROI) than independent dog bets (+5.9%). When the model already has an ML edge on a dog, the RL +1.5 is double-dipping on the same signal.
+- The best RL bets are dogs where the model doesn't see enough ML edge but the team is still likely to keep it close.
+- **Never bet fav -1.5** — structurally unprofitable due to home walk-off asymmetry.
+
+### 2026 Strategy
+
+- **ML**: Primary profit driver. α=0.9, edge 7-15%, conf≥0.5.
+- **Run line**: Dog +1.5 only. No ML alignment required. α=0.9, edge 7-15%.
+- **Totals**: Disabled (market too efficient, -10.1% ROI).
+
+---
+
 *Future iterations will be appended below with date, config changes, and metric deltas.*

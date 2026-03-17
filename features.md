@@ -357,10 +357,11 @@ The best available odds get a ring highlight (`.best-odds` class). This helps us
 - **Sizing**: Quarter-Kelly with 5% hard cap
 - **Max edge cap**: Edges above 15% filtered out (market is right when disagreement is that large)
 
-### Run Line (spread ±1.5)
+### Run Line (dog +1.5 only)
 
 - **Source**: The Odds API historical endpoint, spreads market. FanDuel as single book (consensus fallback). Only standard ±1.5 lines kept (alternate lines filtered out).
-- **Model probability**: From MC simulation margin distribution — `P(home covers -1.5) = count(margin > 1.5) / N`. This correctly captures the home/away asymmetry: home teams win by exactly 1 run 34.3% of the time (don't bat in bottom 9th, walk-offs) vs 23.9% for away teams.
+- **Model probability**: From MC simulation margin distribution — `P(home covers +1.5) = count(margin > -1.5) / N`. This correctly captures the home/away asymmetry: home teams win by exactly 1 run 34.3% of the time (don't bat in bottom 9th, walk-offs) vs 23.9% for away teams.
+- **Dog +1.5 only**: Favorite -1.5 bets removed after backtesting showed -25.9% ROI (75 bets). Dog +1.5 is +2.8% ROI all (228 bets) and +5.9% ROI for independent bets without ML alignment (167 bets). The constraint `home_spread > 0` / `away_spread > 0` filters to underdog side only.
 - **Edge & sizing**: Spread: α=0.9, edge 7-15%, min confidence 0.5 (same as ML). Quarter-Kelly with 5% hard cap.
 
 ### Totals (over/under)
@@ -451,7 +452,18 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Starter BF limit** | `constants.py` | Done — 21→22 BF (matches 2024 MLB avg) |
 | **Weather adjustments** | `src/features/weather.py`, `runner.py`, `run_daily.py` | Done — temperature + wind factors on HR/XBH, dome detection, Open-Meteo for daily pipeline |
 
-### v1.2+ — Additional features
+### v1.3 — Two-Run Pipeline + Dog-Only Run Line + Enriched Game View (DONE)
+
+| Change | Module | Status |
+|--------|--------|--------|
+| **Two-run daily pipeline** | `.github/workflows/daily_picks.yml`, `run_daily.py`, `fetch.py` | Done — early run (1 PM ET, projected lineups) + late run (6 PM ET, confirmed lineups + newsletter) |
+| **Projected lineup fallback** | `src/data/fetch.py` | Done — `fetch_team_recent_lineup()` gets batting order from team's most recent game when confirmed lineups unavailable |
+| **Dog-only run line** | `src/backtest/runner.py` | Done — fav -1.5 removed (-25.9% ROI), only dog +1.5 allowed |
+| **Fresh $10K bankroll** | `site/generate.py` | Done — 2025 backtest starts at $10K (not carried from 2024) |
+| **Expandable game detail view** | `run_daily.py`, `index.html`, `style.css` | Done — clickable game rows show lineups, margin distribution chart, weather, park factors, Elo ratings |
+| **Enriched daily JSON** | `run_daily.py` | Done — lineup names, sim detail histograms, weather, park factors, Elo ratings added to game output |
+
+### v1.3+ — Additional features
 
 | Feature | Expected impact |
 |---------|-----------------|

@@ -85,7 +85,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Per-book no-vig consensus** (v0.3.1) | Previous approach cherry-picked best home odds from one book and best away odds from another, creating impossible pairs (e.g. -106 / +400). Fix: compute no-vig probability per book (each book's pair is coherent), then take the median across books. Filters: \|American odds\| ≤ 600, vig 0-12%, minimum 3 books per game. |
 | **Totals quality controls** (v0.8) | `build_closing_totals()` now mirrors moneyline QC: \|odds\| ≥ 100, per-book vig 0-12%, min 3 books per game, final-pair vig validation. Previously had no vig/min-books filters, causing 20+ games with negative vig and consensus fallback producing garbage odds (-6.5, -0.5). |
 | **Confidence-gated edge detection** (v0.8) | Raw model probabilities are shrunk toward market via `adjusted_prob = market + (alpha * confidence) * (model - market)`. Alpha is per-bet-type (ML=0.4, Totals=0.3). Confidence combines (1) season depth: cumulative pitchers tracked 850→1300 maps to 0.2→1.0, and (2) model-market agreement: penalises when model and market disagree on the favourite. |
-| **Run line (spread) betting** (v1.2) | Cover probabilities computed directly from the 10,000-simulation margin distribution (`P(cover -1.5) = count(margin > 1.5) / N`). No heuristic conversion from win probability — this correctly captures the structural asymmetry where home teams win by exactly 1 run 34% of the time vs 24% for away teams (due to not batting in bottom 9th). Uses same alpha (0.9) and edge thresholds (7-15%) as moneyline. |
+| **Run line (spread) betting** (v1.2, refined v1.3) | Cover probabilities computed directly from the 10,000-simulation margin distribution (`P(cover -1.5) = count(margin > 1.5) / N`). No heuristic conversion from win probability. **Dog +1.5 only** — favorite -1.5 bets removed after backtesting showed -25.9% ROI (75 bets). Independent dog +1.5 bets (no ML alignment required) are +5.9% ROI (167 bets). |
 | **Separate ML/Totals betting params** (v0.9) | Moneyline and totals use independent alpha, min_edge, max_edge, and min_confidence settings. Grid search on v0.9+BHQ CSV found optimal: **ML: α=0.9, edge 7-15%, conf≥0.5** (+1.3% ROI, 232 bets). **Totals: α=0.3, edge 7-15%, conf≥0.0** (+5.1% ROI, 51 bets). High ML alpha works because BHQ improves projections enough to trust model-market disagreements. |
 | **Max edge cap** (v0.9) | Edges above 15% are filtered out. Large model-market disagreements (15-20%+) were almost always losers in v0.8 — the market is right when disagreement is that large. Applies to both moneyline and totals via `ML_MAX_EDGE` / `TOTALS_MAX_EDGE`. |
 | **Home field advantage** (v0.9) | Additive +2.5% boost to home win probability post-simulation. Model avg home prob was 0.501 vs actual 0.526 — HFA closes this gap. Applied in `_sim_with_lineups()` and `_sim_league_avg()`. Does not affect total runs distribution. |
@@ -104,24 +104,29 @@ The Odds API        →  park factors                             →  ROI / CLV
 |-----------|--------|---------|
 | `src/data/state.py` | State persistence | Saves/loads CumulativeStats, Elo, batter speeds, bankroll between daily runs as pickles in `data/state/` |
 | `scripts/init_season.py` | Preseason setup | One-time: builds Marcel+BHQ projections, seeds Elo from prior seasons, saves initial state |
-| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds, runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Games without confirmed lineups are included with `status: "lineups_pending"` instead of being skipped. |
+| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds, runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode early` (projected lineups from team's most recent game) and `--mode late` (confirmed lineups). Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, and Elo ratings for the expandable game detail view. |
 | `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L |
 | `site/generate.py` | Static site generator | Reads daily JSON files, renders Jinja2 templates to `site/public/` (Netlify) |
-| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + games), `history.html` (chart + results), `about.html` (model info) |
-| `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges |
+| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + expandable game details), `history.html` (chart + results), `about.html` (model info) |
+| `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges, expandable game detail panels with CSS bar charts |
 | `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
 | `site/netlify.toml` | Netlify config | Build settings, publish dir, functions dir |
 | `src/newsletter/sender.py` | Email newsletter | Fetches subscribers from Resend Contacts API (audience-based), sends daily picks HTML email from `picks@ozzyanalytics.com` |
-| `.github/workflows/daily_picks.yml` | Automation | Cron at 5 PM UTC: update results → run pipeline → generate site → send newsletter → commit + push |
+| `.github/workflows/daily_picks.yml` | Automation | Two-run daily schedule: early (1 PM ET, projected lineups) + late (6 PM ET, confirmed lineups + newsletter). Auto-detects spring training in March. |
 
-**Daily pipeline flow:**
+**Daily pipeline flow (two-run schedule):**
 ```
-[1 PM ET] Lineups confirmed
+[1 PM ET] Early run (--mode early)
     → update_results.py (grade yesterday, update state)
-    → run_daily.py (fetch odds, simulate, find edges)
-    → site/generate.py (rebuild website)
+    → run_daily.py --mode early (projected lineups, simulate, find edges)
+    → site/generate.py (rebuild website with "Preliminary" banner)
+    → git commit + push
+
+[6 PM ET] Late run (--mode late)
+    → run_daily.py --mode late (confirmed lineups, overwrites daily JSON)
+    → site/generate.py (rebuild website, "Final" picks)
     → newsletter/sender.py (email subscribers)
-    → git commit + push (state + picks + site)
+    → git commit + push
 ```
 
 ## Deployment
@@ -132,13 +137,12 @@ The Odds API        →  park factors                             →  ROI / CLV
 
 ## Validation Status
 
-**2025 out-of-sample backtest (v1.2, rolling backtest with weather + tiered bullpen + spreads, $7,753 starting bankroll from 2024):**
+**2025 out-of-sample backtest (v1.3, rolling backtest with weather + tiered bullpen + dog-only run line, fresh $10K bankroll):**
 - Brier 0.2429
 - ML: 234 bets, **+8.2% ROI** (+$8,503 profit), 48.7% win rate at avg +97 odds
-- Run Line: 303 bets, -3.6% ROI overall. Underdog +1.5 is +2.8% ROI (228 bets), but favorite -1.5 is -25.9% (75 bets). Sim-derived cover probs are accurate but edge is thin.
+- Run Line (dog +1.5 only): 228 bets, 59.6% win rate, **+2.8% ROI** (+$3,473). Fav -1.5 removed (-25.9% ROI).
 - Totals: 37 bets, -10.1% ROI — market is too sharp on totals
-- Ending bankroll: $8,991 (+16.0% from $7,753)
-- Conclusion: **Moneyline edge is real and the primary profit driver. Run line underdog +1.5 shows a small edge. Totals market too efficient.**
+- Conclusion: **Moneyline is the primary profit driver. Dog +1.5 run line adds moderate value. Totals market too efficient.**
 
 ## Current Limitations (v1.0)
 

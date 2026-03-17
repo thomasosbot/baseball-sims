@@ -27,7 +27,10 @@ python scripts/backtest.py --bankroll 10000       # set starting bankroll for be
 # Daily betting pipeline (requires ODDS_API_KEY in .env)
 python scripts/init_season.py --year 2026      # one-time preseason setup
 python scripts/run_daily.py --bankroll 1000     # run daily pipeline
+python scripts/run_daily.py --mode early        # projected lineups (1 PM ET run)
+python scripts/run_daily.py --mode late         # confirmed lineups (6 PM ET run)
 python scripts/run_daily.py --date 2026-04-01   # specific date
+python scripts/run_daily.py --spring            # include spring training games
 python scripts/update_results.py                # grade yesterday's picks + update state
 
 # Generate picks website
@@ -50,7 +53,7 @@ Key modules:
 | Betting | `src/betting/odds.py` (The Odds API), `edge.py`, `kelly.py` (quarter-Kelly sizing) |
 | Backtest | `src/backtest/runner.py`, `metrics.py` (Brier, CLV, ROI, calibration) |
 | Pipeline | `src/data/state.py` (state persistence), `scripts/init_season.py`, `run_daily.py`, `update_results.py` |
-| Website | `site/generate.py` (static site generator), `site/templates/` (Jinja2 — base, index, history, about), `site/static/style.css` (Meta-inspired pastel + glass UI), `site/public/` (output), `site/netlify.toml` + `site/netlify/functions/subscribe.js` (Netlify deploy + newsletter subscribe) |
+| Website | `site/generate.py` (static site generator), `site/templates/` (Jinja2 — base, index with expandable game details, history, about), `site/static/style.css` (Meta-inspired pastel + glass UI, CSS bar charts), `site/public/` (output), `site/netlify.toml` + `site/netlify/functions/subscribe.js` (Netlify deploy + newsletter subscribe) |
 | Newsletter | `src/newsletter/sender.py` (Resend API), `src/newsletter/templates/` |
 
 ## Context Files
