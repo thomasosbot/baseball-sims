@@ -165,12 +165,53 @@ def fetch_game_lineup(game_id: int) -> dict:
     return result
 
 
-def fetch_daily_lineups(date: str, include_spring: bool = False) -> List[dict]:
+def fetch_team_recent_lineup(team_id: int, before_date: str, include_spring: bool = False) -> list:
+    """
+    Fetch a team's most recent starting lineup (9 MLBAM IDs in batting order)
+    from their last completed game before `before_date`.
+    Returns empty list if no recent game found within 10 days.
+    """
+    end = datetime.strptime(before_date, "%Y-%m-%d") - timedelta(days=1)
+    start = end - timedelta(days=10)
+    start_str = start.strftime("%m/%d/%Y")
+    end_str = end.strftime("%m/%d/%Y")
+
+    try:
+        recent = statsapi.schedule(team=team_id, start_date=start_str, end_date=end_str)
+    except Exception:
+        return []
+
+    allowed = {"Final", "Game Over"}
+    candidates = [g for g in recent if g.get("status") in allowed]
+    if not include_spring:
+        candidates = [g for g in candidates if g.get("game_type") == "R"]
+
+    if not candidates:
+        return []
+
+    # Most recent game
+    latest = candidates[-1]
+    try:
+        lineups = fetch_game_lineup(latest["game_id"])
+    except Exception:
+        return []
+
+    # Return the lineup for the side this team was on
+    if latest["home_id"] == team_id:
+        return lineups.get("home", [])
+    else:
+        return lineups.get("away", [])
+
+
+def fetch_daily_lineups(date: str, include_spring: bool = False, use_projected: bool = False) -> List[dict]:
     """
     Fetch all games and their starting lineups for a given date (YYYY-MM-DD).
     Returns list of dicts, each with: game_id, home_team, away_team,
     home_lineup (list of MLBAM IDs), away_lineup, home_starter, away_starter,
-    home_score, away_score, status.
+    home_score, away_score, status, lineup_status.
+
+    If use_projected=True, games with missing lineups will fall back to the
+    team's most recent game's batting order (lineup_status='projected').
     """
     m, d, y = date[5:7], date[8:10], date[:4]
     games = statsapi.schedule(date=f"{m}/{d}/{y}")
@@ -184,6 +225,33 @@ def fetch_daily_lineups(date: str, include_spring: bool = False) -> List[dict]:
         except Exception:
             lineups = {"home": [], "away": []}
 
+        # Determine lineup status
+        home_lineup = lineups["home"]
+        away_lineup = lineups["away"]
+        home_projected = False
+        away_projected = False
+
+        if use_projected:
+            if len(home_lineup) < 9:
+                fallback = fetch_team_recent_lineup(g["home_id"], date, include_spring)
+                if len(fallback) >= 9:
+                    home_lineup = fallback
+                    home_projected = True
+                    time.sleep(0.2)
+            if len(away_lineup) < 9:
+                fallback = fetch_team_recent_lineup(g["away_id"], date, include_spring)
+                if len(fallback) >= 9:
+                    away_lineup = fallback
+                    away_projected = True
+                    time.sleep(0.2)
+
+        if home_projected or away_projected:
+            lineup_status = "projected"
+        elif len(home_lineup) >= 9 and len(away_lineup) >= 9:
+            lineup_status = "confirmed"
+        else:
+            lineup_status = "pending"
+
         results.append({
             "game_id":       g["game_id"],
             "game_date":     date,
@@ -192,13 +260,14 @@ def fetch_daily_lineups(date: str, include_spring: bool = False) -> List[dict]:
             "home_id":       g["home_id"],
             "away_id":       g["away_id"],
             "venue":         g.get("venue_name", ""),
-            "home_lineup":   lineups["home"],
-            "away_lineup":   lineups["away"],
+            "home_lineup":   home_lineup,
+            "away_lineup":   away_lineup,
             "home_starter":  g.get("home_probable_pitcher", ""),
             "away_starter":  g.get("away_probable_pitcher", ""),
             "home_score":    g.get("home_score"),
             "away_score":    g.get("away_score"),
             "status":        g.get("status", ""),
+            "lineup_status": lineup_status,
         })
         time.sleep(0.2)  # gentle rate limiting
 

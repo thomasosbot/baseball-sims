@@ -2,8 +2,8 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    # 1 PM ET / 5 PM UTC — lineups usually confirmed by then
-    - cron: '0 17 * * *'
+    - cron: '0 17 * * *'   # 1 PM ET — early run (projected lineups)
+    - cron: '0 22 * * *'   # 6 PM ET — late run (confirmed lineups)
   workflow_dispatch:
     inputs:
       date:
@@ -15,6 +15,14 @@ on:
         required: false
         type: boolean
         default: true
+      mode:
+        description: 'Run mode'
+        required: false
+        type: choice
+        options:
+          - early
+          - late
+        default: late
 
 permissions:
   contents: write
@@ -56,6 +64,18 @@ jobs:
             exit 1
           fi
 
+      - name: Determine run mode
+        id: mode
+        run: |
+          if [ -n "${{ inputs.mode }}" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 17 * * *" ]; then
+            echo "mode=early" >> $GITHUB_OUTPUT
+          else
+            echo "mode=late" >> $GITHUB_OUTPUT
+          fi
+          echo "Run mode: $(cat $GITHUB_OUTPUT | grep mode | cut -d= -f2)"
+
       - name: Determine spring training flag
         id: season
         run: |
@@ -69,21 +89,23 @@ jobs:
           fi
 
       - name: Update yesterday's results
+        if: steps.mode.outputs.mode == 'early'
         run: python3 scripts/update_results.py ${{ steps.season.outputs.spring_flag }}
         continue-on-error: true
 
       - name: Run daily pipeline
         run: |
           if [ -n "${{ inputs.date }}" ]; then
-            python3 scripts/run_daily.py --date "${{ inputs.date }}" ${{ steps.season.outputs.spring_flag }}
+            python3 scripts/run_daily.py --date "${{ inputs.date }}" --mode ${{ steps.mode.outputs.mode }} ${{ steps.season.outputs.spring_flag }}
           else
-            python3 scripts/run_daily.py ${{ steps.season.outputs.spring_flag }}
+            python3 scripts/run_daily.py --mode ${{ steps.mode.outputs.mode }} ${{ steps.season.outputs.spring_flag }}
           fi
 
       - name: Generate website
         run: python3 site/generate.py
 
       - name: Send newsletter
+        if: steps.mode.outputs.mode == 'late'
         run: |
           python3 -c "
           import json, sys
@@ -113,7 +135,8 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
+            MODE="${{ steps.mode.outputs.mode }}"
             DATE=$(date +%Y-%m-%d)
-            git commit -m "Daily pipeline: ${DATE}"
+            git commit -m "Daily pipeline ($MODE): ${DATE}"
             git push
           fi

@@ -64,10 +64,20 @@ def run_daily(
     date: str = None,
     n_sims: int = N_SIMULATIONS,
     include_spring: bool = False,
+    mode: str = "late",
 ):
+    # Spring training: loosen totals thresholds for pressure testing
+    if include_spring:
+        global TOTALS_ALPHA, TOTALS_MIN_EDGE, TOTALS_MIN_CONFIDENCE
+        TOTALS_ALPHA = 0.7       # let more model signal through (was 0.3)
+        TOTALS_MIN_EDGE = 0.03   # lower edge floor to 3% (was 7%)
+        TOTALS_MIN_CONFIDENCE = 0.0
+
     today = date or datetime.now().strftime("%Y-%m-%d")
     print(f"\n{'=' * 60}")
     print(f"  MLB Betting Model — {today}")
+    if include_spring:
+        print(f"  SPRING TRAINING — totals pressure test (α={TOTALS_ALPHA}, min edge={TOTALS_MIN_EDGE*100:.0f}%)")
     print(f"  Bankroll: ${bankroll:,.2f}")
     print(f"{'=' * 60}")
 
@@ -84,9 +94,10 @@ def run_daily(
     print(f"  {cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers tracked")
 
     # --- 2. Fetch today's schedule + lineups ---
-    print(f"\nFetching lineups for {today}...")
+    use_projected = (mode == "early")
+    print(f"\nFetching lineups for {today} (mode={mode}, projected={use_projected})...")
     try:
-        games = fetch_daily_lineups(today, include_spring=include_spring)
+        games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=use_projected)
     except Exception as e:
         print(f"  Error fetching lineups: {e}")
         return
@@ -143,6 +154,8 @@ def run_daily(
         home_lineup = g.get("home_lineup", [])
         away_lineup = g.get("away_lineup", [])
 
+        lineup_status = g.get("lineup_status", "confirmed")
+
         # Games without lineups: include in output but don't simulate
         if len(home_lineup) < 9 or len(away_lineup) < 9:
             print(f"  {away_abbr} @ {home_abbr}: lineups pending")
@@ -152,8 +165,12 @@ def run_daily(
                 "away_pitcher": g.get("away_starter", "TBD"),
                 "home_pitcher": g.get("home_starter", "TBD"),
                 "status": "lineups_pending",
+                "lineup_status": "pending",
             })
             continue
+
+        if lineup_status == "projected":
+            print(f"  {away_abbr} @ {home_abbr}: using projected lineups")
 
         # Resolve starter IDs from the schedule data
         home_starter_id = _resolve_starter_id(g, "home", pitcher_profiles)
@@ -227,6 +244,7 @@ def run_daily(
             "avg_total_runs": round(result["avg_total_runs"], 2),
             "elo_home_wp": round(elo_prob, 4),
             "sim_home_wp": round(sim_home, 4),
+            "lineup_status": lineup_status,
         }
 
         # --- Match to odds and find edges ---
@@ -272,6 +290,7 @@ def run_daily(
                     pick["sportsbook_odds"] = {
                         k: int(v) for k, v in pick_side_books.items()
                     }
+                pick["lineup_status"] = lineup_status
                 game_out["pick"] = pick["pick"]
                 game_out["edge_pct"] = pick["edge_pct"]
                 game_out["odds"] = pick["odds"]
@@ -301,6 +320,7 @@ def run_daily(
     output = {
         "date": today,
         "generated_at": datetime.now().isoformat(),
+        "run_mode": mode,
         "games": output_games,
         "picks": picks,
         "bankroll": {
@@ -740,6 +760,8 @@ if __name__ == "__main__":
                         help=f"Number of simulations per game (default: {N_SIMULATIONS})")
     parser.add_argument("--spring", action="store_true",
                         help="Include spring training games")
+    parser.add_argument("--mode", choices=["early", "late"], default="late",
+                        help="Run mode: early (projected lineups) or late (confirmed)")
     args = parser.parse_args()
 
     bankroll = args.bankroll
@@ -748,4 +770,4 @@ if __name__ == "__main__":
         bankroll = state["bankroll"] if state else 1000.0
 
     run_daily(bankroll=bankroll, date=args.date, n_sims=args.sims,
-              include_spring=args.spring)
+              include_spring=args.spring, mode=args.mode)

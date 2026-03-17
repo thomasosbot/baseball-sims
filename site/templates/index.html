@@ -8,6 +8,11 @@
     {% if today %}
     <p class="hero-date">{{ today.date }}</p>
     <h1>Today's Picks</h1>
+    {% if today.run_mode == 'early' %}
+    <div class="preliminary-banner glass">
+        Preliminary picks using projected lineups. Final picks at 6 PM ET.
+    </div>
+    {% endif %}
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
             <span class="stat-value">{{ stats.wins }}-{{ stats.losses }}</span>
@@ -41,6 +46,9 @@
             <div class="pick-header">
                 <span class="pick-name">{{ pick.pick }}</span>
                 <span class="pick-odds">{{ pick.odds }}</span>
+                {% if pick.lineup_status == 'projected' %}
+                <span class="lineup-badge projected">projected lineup</span>
+                {% endif %}
             </div>
             <div class="pick-details">
                 <div class="pick-metric">
@@ -100,11 +108,14 @@
             </thead>
             <tbody>
                 {% for game in today.games %}
-                <tr class="{% if game.status == 'lineups_pending' %}pending-row{% endif %}">
+                <tr class="{% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' %}projected-row{% endif %}">
                     <td>
                         <span class="team">{{ game.away }}</span>
                         <span class="at">@</span>
                         <span class="team">{{ game.home }}</span>
+                        {% if game.lineup_status == 'projected' %}
+                        <span class="lineup-badge projected">projected</span>
+                        {% endif %}
                     </td>
                     {% if game.status == 'lineups_pending' %}
                     <td colspan="3" class="pending-label">Lineups pending</td>
