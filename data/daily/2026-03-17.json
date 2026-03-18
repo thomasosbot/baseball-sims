@@ -2016,9 +2016,7 @@
         "betrivers": 112,
         "mybookieag": 113
       },
-      "confidence": 0.857,
-      "totals_pick": "CLE@CIN UNDER 10.5",
-      "totals_edge_pct": 9.4
+      "confidence": 0.857
     },
     {
       "away": "LAD",
@@ -2236,19 +2234,10 @@
         "mybookieag": -167
       },
       "lineup_status": "confirmed"
-    },
-    {
-      "pick": "CLE@CIN UNDER 10.5",
-      "edge_pct": 9.4,
-      "odds": "+105",
-      "kelly_fraction": 0.0444,
-      "wager": 444.4,
-      "explanation": "Model projects 64% under vs 48% market.",
-      "type": "totals"
     }
   ],
   "bankroll": {
     "current": 10000.0,
-    "today_wagered": 794.25
+    "today_wagered": 349.85
   }
 }

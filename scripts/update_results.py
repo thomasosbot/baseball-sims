@@ -130,7 +130,10 @@ def update_results(date: str = None, include_spring: bool = False):
         "bankroll": round(bankroll, 2),
         "picks": daily_results,
     }
+    # Replace existing entry for this date (avoid duplicates on re-runs)
+    season_results = [r for r in season_results if r["date"] != date]
     season_results.append(day_entry)
+    season_results.sort(key=lambda r: r["date"])
 
     with open(RESULTS_PATH, "w") as f:
         json.dump(season_results, f, indent=2, default=str)

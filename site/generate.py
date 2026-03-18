@@ -52,7 +52,11 @@ def generate_site():
     # Compute season stats
     stats = _compute_season_stats(season_results)
 
-    # Latest day's picks (for homepage)
+    # Latest day's picks (for homepage) — filter out totals picks
+    for day in all_days:
+        if "picks" in day:
+            day["picks"] = [p for p in day["picks"] if p.get("type", "moneyline") != "totals"]
+
     latest = all_days[-1] if all_days else None
 
     # Format the display date (e.g. "March 17, 2026")
