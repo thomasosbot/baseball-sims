@@ -20,5 +20,26 @@
     "day_profit": 0,
     "bankroll": 10000.0,
     "picks": []
+  },
+  {
+    "date": "2026-03-17",
+    "games_played": 12,
+    "picks_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 222.83,
+    "bankroll": 10222.83,
+    "picks": [
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 349.85,
+        "profit": 222.83,
+        "odds": "-157",
+        "actual_score": "LAA 6 - CHC 8"
+      }
+    ]
   }
 ]

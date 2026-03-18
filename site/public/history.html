@@ -31,23 +31,23 @@
     <h1>Season History</h1>
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
-            <span class="stat-value">0</span>
+            <span class="stat-value">1</span>
             <span class="stat-label">Total Picks</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">0-0</span>
+            <span class="stat-value">1-0</span>
             <span class="stat-label">Record</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">0.0%</span>
+            <span class="stat-value">100.0%</span>
             <span class="stat-label">Win Rate</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value profit">$0</span>
+            <span class="stat-value profit">$223</span>
             <span class="stat-label">Total P&L</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">0%</span>
+            <span class="stat-value">63.7%</span>
             <span class="stat-label">ROI</span>
         </div>
     </div>
@@ -79,6 +79,16 @@
                 </tr>
             </thead>
             <tbody>
+                
+                <tr>
+                    <td>2026-03-17</td>
+                    <td>1</td>
+                    <td>1-0</td>
+                    <td class="profit">
+                        $223
+                    </td>
+                    <td>$10223</td>
+                </tr>
                 
                 <tr>
                     <td>2026-03-16</td>
@@ -178,7 +188,7 @@
 
 <script>
 const ctx = document.getElementById('pnlChart').getContext('2d');
-const data = [{"bankroll": 1000.0, "cumulative": 0, "date": "2026-03-12", "day_profit": 0}, {"bankroll": 10000.0, "cumulative": 0, "date": "2026-03-16", "day_profit": 0}];
+const data = [{"bankroll": 1000.0, "cumulative": 0, "date": "2026-03-12", "day_profit": 0}, {"bankroll": 10000.0, "cumulative": 0, "date": "2026-03-16", "day_profit": 0}, {"bankroll": 10222.83, "cumulative": 222.83, "date": "2026-03-17", "day_profit": 222.83}];
 const isPositive = data[data.length-1].cumulative >= 0;
 
 new Chart(ctx, {
