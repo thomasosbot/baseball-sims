@@ -41,5 +41,16 @@
         "actual_score": "LAA 6 - CHC 8"
       }
     ]
+  },
+  {
+    "date": "2026-03-18",
+    "games_played": 11,
+    "picks_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 0,
+    "bankroll": 10222.83,
+    "picks": []
   }
 ]
