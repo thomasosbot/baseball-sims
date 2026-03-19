@@ -287,7 +287,7 @@ On regular outs (non-sac-fly, non-DP), runners can advance on groundball outs to
 - Checked at the end of `_handle_out()` after sac fly and DP checks
 - Runner on 2B → 3B: 18% probability (when 3B is empty)
 - Runner on 1B → 2B: 11% probability (when 2B is empty)
-- Both can trigger on the same out
+- Only one can trigger per out (elif, not if — fixed in v1.3 to prevent double-advancement)
 
 **Constants** (`constants.py`): `PRODUCTIVE_OUT_2B_TO_3B=0.18`, `PRODUCTIVE_OUT_1B_TO_2B=0.11`
 
@@ -353,7 +353,7 @@ The best available odds get a ring highlight (`.best-odds` class). This helps us
 
 - **Source**: The Odds API historical endpoint, FanDuel as single book (consensus fallback)
 - **Closing line construction**: FanDuel odds for both home and away (coherent pair from one book). Filters: |American odds| ≤ 600, vig 0-12%, minimum 3 books available per game. Falls back to median-consensus when FanDuel is missing.
-- **Edge detection**: `adjusted_prob = market + (alpha * confidence) * (model - market)`. ML: α=0.9, edge 7-15%, min confidence 0.5 (grid-search optimal from v0.9+BHQ).
+- **Edge detection**: `adjusted_prob = market + (alpha * confidence) * (model - market)`. ML: α=0.9, edge 6-15%, min confidence 0.5 (grid-search optimal from v0.9+BHQ, threshold lowered from 7% to 6% in v1.3).
 - **Sizing**: Quarter-Kelly with 5% hard cap
 - **Max edge cap**: Edges above 15% filtered out (market is right when disagreement is that large)
 
@@ -364,11 +364,9 @@ The best available odds get a ring highlight (`.best-odds` class). This helps us
 - **Dog +1.5 only**: Favorite -1.5 bets removed after backtesting showed -25.9% ROI (75 bets). Dog +1.5 is +2.8% ROI all (228 bets) and +5.9% ROI for independent bets without ML alignment (167 bets). The constraint `home_spread > 0` / `away_spread > 0` filters to underdog side only.
 - **Edge & sizing**: Spread: α=0.9, edge 7-15%, min confidence 0.5 (same as ML). Quarter-Kelly with 5% hard cap.
 
-### Totals (over/under)
+### Totals (over/under) — DISABLED for 2026
 
-- **Source**: Same API, totals market. Consensus line = mode across books, FanDuel odds on that line (median fallback).
-- **Model probability**: From MC simulation distribution — `P(over) = count(total > line) / count(total ≠ line)` (pushes excluded)
-- **Edge & sizing**: Totals: α=0.3, edge 7-15%, no min confidence (grid-search optimal from v0.9+BHQ). Quarter-Kelly with 5% hard cap.
+Totals betting was disabled in the daily pipeline after backtesting showed the totals market is too efficient for the model to exploit profitably. The evaluation code remains in the backtest runner for analysis but is excluded from combined P&L. The daily pipeline no longer fetches totals odds or evaluates totals edges. `generate.py` also filters out any totals picks as a safety net.
 
 ## Probability Spread (resolved in v0.7)
 
@@ -416,7 +414,7 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Marcel preseason projections** | `src/features/marcel.py`, `cumulative.py`, `runner.py` | Done — 3-year weighted, regression, age adjustment, platoon splits |
 | **BHQ skills-based blend** | `src/data/bhq.py`, `src/features/bhq_rates.py`, `marcel.py` | Done — 50/50 blend, ~530 batters + ~650 pitchers, calibrated correlations |
 | **Elo team-strength layer** | `src/features/elo.py`, `runner.py` | Done — K=20, HFA=24, regression=1/4, 50% blend with sim |
-| **Separate ML/Totals params** | `config.py`, `runner.py`, `edge.py` | Done — ML α=0.9 edge 7-15% conf≥0.5, Totals α=0.3 edge 7-15% (grid-search optimal) |
+| **Separate ML/Spread params** | `config.py`, `runner.py`, `edge.py` | Done — ML α=0.9 edge 6-15% conf≥0.5 (lowered from 7% in v1.3), Spread α=0.9 edge 7-15%. Totals params retained but evaluation disabled. |
 | **Max edge cap** | `config.py`, `runner.py`, `edge.py` | Done — 15% cap filters out market-is-right overconfidence |
 | **Home field advantage** | `runner.py` | Done — +2.5% additive boost to home win prob |
 | **9.4x simulation speedup** | `game_sim.py` | Done — pre-computed PA arrays (38s→4s per game) |
@@ -462,6 +460,10 @@ The model's predicted win probabilities were historically narrower than the mark
 | **Fresh $10K bankroll** | `site/generate.py` | Done — 2025 backtest starts at $10K (not carried from 2024) |
 | **Expandable game detail view** | `run_daily.py`, `index.html`, `style.css` | Done — clickable game rows show lineups, margin distribution chart, weather, park factors, Elo ratings |
 | **Enriched daily JSON** | `run_daily.py` | Done — lineup names, sim detail histograms, weather, park factors, Elo ratings added to game output |
+| **Totals fully disabled** | `run_daily.py`, `site/generate.py` | Done — totals odds fetch + evaluation commented out, generate.py filters totals as safety net |
+| **ML_MIN_EDGE 7%→6%** | `config.py` | Done — 366 bets vs 241, +8.8% ROI, 6-7% band has 56.4% win rate |
+| **Productive outs fix** | `game_sim.py` | Done — `if`→`elif` prevents double-advancement (2B→3B then 1B→2B on same out) |
+| **Results deduplication** | `update_results.py` | Done — replaces existing entry for same date instead of appending duplicates |
 
 ### v1.3+ — Additional features
 
