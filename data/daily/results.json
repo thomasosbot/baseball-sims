@@ -52,5 +52,26 @@
     "day_profit": 0,
     "bankroll": 10222.83,
     "picks": []
+  },
+  {
+    "date": "2026-03-19",
+    "games_played": 14,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -282.81,
+    "bankroll": 9940.02,
+    "picks": [
+      {
+        "pick": "COL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 282.81,
+        "profit": -282.81,
+        "odds": "+143",
+        "actual_score": "SFG 14 - COL 11"
+      }
+    ]
   }
 ]
