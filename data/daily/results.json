@@ -84,5 +84,16 @@
     "day_profit": 0,
     "bankroll": 9940.02,
     "picks": []
+  },
+  {
+    "date": "2026-03-21",
+    "games_played": 15,
+    "picks_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 0,
+    "bankroll": 9940.02,
+    "picks": []
   }
 ]
