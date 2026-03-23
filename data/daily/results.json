@@ -95,5 +95,26 @@
     "day_profit": 0,
     "bankroll": 9940.02,
     "picks": []
+  },
+  {
+    "date": "2026-03-22",
+    "games_played": 13,
+    "picks_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 237.17,
+    "bankroll": 10177.19,
+    "picks": [
+      {
+        "pick": "SEA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 272.75,
+        "profit": 237.17,
+        "odds": "-115",
+        "actual_score": "SEA 4 - CWS 2"
+      }
+    ]
   }
 ]
