@@ -31,139 +31,30 @@
     <h1>Season History</h1>
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
-            <span class="stat-value">3</span>
+            <span class="stat-value">0</span>
             <span class="stat-label">Total Picks</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">2-1</span>
+            <span class="stat-value">0-0</span>
             <span class="stat-label">Record</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">66.7%</span>
+            <span class="stat-value">0%</span>
             <span class="stat-label">Win Rate</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value profit">$177</span>
+            <span class="stat-value profit">$0</span>
             <span class="stat-label">Total P&L</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">19.6%</span>
+            <span class="stat-value">0%</span>
             <span class="stat-label">ROI</span>
         </div>
     </div>
 </section>
 
 
-<section class="section fade-in">
-    <h2 class="section-title">Cumulative P&L</h2>
-    <div class="chart-card glass">
-        <div class="chart-container">
-            <canvas id="pnlChart"></canvas>
-        </div>
-    </div>
-</section>
 
-
-
-<section class="section fade-in">
-    <h2 class="section-title">Daily Results</h2>
-    <div class="table-card glass">
-        <table class="games-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Picks</th>
-                    <th>W-L</th>
-                    <th>Day P&L</th>
-                    <th>Bankroll</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                <tr>
-                    <td>2026-03-22</td>
-                    <td>1</td>
-                    <td>1-0</td>
-                    <td class="profit">
-                        $237
-                    </td>
-                    <td>$10177</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-21</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$9940</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-20</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$9940</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-19</td>
-                    <td>1</td>
-                    <td>0-1</td>
-                    <td class="loss">
-                        $-283
-                    </td>
-                    <td>$9940</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-18</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$10223</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-17</td>
-                    <td>1</td>
-                    <td>1-0</td>
-                    <td class="profit">
-                        $223
-                    </td>
-                    <td>$10223</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-16</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$10000</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-12</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$1000</td>
-                </tr>
-                
-            </tbody>
-        </table>
-    </div>
-</section>
 
 
     </main>
@@ -235,59 +126,6 @@
     </script>
 
     
-
-<script>
-const ctx = document.getElementById('pnlChart').getContext('2d');
-const data = [{"bankroll": 1000.0, "cumulative": 0, "date": "2026-03-12", "day_profit": 0}, {"bankroll": 10000.0, "cumulative": 0, "date": "2026-03-16", "day_profit": 0}, {"bankroll": 10222.83, "cumulative": 222.83, "date": "2026-03-17", "day_profit": 222.83}, {"bankroll": 10222.83, "cumulative": 222.83, "date": "2026-03-18", "day_profit": 0}, {"bankroll": 9940.02, "cumulative": -59.98, "date": "2026-03-19", "day_profit": -282.81}, {"bankroll": 9940.02, "cumulative": -59.98, "date": "2026-03-20", "day_profit": 0}, {"bankroll": 9940.02, "cumulative": -59.98, "date": "2026-03-21", "day_profit": 0}, {"bankroll": 10177.19, "cumulative": 177.19, "date": "2026-03-22", "day_profit": 237.17}];
-const isPositive = data[data.length-1].cumulative >= 0;
-
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: data.map(d => d.date),
-        datasets: [{
-            label: 'Cumulative P&L ($)',
-            data: data.map(d => d.cumulative),
-            borderColor: isPositive ? '#31A24C' : '#FA383E',
-            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.06)' : 'rgba(250, 56, 62, 0.06)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-            pointBackgroundColor: isPositive ? '#31A24C' : '#FA383E',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 1.5,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: 'rgba(28, 30, 33, 0.9)',
-                titleFont: { family: 'Inter' },
-                bodyFont: { family: 'Inter' },
-                padding: 10,
-                cornerRadius: 8,
-            },
-        },
-        scales: {
-            x: {
-                grid: { color: 'rgba(0,0,0,0.04)' },
-                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
-            },
-            y: {
-                grid: { color: 'rgba(0,0,0,0.04)' },
-                ticks: {
-                    color: '#8A8D91',
-                    font: { family: 'Inter', size: 11 },
-                    callback: v => '$' + v,
-                },
-            },
-        },
-    },
-});
-</script>
 
 
 </body>
