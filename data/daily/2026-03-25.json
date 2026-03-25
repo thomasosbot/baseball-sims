@@ -1,0 +1,20 @@
+{
+  "date": "2026-03-25",
+  "generated_at": "2026-03-25T19:36:39.069069",
+  "run_mode": "early",
+  "games": [
+    {
+      "away": "NYY",
+      "home": "SFG",
+      "away_pitcher": "Max Fried",
+      "home_pitcher": "Logan Webb",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    }
+  ],
+  "picks": [],
+  "bankroll": {
+    "current": 10177.19,
+    "today_wagered": 0.0
+  }
+}
