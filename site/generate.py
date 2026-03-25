@@ -17,6 +17,8 @@ import numpy as np
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 
+OPENING_DAY = "2026-03-26"
+
 SITE_DIR = Path(__file__).parent
 TEMPLATE_DIR = SITE_DIR / "templates"
 OUTPUT_DIR = SITE_DIR / "public"
@@ -67,6 +69,12 @@ def generate_site():
         except (ValueError, TypeError):
             display_date = latest["date"]
 
+    # Check if it's opening day
+    is_opening_day = latest and latest.get("date") == OPENING_DAY
+    opening_day_schedule = []
+    if is_opening_day:
+        opening_day_schedule = _build_opening_day_schedule(latest)
+
     # --- Render pages ---
     # Index (today's picks)
     template = env.get_template("index.html")
@@ -74,6 +82,8 @@ def generate_site():
         today=latest,
         display_date=display_date,
         stats=stats,
+        is_opening_day=is_opening_day,
+        opening_day_schedule=opening_day_schedule,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M ET"),
     )
     (OUTPUT_DIR / "index.html").write_text(html)
@@ -546,6 +556,95 @@ def _compute_season_stats(results):
         "current_streak": streak,
         "daily_pnl": daily_pnl,
     }
+
+
+def _build_opening_day_schedule(latest):
+    """Build opening day schedule with odds from the Odds API."""
+    try:
+        from src.betting.odds import fetch_mlb_odds, american_to_prob, remove_vig
+    except ImportError:
+        return []
+
+    # Team abbreviation mapping
+    TEAM_ABBREV = {
+        "Arizona Diamondbacks": "ARI", "Atlanta Braves": "ATL", "Baltimore Orioles": "BAL",
+        "Boston Red Sox": "BOS", "Chicago Cubs": "CHC", "Chicago White Sox": "CWS",
+        "Cincinnati Reds": "CIN", "Cleveland Guardians": "CLE", "Colorado Rockies": "COL",
+        "Detroit Tigers": "DET", "Houston Astros": "HOU", "Kansas City Royals": "KCR",
+        "Los Angeles Angels": "LAA", "Los Angeles Dodgers": "LAD", "Miami Marlins": "MIA",
+        "Milwaukee Brewers": "MIL", "Minnesota Twins": "MIN", "New York Mets": "NYM",
+        "New York Yankees": "NYY", "Oakland Athletics": "OAK", "Philadelphia Phillies": "PHI",
+        "Pittsburgh Pirates": "PIT", "San Diego Padres": "SDP", "San Francisco Giants": "SFG",
+        "Seattle Mariners": "SEA", "St. Louis Cardinals": "STL", "Tampa Bay Rays": "TBR",
+        "Texas Rangers": "TEX", "Toronto Blue Jays": "TOR", "Washington Nationals": "WSN",
+    }
+
+    schedule = []
+    games = latest.get("games", [])
+
+    # Fetch odds
+    try:
+        odds_data = fetch_mlb_odds(markets="h2h")
+    except Exception:
+        odds_data = []
+
+    # Build odds lookup by (home_abbrev, away_abbrev)
+    odds_lookup = {}
+    for event in odds_data:
+        home_full = event.get("home_team", "")
+        away_full = event.get("away_team", "")
+        home_abbr = TEAM_ABBREV.get(home_full, home_full)
+        away_abbr = TEAM_ABBREV.get(away_full, away_full)
+
+        best_home = None
+        best_away = None
+        for bm in event.get("bookmakers", []):
+            for market in bm.get("markets", []):
+                if market["key"] == "h2h":
+                    for outcome in market["outcomes"]:
+                        if outcome["name"] == home_full:
+                            val = outcome["price"]
+                            if best_home is None or val > best_home:
+                                best_home = val
+                        elif outcome["name"] == away_full:
+                            val = outcome["price"]
+                            if best_away is None or val > best_away:
+                                best_away = val
+
+        if best_home and best_away:
+            hp = american_to_prob(best_home)
+            ap = american_to_prob(best_away)
+            hp_nv, ap_nv = remove_vig(hp, ap)
+            odds_lookup[(home_abbr, away_abbr)] = {
+                "home_odds": best_home,
+                "away_odds": best_away,
+                "home_implied": round(hp_nv * 100, 1),
+                "away_implied": round(ap_nv * 100, 1),
+            }
+
+    # Match games to odds
+    for game in games:
+        home = game.get("home", "")
+        away = game.get("away", "")
+        entry = {
+            "away": away,
+            "home": home,
+            "away_pitcher": game.get("away_pitcher", "TBD"),
+            "home_pitcher": game.get("home_pitcher", "TBD"),
+        }
+        odds_info = odds_lookup.get((home, away))
+        if odds_info:
+            entry.update(odds_info)
+            # Determine favorite
+            if odds_info["home_implied"] > odds_info["away_implied"]:
+                entry["favorite"] = home
+                entry["fav_pct"] = odds_info["home_implied"]
+            else:
+                entry["favorite"] = away
+                entry["fav_pct"] = odds_info["away_implied"]
+        schedule.append(entry)
+
+    return schedule
 
 
 def _copy_static():

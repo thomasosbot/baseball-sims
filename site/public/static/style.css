@@ -111,6 +111,154 @@ body {
     box-shadow: var(--card-shadow-hover);
 }
 
+/* ── Opening Day Banner ── */
+.opening-day-banner {
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2744 40%, #0d2137 100%);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    color: #fff;
+    margin-bottom: 0;
+}
+.od-glow {
+    position: absolute;
+    top: -60%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(24, 119, 242, 0.25) 0%, transparent 65%);
+    pointer-events: none;
+}
+.od-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.od-badge {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    background: rgba(49, 162, 76, 0.2);
+    border: 1px solid rgba(49, 162, 76, 0.4);
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #5edb7f;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+.od-headline {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 30%, #7eb8ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.15;
+}
+.od-subtext {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.od-schedule {
+    margin: 0 auto;
+    max-width: 860px;
+}
+.od-schedule-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+}
+.od-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.6rem;
+}
+.od-game-card {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 0.75rem 0.85rem;
+    text-align: center;
+    transition: background 0.2s, transform 0.15s;
+}
+.od-game-card:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px);
+}
+.od-matchup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+}
+.od-team {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+}
+.od-at {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.75rem;
+}
+.od-pitchers {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 0.4rem;
+}
+.od-odds-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+}
+.od-odds-team {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+.od-odds-team.od-fav {
+    color: #5edb7f;
+    font-weight: 700;
+}
+.od-odds-num {
+    margin-left: 3px;
+    font-family: 'Inter', monospace;
+    font-weight: 600;
+}
+.od-cta {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .od-headline { font-size: 2rem; }
+    .od-games-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .opening-day-banner { padding: 2rem 1rem 1.5rem; }
+}
+@media (max-width: 480px) {
+    .od-headline { font-size: 1.6rem; }
+    .od-subtext { font-size: 0.9rem; }
+    .od-games-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .od-game-card { padding: 0.6rem 0.5rem; }
+    .od-team { font-size: 0.85rem; }
+}
+
 /* ── Hero ── */
 .hero {
     padding: 2.5rem 0 1.5rem;

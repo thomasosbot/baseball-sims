@@ -4,11 +4,57 @@
 {% block title %}Today's Picks — Ozzy Analytics{% endblock %}
 
 {% block content %}
+
+{% if is_opening_day %}
+<section class="opening-day-banner fade-in">
+    <div class="od-glow"></div>
+    <div class="od-content">
+        <div class="od-badge">OPENING DAY 2026</div>
+        <h1 class="od-headline">The Season Is Here.</h1>
+        <p class="od-subtext">162 games. Thousands of simulations. Real edges. Real money.<br>It's time to get to work.</p>
+
+        {% if opening_day_schedule %}
+        <div class="od-schedule">
+            <h3 class="od-schedule-title">Today's Slate &mdash; {{ opening_day_schedule|length }} Games</h3>
+            <div class="od-games-grid">
+                {% for game in opening_day_schedule %}
+                <div class="od-game-card glass">
+                    <div class="od-matchup">
+                        <span class="od-team">{{ game.away }}</span>
+                        <span class="od-at">@</span>
+                        <span class="od-team">{{ game.home }}</span>
+                    </div>
+                    <div class="od-pitchers">
+                        {{ game.away_pitcher }} vs {{ game.home_pitcher }}
+                    </div>
+                    {% if game.home_odds is defined and game.home_odds %}
+                    <div class="od-odds-row">
+                        <span class="od-odds-team {% if game.favorite == game.away %}od-fav{% endif %}">
+                            {{ game.away }}
+                            <span class="od-odds-num">{{ "%+d"|format(game.away_odds) }}</span>
+                        </span>
+                        <span class="od-odds-team {% if game.favorite == game.home %}od-fav{% endif %}">
+                            {{ game.home }}
+                            <span class="od-odds-num">{{ "%+d"|format(game.home_odds) }}</span>
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <p class="od-cta">Model picks drop once lineups are confirmed &mdash; check back at 6 PM ET</p>
+    </div>
+</section>
+{% endif %}
+
 <section class="hero">
     {% if today %}
-    <h1 class="hero-date-big">MLB Picks — {{ display_date }}</h1>
+    <h1 class="hero-date-big">{% if is_opening_day %}Opening Day Picks — {{ display_date }}{% else %}MLB Picks — {{ display_date }}{% endif %}</h1>
     <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
-    {% if today.run_mode == 'early' %}
+    {% if today.run_mode == 'early' and not is_opening_day %}
     <div class="preliminary-banner glass">
         Preliminary picks using projected lineups. Final picks at 6 PM ET.
     </div>
