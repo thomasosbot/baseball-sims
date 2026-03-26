@@ -48,9 +48,9 @@
         <div class="od-pipeline">
             <div class="od-pipeline-step"><span class="od-step-time">9 PM ET</span> <span class="od-step-desc">Preview picks using projected lineups</span></div>
             <div class="od-pipeline-arrow">&rarr;</div>
-            <div class="od-pipeline-step"><span class="od-step-time">1 PM ET</span> <span class="od-step-desc">Updated with day-of lineups</span></div>
+            <div class="od-pipeline-step"><span class="od-step-time">All Day</span> <span class="od-step-desc">Auto-updates as lineups are confirmed</span></div>
             <div class="od-pipeline-arrow">&rarr;</div>
-            <div class="od-pipeline-step"><span class="od-step-time">6 PM ET</span> <span class="od-step-desc">Final picks with confirmed lineups</span></div>
+            <div class="od-pipeline-step"><span class="od-step-time">6 PM ET</span> <span class="od-step-desc">Final picks guaranteed</span></div>
         </div>
     </div>
 </section>
@@ -63,12 +63,12 @@
     {% if today.run_mode == 'preview' %}
     <div class="preview-banner glass">
         <span class="preview-badge">PREVIEW</span>
-        Night-before projections using expected lineups. Updates at 1 PM ET with day-of lineups, then final picks at 6 PM ET once confirmed.
+        Night-before projections using expected lineups. Picks auto-update throughout the day as lineups are confirmed.
     </div>
     {% elif today.run_mode == 'early' and not is_opening_day %}
     <div class="preliminary-banner glass">
-        <span class="preview-badge" style="background: rgba(24, 119, 242, 0.12); color: var(--accent);">EARLY</span>
-        Day-of projections using expected lineups. Final picks at 6 PM ET once lineups are confirmed.
+        <span class="preview-badge" style="background: rgba(24, 119, 242, 0.12); color: var(--accent);">UPDATING</span>
+        Picks are updating as lineups are confirmed. The model re-runs automatically when new lineups are posted.
     </div>
     {% endif %}
     <div class="stats-bar fade-in">

@@ -121,7 +121,7 @@
 }
 .scoreboard .inning-future { color: var(--text-muted); opacity: 0.4; }
 
-/* ── Main Panel (diamond + probabilities) ── */
+/* ── Main Panel (diamond + right column) ── */
 .sim-main {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -129,7 +129,10 @@
     margin-bottom: 1.25rem;
 }
 .diamond-card { padding: 1.25rem; display: flex; flex-direction: column; align-items: center; }
+.sim-right-col { display: flex; flex-direction: column; gap: 1rem; }
 .prob-card { padding: 1.25rem; }
+.sim-right-col .play-log-card { flex: 1; }
+.sim-right-col .play-log { max-height: 320px; }
 
 /* ── Diamond SVG ── */
 .diamond-svg { width: 100%; max-width: 400px; height: auto; }
@@ -269,6 +272,18 @@
 }
 .play-batter { font-weight: 600; color: var(--text); min-width: 100px; }
 .play-desc { flex: 1; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4; }
+.play-entry.inning-change {
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 0;
+    margin-bottom: 0.2rem;
+}
+.inning-change-text {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+}
 .play-outcome { color: var(--text-secondary); }
 .play-outcome.outcome-HR  { color: #22c55e; font-weight: 700; }
 .play-outcome.outcome-3B  { color: #16a34a; font-weight: 600; }
@@ -397,6 +412,14 @@
 .bx-table td.bx-name-cell .bx-pos { font-size: 0.65rem; color: var(--text-muted); margin-left: 4px; }
 .bx-table tbody tr:last-child td { border-bottom: none; }
 .bx-table tbody tr:hover { background: rgba(24, 119, 242, 0.03); }
+.bx-totals-row td { border-top: 2px solid var(--border); font-weight: 600; }
+.bx-summary {
+    padding: 0.5rem 1rem 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+}
 
 /* ── Responsive ── */
 @media (max-width: 720px) {
@@ -555,15 +578,25 @@
             <div class="outs-label">Outs</div>
         </div>
 
-        <div class="glass prob-card">
-            <div class="matchup-text" id="matchup-text">Select teams to begin</div>
-            <div class="prob-bars" id="prob-bars">
-                <!-- Filled by JS -->
+        <div class="sim-right-col">
+            <div class="glass prob-card">
+                <div class="matchup-text" id="matchup-text">Select teams to begin</div>
+                <div class="prob-bars" id="prob-bars">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <!-- Play-by-Play (next to diamond) -->
+            <div class="glass play-log-card">
+                <h3>Play-by-Play</h3>
+                <div class="play-log" id="play-log">
+                    <div class="play-entry" style="color:var(--text-muted); font-style:italic;">Select two teams and press Start Game.</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Box Score -->
+    <!-- Box Score (at bottom) -->
     <div class="glass boxscore-card" id="boxscore-card" style="display:none;">
         <div class="boxscore-tabs">
             <button class="bx-tab active" data-side="away" id="bx-tab-away">Away</button>
@@ -574,14 +607,6 @@
         </div>
         <div id="bx-home" class="bx-panel" style="display:none;">
             <table class="bx-table"><thead><tr><th class="bx-name">Batter</th><th>AB</th><th>R</th><th>H</th><th>RBI</th><th>BB</th><th>K</th><th>AVG</th></tr></thead><tbody id="bx-home-body"></tbody></table>
-        </div>
-    </div>
-
-    <!-- Play-by-Play -->
-    <div class="glass play-log-card">
-        <h3>Play-by-Play</h3>
-        <div class="play-log" id="play-log">
-            <div class="play-entry" style="color:var(--text-muted); font-style:italic;">Select two teams and press Start Game.</div>
         </div>
     </div>
 </div>
@@ -858,6 +883,15 @@
         baseRunners = newRunners;
     }
 
+    function _findScoringRunner(ev) {
+        // Try to find who scored based on pre-play base runners
+        const pre = ev.prePlay.bases;
+        if (pre[2] && baseRunners[2]) return baseRunners[2]; // 3B runner most likely to score
+        if (pre[1] && baseRunners[1]) return baseRunners[1]; // 2B runner
+        if (pre[0] && baseRunners[0]) return baseRunners[0]; // 1B runner
+        return null;
+    }
+
     function buildRichDescription(ev) {
         if (!ev || !ev.batter) return '';
         const name = ev.batter.name || '?';
@@ -899,15 +933,47 @@
             } else if (ev.postPlay.outs - ev.prePlay.outs >= 2) {
                 parts.push(`${name} grounds into a double play.`);
             } else if (runs > 0) {
-                parts.push(`${name} hits a sac fly, run scores.`);
+                parts.push(`${name} hits a sacrifice fly, run scores.`);
             } else {
-                parts.push(`${name} grounds out.`);
+                // Vary out types randomly for realism
+                const outTypes = [
+                    `${name} grounds out to short.`,
+                    `${name} grounds out to second.`,
+                    `${name} flies out to center.`,
+                    `${name} flies out to left.`,
+                    `${name} flies out to right.`,
+                    `${name} lines out to third.`,
+                    `${name} lines out to second.`,
+                    `${name} pops out to the catcher.`,
+                    `${name} grounds out to first.`,
+                    `${name} flies out to deep left.`,
+                ];
+                parts.push(outTypes[Math.floor(Math.random() * outTypes.length)]);
             }
+        }
+
+        // Runner advancement context
+        if (runs === 0 && o !== 'K' && o !== 'HR' && HIT_SET.has(o)) {
+            // Describe runner movement on hits with no runs
+            const pre = ev.prePlay.bases;
+            const post = ev.postPlay.bases;
+            const advances = [];
+            if (pre[0] && post[2] && !pre[2]) advances.push('runner advances to third');
+            else if (pre[0] && post[1] && !pre[1]) advances.push('runner advances to second');
+            if (pre[1] && post[2] && !pre[2] && !(pre[0] && post[2])) advances.push('runner moves to third');
+            if (advances.length) parts.push(advances.join(', ').replace(/^./, c => c.toUpperCase()) + '.');
         }
 
         // Scoring context
         if (runs > 0 && o !== 'HR') {
-            parts.push(`${runs} run${runs > 1 ? 's' : ''} score${runs === 1 ? 's' : ''}.`);
+            if (runs === 1) {
+                // Try to name the scoring runner
+                const scorerName = _findScoringRunner(ev);
+                if (scorerName) parts.push(`${scorerName} scores.`);
+                else parts.push('1 run scores.');
+            } else {
+                parts.push(`${runs} runs score.`);
+            }
         }
         if (runs > 0) {
             parts.push(`Score: ${awayAbbr} ${score[0]}, ${homeAbbr} ${score[1]}.`);
@@ -956,14 +1022,19 @@
         renderBoxScore();
     }
 
+    // Track which batter slot is on each base: [1B_slot, 2B_slot, 3B_slot]
+    let baseSlots = [null, null, null];
+
     function updateBoxFromEvent(ev) {
-        if (!ev || !ev.outcome || !ev.batter) return;
+        if (!ev || !ev.batter) return;
         const isTop = ev.halfInning === 'top';
         const box = isTop ? boxAway : boxHome;
         const slot = ev.batter.slot;
         if (slot == null || !box[slot]) return;
         const b = box[slot];
         const o = ev.outcome;
+
+        if (!o) return; // CS ending inning, no outcome
 
         if (o === 'BB' || o === 'HBP') {
             b.bb++;
@@ -972,23 +1043,102 @@
             if (HIT_SET.has(o)) b.h++;
             if (o === 'K') b.k++;
         }
-        // RBI = runs scored on this PA outcome (excluding pre-PA events like WP/SB)
-        const preScore = ev.prePlay.score[0] + ev.prePlay.score[1];
-        const postScore = ev.postPlay.score[0] + ev.postPlay.score[1];
-        b.rbi += (postScore - preScore);
 
-        // Runs scored: check if any previously-on-base runners scored
-        // (We track runs simply as score changes for now)
-    }
+        // Track extra-base hits for the summary line
+        if (o === '2B') b.doubles = (b.doubles || 0) + 1;
+        if (o === '3B') b.triples = (b.triples || 0) + 1;
+        if (o === 'HR') b.hr = (b.hr || 0) + 1;
 
-    function trackRunsScored(ev) {
-        // Award runs to batters who were on base and scored
-        // Simple heuristic: if bases had runners that are now gone and score increased
-        if (!ev || !ev.postPlay) return;
-        const isTop = ev.halfInning === 'top';
-        const box = isTop ? boxAway : boxHome;
-        // Runs scored tracked globally, not per-batter for 'R' column
-        // We'll update 'R' after each inning ends based on score
+        // Figure out who scored — compare pre/post bases and score
+        const sideIdx = isTop ? 0 : 1;
+        const runsScored = ev.postPlay.score[sideIdx] - ev.prePlay.score[sideIdx];
+
+        // RBI (batter gets credit for runs scored on their PA, except on errors/DP)
+        if (o !== 'OUT' || (o === 'OUT' && ev.postPlay.outs === ev.prePlay.outs)) {
+            // Not a normal out — error, sac fly, etc
+            b.rbi += runsScored;
+        } else if (o === 'OUT' && runsScored > 0) {
+            // Sac fly or productive out scoring a run
+            b.rbi += runsScored;
+        } else {
+            b.rbi += runsScored;
+        }
+
+        // Award runs scored to runners who were on base
+        if (runsScored > 0) {
+            const pre = ev.prePlay.bases;
+            const post = ev.postPlay.bases;
+            // Check from 3B backward which runners scored
+            let remaining = runsScored;
+            for (let i = 2; i >= 0; i--) {
+                if (remaining <= 0) break;
+                if (pre[i] && !post[i] && baseSlots[i] != null) {
+                    // This runner likely scored
+                    const scoredSlot = baseSlots[i];
+                    if (box[scoredSlot]) { box[scoredSlot].r++; remaining--; }
+                }
+            }
+            // If HR, batter also scores
+            if (o === 'HR') {
+                b.r++;
+            }
+        }
+
+        // Update base slot tracking (who's on which base now)
+        const newSlots = [null, null, null];
+        if (o === 'HR') {
+            // Bases cleared
+        } else if (o === 'BB' || o === 'HBP') {
+            // Walk logic — push forced runners
+            if (ev.prePlay.bases[0]) {
+                if (ev.prePlay.bases[1]) {
+                    newSlots[2] = baseSlots[1];
+                } else {
+                    newSlots[1] = baseSlots[0];
+                }
+                if (!ev.prePlay.bases[1]) { /* already handled */ }
+                else { newSlots[1] = baseSlots[0]; }
+            }
+            newSlots[0] = slot;
+            // Preserve non-forced runners
+            if (ev.postPlay.bases[2] && newSlots[2] == null) newSlots[2] = baseSlots[2];
+        } else if (HIT_SET.has(o)) {
+            // Batter goes to hit base
+            if (o === '1B') newSlots[0] = slot;
+            if (o === '2B') newSlots[1] = slot;
+            if (o === '3B') newSlots[2] = slot;
+            // Advance previous runners
+            for (let i = 2; i >= 0; i--) {
+                if (ev.postPlay.bases[i] && newSlots[i] == null) {
+                    // Find a previous runner to place here
+                    for (let j = i - 1; j >= 0; j--) {
+                        if (ev.prePlay.bases[j] && baseSlots[j] != null) {
+                            newSlots[i] = baseSlots[j];
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            // Outs — keep whoever is still on base
+            for (let i = 0; i < 3; i++) {
+                if (ev.postPlay.bases[i]) {
+                    newSlots[i] = baseSlots[i] != null ? baseSlots[i] : null;
+                    // Check if runner advanced
+                    if (newSlots[i] == null) {
+                        for (let j = i - 1; j >= 0; j--) {
+                            if (ev.prePlay.bases[j] && baseSlots[j] != null) {
+                                newSlots[i] = baseSlots[j];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // Error: batter reaches 1B
+            if (ev.postPlay.outs === ev.prePlay.outs) newSlots[0] = slot;
+        }
+        baseSlots = newSlots;
     }
 
     function renderBoxScore() {
@@ -996,12 +1146,37 @@
             const box = side === 'away' ? boxAway : boxHome;
             const tbody = $('bx-' + side + '-body');
             tbody.innerHTML = '';
+            let totals = { ab:0, r:0, h:0, rbi:0, bb:0, k:0 };
             box.forEach((b, i) => {
                 const avg = b.ab > 0 ? (b.h / b.ab).toFixed(3) : '.000';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td class="bx-name-cell">${b.name} <span class="bx-pos">${i+1}</span></td><td>${b.ab}</td><td>${b.r}</td><td>${b.h}</td><td>${b.rbi}</td><td>${b.bb}</td><td>${b.k}</td><td>${avg}</td>`;
                 tbody.appendChild(tr);
+                totals.ab += b.ab; totals.r += b.r; totals.h += b.h;
+                totals.rbi += b.rbi; totals.bb += b.bb; totals.k += b.k;
             });
+            // Totals row
+            const totalAvg = totals.ab > 0 ? (totals.h / totals.ab).toFixed(3) : '.000';
+            const trTotal = document.createElement('tr');
+            trTotal.className = 'bx-totals-row';
+            trTotal.innerHTML = `<td class="bx-name-cell" style="font-weight:700;">Totals</td><td><strong>${totals.ab}</strong></td><td><strong>${totals.r}</strong></td><td><strong>${totals.h}</strong></td><td><strong>${totals.rbi}</strong></td><td><strong>${totals.bb}</strong></td><td><strong>${totals.k}</strong></td><td><strong>${totalAvg}</strong></td>`;
+            tbody.appendChild(trTotal);
+
+            // Extra base hit summary
+            const extras = [];
+            box.forEach(b => {
+                if (b.doubles) extras.push(`<strong>2B:</strong> ${b.name} (${b.doubles})`);
+                if (b.triples) extras.push(`<strong>3B:</strong> ${b.name} (${b.triples})`);
+                if (b.hr) extras.push(`<strong>HR:</strong> ${b.name} (${b.hr})`);
+            });
+            let summaryEl = $('bx-' + side + '-summary');
+            if (!summaryEl) {
+                summaryEl = document.createElement('div');
+                summaryEl.id = 'bx-' + side + '-summary';
+                summaryEl.className = 'bx-summary';
+                $('bx-' + side).appendChild(summaryEl);
+            }
+            summaryEl.innerHTML = extras.length ? extras.join(' &middot; ') : '';
         });
     }
 
@@ -1015,13 +1190,13 @@
         $('bx-home').style.display = ''; $('bx-away').style.display = 'none';
     });
 
-    // Inning tracking
+    // Inning tracking — track runs per half-inning separately
     function checkInningChange(ev) {
         if (!ev) return;
         const inn = ev.inning;
         const half = ev.halfInning;
         if (inn !== lastInning || half !== lastHalf) {
-            // Previous half-inning ended — record runs
+            // Previous half-inning ended — record runs + add separator to play log
             if (lastHalf === 'top') {
                 awayInningRuns.push(currentInningRuns);
             } else {
@@ -1030,11 +1205,28 @@
             currentInningRuns = 0;
             lastInning = inn;
             lastHalf = half;
+
+            // Add inning change entry to play log
+            addInningChangeEntry(inn, half);
+            // Reset base runners and base slots for new half-inning
+            baseRunners = [null, null, null];
+            baseSlots = [null, null, null];
         }
-        // Track runs in current half-inning
-        const preTotal = ev.prePlay.score[0] + ev.prePlay.score[1];
-        const postTotal = ev.postPlay.score[0] + ev.postPlay.score[1];
-        currentInningRuns += (postTotal - preTotal);
+        // Track runs scored by the BATTING team only
+        const sideIdx = half === 'top' ? 0 : 1;
+        const runsThisPA = ev.postPlay.score[sideIdx] - ev.prePlay.score[sideIdx];
+        currentInningRuns += runsThisPA;
+    }
+
+    function addInningChangeEntry(inn, half) {
+        if (playLog.querySelector('[style]')) playLog.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'play-entry inning-change';
+        const ordinal = inn === 1 ? '1st' : inn === 2 ? '2nd' : inn === 3 ? '3rd' : inn + 'th';
+        const halfLabel = half === 'top' ? 'Top' : 'Bottom';
+        const battingTeam = half === 'top' ? awayAbbr : homeAbbr;
+        div.innerHTML = `<span class="inning-change-text">\u2014 ${halfLabel} ${ordinal} \u2014 ${battingTeam} batting</span>`;
+        playLog.prepend(div);
     }
 
     // Start game
@@ -1061,6 +1253,7 @@
         lastInning = 1; lastHalf = 'top'; currentInningRuns = 0;
 
         baseRunners = [null, null, null];
+        baseSlots = [null, null, null];
         resetScoreboard();
         updateDiamond(null, 0);
         $('pitcher-name').textContent = getLastName(homeTeam.starter ? homeTeam.starter.name : '');
