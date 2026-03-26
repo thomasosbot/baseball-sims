@@ -125,7 +125,7 @@ def run_daily(
     use_projected = (mode == "early")
     print(f"\nFetching lineups for {today} (mode={mode}, projected={use_projected})...")
     try:
-        games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=use_projected)
+        games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=use_projected, cumulative=cumulative)
     except Exception as e:
         print(f"  Error fetching lineups: {e}")
         return

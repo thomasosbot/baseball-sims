@@ -165,6 +165,167 @@ def fetch_game_lineup(game_id: int) -> dict:
     return result
 
 
+def resolve_pitcher_throws(pitcher_name: str, cumulative=None) -> str:
+    """
+    Resolve a pitcher's throwing hand ('L' or 'R') by name.
+    Resolution chain: cumulative state → statsapi lookup → default 'R'.
+    """
+    if not pitcher_name or pitcher_name == "TBD":
+        return "R"
+
+    # 1. Check cumulative state (reverse lookup: name → id → throws)
+    if cumulative is not None:
+        name_lower = pitcher_name.lower().strip()
+        for pid, pname in cumulative._pitcher_names.items():
+            if pname.lower().strip() == name_lower:
+                throws = cumulative._pitcher_throws.get(pid)
+                if throws:
+                    return throws
+        # Try partial match (last name)
+        last_name = name_lower.split()[-1] if " " in name_lower else name_lower
+        for pid, pname in cumulative._pitcher_names.items():
+            if pname.lower().strip().split()[-1] == last_name:
+                throws = cumulative._pitcher_throws.get(pid)
+                if throws:
+                    return throws
+
+    # 2. MLB API people search (more reliable than statsapi.lookup_player)
+    try:
+        search_name = pitcher_name.replace(" ", "+")
+        resp = _requests.get(
+            f"https://statsapi.mlb.com/api/v1/people/search?names={search_name}",
+            timeout=5,
+        )
+        if resp.ok:
+            people = resp.json().get("people", [])
+            if people:
+                hand = people[0].get("pitchHand", {}).get("code", "R")
+                return hand
+    except Exception:
+        pass
+
+    return "R"
+
+
+def fetch_team_platoon_lineup(
+    team_id: int,
+    before_date: str,
+    opposing_pitcher_throws: str,
+    cumulative=None,
+    include_spring: bool = False,
+) -> list:
+    """
+    Fetch a platoon-aware projected lineup for a team based on the opposing
+    pitcher's handedness.  Looks at the team's recent games, filters to those
+    where the opposing starter had the same hand, and builds a consensus
+    batting order from those games.
+
+    Falls back to most-recent-game lineup if insufficient platoon data.
+    """
+    end = datetime.strptime(before_date, "%Y-%m-%d") - timedelta(days=1)
+    start = end - timedelta(days=30)
+    start_str = start.strftime("%m/%d/%Y")
+    end_str = end.strftime("%m/%d/%Y")
+
+    try:
+        recent = statsapi.schedule(team=team_id, start_date=start_str, end_date=end_str)
+    except Exception:
+        return []
+
+    allowed = {"Final", "Game Over"}
+    candidates = [g for g in recent if g.get("status") in allowed]
+    if not include_spring:
+        candidates = [g for g in candidates if g.get("game_type") == "R"]
+    if not candidates:
+        # Fall back: try including spring training
+        candidates = [g for g in recent if g.get("status") in allowed]
+
+    if not candidates:
+        return []
+
+    # Partition games by opposing pitcher handedness
+    matching_games = []
+    fallback_latest = candidates[-1]  # most recent game regardless
+
+    for g in reversed(candidates):  # most recent first
+        if len(matching_games) >= 5:
+            break
+        # Determine opposing pitcher name
+        if g["home_id"] == team_id:
+            opp_pitcher = g.get("away_probable_pitcher", "")
+        else:
+            opp_pitcher = g.get("home_probable_pitcher", "")
+
+        throws = resolve_pitcher_throws(opp_pitcher, cumulative)
+        if throws == opposing_pitcher_throws:
+            matching_games.append(g)
+
+    # If not enough matching games, fall back to last game's lineup
+    if len(matching_games) < 1:
+        try:
+            lineups = fetch_game_lineup(fallback_latest["game_id"])
+        except Exception:
+            return []
+        side = "home" if fallback_latest["home_id"] == team_id else "away"
+        return lineups.get(side, [])
+
+    # If only 1-2 matching games, use the most recent one
+    if len(matching_games) <= 2:
+        g = matching_games[0]
+        try:
+            lineups = fetch_game_lineup(g["game_id"])
+        except Exception:
+            return []
+        side = "home" if g["home_id"] == team_id else "away"
+        return lineups.get(side, [])
+
+    # 3+ matching games: build consensus lineup
+    # Collect lineups from matching games
+    all_lineups = []
+    for g in matching_games:
+        try:
+            lineups = fetch_game_lineup(g["game_id"])
+            side = "home" if g["home_id"] == team_id else "away"
+            lineup = lineups.get(side, [])
+            if len(lineup) >= 9:
+                all_lineups.append(lineup[:9])
+            time.sleep(0.2)
+        except Exception:
+            continue
+
+    if not all_lineups:
+        return []
+
+    # For each slot (0-8), find the most common player
+    from collections import Counter
+    consensus = []
+    used_players = set()
+
+    for slot in range(9):
+        counts = Counter(lu[slot] for lu in all_lineups if slot < len(lu))
+        # Pick most common player not already used
+        for player_id, _ in counts.most_common():
+            if player_id not in used_players:
+                consensus.append(player_id)
+                used_players.add(player_id)
+                break
+
+    # If we have gaps (duplicates displaced someone), fill from most-used players
+    if len(consensus) < 9:
+        all_players = Counter()
+        for lu in all_lineups:
+            for pid in lu:
+                all_players[pid] += 1
+        for pid, _ in all_players.most_common():
+            if pid not in used_players:
+                consensus.append(pid)
+                used_players.add(pid)
+                if len(consensus) >= 9:
+                    break
+
+    return consensus
+
+
 def fetch_team_recent_lineup(team_id: int, before_date: str, include_spring: bool = False) -> list:
     """
     Fetch a team's most recent starting lineup (9 MLBAM IDs in batting order)
@@ -203,15 +364,16 @@ def fetch_team_recent_lineup(team_id: int, before_date: str, include_spring: boo
         return lineups.get("away", [])
 
 
-def fetch_daily_lineups(date: str, include_spring: bool = False, use_projected: bool = False) -> List[dict]:
+def fetch_daily_lineups(date: str, include_spring: bool = False, use_projected: bool = False, cumulative=None) -> List[dict]:
     """
     Fetch all games and their starting lineups for a given date (YYYY-MM-DD).
     Returns list of dicts, each with: game_id, home_team, away_team,
     home_lineup (list of MLBAM IDs), away_lineup, home_starter, away_starter,
     home_score, away_score, status, lineup_status.
 
-    If use_projected=True, games with missing lineups will fall back to the
-    team's most recent game's batting order (lineup_status='projected').
+    If use_projected=True, games with missing lineups will fall back to a
+    platoon-aware projected lineup based on the opposing pitcher's handedness.
+    Pass cumulative (CumulativeStats) for pitcher handedness resolution.
     """
     m, d, y = date[5:7], date[8:10], date[:4]
     games = statsapi.schedule(date=f"{m}/{d}/{y}")
@@ -233,13 +395,30 @@ def fetch_daily_lineups(date: str, include_spring: bool = False, use_projected: 
 
         if use_projected:
             if len(home_lineup) < 9:
-                fallback = fetch_team_recent_lineup(g["home_id"], date, include_spring)
+                # Home team faces away pitcher — resolve handedness for platoon
+                away_pitcher_name = g.get("away_probable_pitcher", "")
+                away_throws = resolve_pitcher_throws(away_pitcher_name, cumulative)
+                fallback = fetch_team_platoon_lineup(
+                    g["home_id"], date, away_throws,
+                    cumulative=cumulative, include_spring=include_spring,
+                )
+                if len(fallback) < 9:
+                    # Final fallback: old method (most recent game)
+                    fallback = fetch_team_recent_lineup(g["home_id"], date, include_spring)
                 if len(fallback) >= 9:
                     home_lineup = fallback
                     home_projected = True
                     time.sleep(0.2)
             if len(away_lineup) < 9:
-                fallback = fetch_team_recent_lineup(g["away_id"], date, include_spring)
+                # Away team faces home pitcher — resolve handedness for platoon
+                home_pitcher_name = g.get("home_probable_pitcher", "")
+                home_throws = resolve_pitcher_throws(home_pitcher_name, cumulative)
+                fallback = fetch_team_platoon_lineup(
+                    g["away_id"], date, home_throws,
+                    cumulative=cumulative, include_spring=include_spring,
+                )
+                if len(fallback) < 9:
+                    fallback = fetch_team_recent_lineup(g["away_id"], date, include_spring)
                 if len(fallback) >= 9:
                     away_lineup = fallback
                     away_projected = True
