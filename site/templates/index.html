@@ -45,7 +45,13 @@
         </div>
         {% endif %}
 
-        <p class="od-cta">Model picks drop once lineups are confirmed &mdash; check back at 6 PM ET</p>
+        <div class="od-pipeline">
+            <div class="od-pipeline-step"><span class="od-step-time">9 PM ET</span> <span class="od-step-desc">Preview picks using projected lineups</span></div>
+            <div class="od-pipeline-arrow">&rarr;</div>
+            <div class="od-pipeline-step"><span class="od-step-time">1 PM ET</span> <span class="od-step-desc">Updated with day-of lineups</span></div>
+            <div class="od-pipeline-arrow">&rarr;</div>
+            <div class="od-pipeline-step"><span class="od-step-time">6 PM ET</span> <span class="od-step-desc">Final picks with confirmed lineups</span></div>
+        </div>
     </div>
 </section>
 {% endif %}
@@ -57,11 +63,12 @@
     {% if today.run_mode == 'preview' %}
     <div class="preview-banner glass">
         <span class="preview-badge">PREVIEW</span>
-        Night-before projections using expected lineups. Picks will update once lineups are confirmed.
+        Night-before projections using expected lineups. Updates at 1 PM ET with day-of lineups, then final picks at 6 PM ET once confirmed.
     </div>
     {% elif today.run_mode == 'early' and not is_opening_day %}
     <div class="preliminary-banner glass">
-        Preliminary picks using projected lineups. Final picks at 6 PM ET.
+        <span class="preview-badge" style="background: rgba(24, 119, 242, 0.12); color: var(--accent);">EARLY</span>
+        Day-of projections using expected lineups. Final picks at 6 PM ET once lineups are confirmed.
     </div>
     {% endif %}
     <div class="stats-bar fade-in">

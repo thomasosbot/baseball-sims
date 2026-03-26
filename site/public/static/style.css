@@ -239,11 +239,37 @@ body {
     font-family: 'Inter', monospace;
     font-weight: 600;
 }
-.od-cta {
+.od-pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+.od-pipeline-step {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.85rem;
+    text-align: center;
+}
+.od-step-time {
+    display: block;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
+    font-weight: 700;
+    color: #5edb7f;
+    margin-bottom: 0.15rem;
+}
+.od-step-desc {
+    display: block;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.3;
+}
+.od-pipeline-arrow {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 1.1rem;
 }
 
 @media (max-width: 768px) {
