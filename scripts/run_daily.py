@@ -519,6 +519,10 @@ def run_daily(
     }
 
     output_path = DAILY_DIR / f"{today}.json"
+
+    # Save changelog snapshot: if a previous run exists, capture the diff
+    _save_changelog_snapshot(output_path, output, today, mode)
+
     with open(output_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
     print(f"\n  Picks saved to {output_path}")
@@ -539,6 +543,128 @@ def run_daily(
                   f"wager=${p.get('wager', 0):,.2f}")
 
     return output
+
+
+# ---------------------------------------------------------------------------
+# Changelog
+# ---------------------------------------------------------------------------
+
+CHANGELOG_PATH = DAILY_DIR / "changelog.json"
+
+
+def _save_changelog_snapshot(output_path, new_output, date, new_mode):
+    """
+    Compare new output against previous run for the same date.
+    Appends a diff entry to changelog.json if the previous run was an
+    earlier mode (preview→early, preview→late, early→late).
+    """
+    if not output_path.exists():
+        return
+
+    try:
+        with open(output_path) as f:
+            prev = json.load(f)
+    except Exception:
+        return
+
+    prev_mode = prev.get("run_mode", "")
+    mode_order = {"preview": 0, "early": 1, "late": 2}
+
+    # Only log when upgrading from an earlier mode
+    if mode_order.get(new_mode, 0) <= mode_order.get(prev_mode, 0):
+        return
+
+    # Build game-level diffs
+    prev_games = {f"{g['away']}@{g['home']}": g for g in prev.get("games", [])}
+    new_games = {f"{g['away']}@{g['home']}": g for g in new_output.get("games", [])}
+    prev_picks = {p["pick"]: p for p in prev.get("picks", [])}
+    new_picks = {p["pick"]: p for p in new_output.get("picks", [])}
+
+    game_diffs = []
+    for key in sorted(set(list(prev_games.keys()) + list(new_games.keys()))):
+        pg = prev_games.get(key, {})
+        ng = new_games.get(key, {})
+        away, home = key.split("@")
+
+        prev_home_wp = pg.get("model_home_wp", 0) or 0
+        new_home_wp = ng.get("model_home_wp", 0) or 0
+        wp_shift = (new_home_wp - prev_home_wp) * 100
+
+        prev_fav = home if prev_home_wp > 0.5 else away
+        prev_fav_pct = round(max(prev_home_wp, 1 - prev_home_wp) * 100, 1)
+        new_fav = home if new_home_wp > 0.5 else away
+        new_fav_pct = round(max(new_home_wp, 1 - new_home_wp) * 100, 1)
+
+        game_diffs.append({
+            "away": away,
+            "home": home,
+            "preview_fav": prev_fav if prev_home_wp else None,
+            "preview_fav_pct": prev_fav_pct if prev_home_wp else None,
+            "final_fav": new_fav if new_home_wp else None,
+            "final_fav_pct": new_fav_pct if new_home_wp else None,
+            "wp_shift": round(wp_shift, 1),
+            "wp_shift_abs": round(abs(wp_shift), 1),
+            "preview_edge": pg.get("edge_pct", 0) or 0,
+            "final_edge": ng.get("edge_pct", 0) or 0,
+        })
+
+    # Pick changes
+    pick_changes = []
+    all_pick_keys = set(list(prev_picks.keys()) + list(new_picks.keys()))
+    for pk in sorted(all_pick_keys):
+        in_prev = pk in prev_picks
+        in_new = pk in new_picks
+        if in_prev and not in_new:
+            pp = prev_picks[pk]
+            pick_changes.append({
+                "type": "dropped",
+                "description": f"{pk} dropped (was {pp.get('odds', '')} at {pp.get('edge_pct', 0):.1f}% edge)",
+            })
+        elif in_new and not in_prev:
+            np_ = new_picks[pk]
+            pick_changes.append({
+                "type": "added",
+                "description": f"{pk} added ({np_.get('odds', '')} at {np_.get('edge_pct', 0):.1f}% edge)",
+            })
+        elif in_prev and in_new:
+            pp = prev_picks[pk]
+            np_ = new_picks[pk]
+            prev_edge = pp.get("edge_pct", 0)
+            new_edge = np_.get("edge_pct", 0)
+            edge_diff = new_edge - prev_edge
+            if abs(edge_diff) >= 0.5:
+                pick_changes.append({
+                    "type": "shifted",
+                    "description": f"{pk} edge {prev_edge:.1f}% → {new_edge:.1f}% ({edge_diff:+.1f}%)",
+                })
+
+    entry = {
+        "date": date,
+        "prev_mode": prev_mode,
+        "new_mode": new_mode,
+        "timestamp": datetime.now().isoformat(),
+        "game_diffs": game_diffs,
+        "pick_changes": pick_changes,
+    }
+
+    # Load or create changelog
+    changelog = []
+    if CHANGELOG_PATH.exists():
+        try:
+            with open(CHANGELOG_PATH) as f:
+                changelog = json.load(f)
+        except Exception:
+            changelog = []
+
+    # Remove any existing entry for same date + transition
+    changelog = [e for e in changelog if not (e["date"] == date and e["new_mode"] == new_mode)]
+    changelog.append(entry)
+
+    with open(CHANGELOG_PATH, "w") as f:
+        json.dump(changelog, f, indent=2, default=str)
+
+    print(f"  Changelog: {prev_mode}→{new_mode}, {len(pick_changes)} pick changes, "
+          f"{sum(1 for g in game_diffs if g['wp_shift_abs'] >= 3)} big WP shifts")
 
 
 # ---------------------------------------------------------------------------

@@ -1215,6 +1215,46 @@ body {
     letter-spacing: 0.02em;
 }
 
+/* ── Changelog Page ── */
+.cl-pick-change {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+}
+.cl-pick-change:last-child { border-bottom: none; }
+.cl-change-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.cl-change-badge.added {
+    background: var(--green-light);
+    color: var(--green);
+}
+.cl-change-badge.dropped {
+    background: var(--red-light);
+    color: var(--red);
+}
+.cl-change-badge.shifted {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+.cl-change-text {
+    color: var(--text-secondary);
+}
+.cl-table td { font-size: 0.85rem; }
+.cl-big-shift {
+    background: rgba(49, 162, 76, 0.04);
+}
+
 /* ── Backtest Page ── */
 .year-tabs {
     display: flex;

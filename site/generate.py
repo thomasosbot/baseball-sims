@@ -40,7 +40,7 @@ def generate_site():
     daily_files = sorted(DAILY_DIR.glob("*.json"))
     all_days = []
     for f in daily_files:
-        if f.name == "results.json":
+        if f.name in ("results.json", "changelog.json"):
             continue
         with open(f) as fh:
             all_days.append(json.load(fh))
@@ -110,6 +110,15 @@ def generate_site():
         )
         (OUTPUT_DIR / "backtest.html").write_text(html)
         print(f"  backtest.html ({', '.join(str(y) for y in sorted(backtest_data.keys()))})")
+
+    # Changelog
+    changelog_days, changelog_summary = _load_changelog()
+    template = env.get_template("changelog.html")
+    html = template.render(
+        changelog_days=changelog_days,
+        summary=changelog_summary,
+    )
+    (OUTPUT_DIR / "changelog.html").write_text(html)
 
     # About
     template = env.get_template("about.html")
@@ -645,6 +654,87 @@ def _build_opening_day_schedule(latest):
         schedule.append(entry)
 
     return schedule
+
+
+def _load_changelog():
+    """Load changelog.json and compute summary stats."""
+    changelog_path = DAILY_DIR / "changelog.json"
+    if not changelog_path.exists():
+        return [], {"total_days": 0, "avg_wp_shift": "0.0", "picks_unchanged_pct": "0",
+                     "picks_added": 0, "picks_dropped": 0}
+
+    with open(changelog_path) as f:
+        entries = json.load(f)
+
+    if not entries:
+        return [], {"total_days": 0, "avg_wp_shift": "0.0", "picks_unchanged_pct": "0",
+                     "picks_added": 0, "picks_dropped": 0}
+
+    # Build per-day view (use the latest transition per date)
+    by_date = {}
+    for entry in entries:
+        d = entry["date"]
+        if d not in by_date or entry.get("new_mode", "") == "late":
+            by_date[d] = entry
+
+    days = []
+    all_wp_shifts = []
+    total_picks_checked = 0
+    picks_unchanged = 0
+    total_added = 0
+    total_dropped = 0
+
+    for d in sorted(by_date.keys()):
+        entry = by_date[d]
+        try:
+            display_date = datetime.strptime(d, "%Y-%m-%d").strftime("%B %-d, %Y")
+        except (ValueError, TypeError):
+            display_date = d
+
+        game_diffs = entry.get("game_diffs", [])
+        pick_changes = entry.get("pick_changes", [])
+
+        for g in game_diffs:
+            if g.get("wp_shift_abs"):
+                all_wp_shifts.append(g["wp_shift_abs"])
+
+        for pc in pick_changes:
+            if pc["type"] == "added":
+                total_added += 1
+            elif pc["type"] == "dropped":
+                total_dropped += 1
+
+        # Count unchanged picks (picks in both runs with < 0.5% edge shift)
+        shifted_picks = sum(1 for pc in pick_changes if pc["type"] == "shifted")
+        added_picks = sum(1 for pc in pick_changes if pc["type"] == "added")
+        dropped_picks = sum(1 for pc in pick_changes if pc["type"] == "dropped")
+        # Rough estimate: picks that didn't appear in changes are unchanged
+        total_picks_checked += shifted_picks + added_picks + dropped_picks
+        if not pick_changes:
+            picks_unchanged += 1  # whole day unchanged
+
+        days.append({
+            "date": d,
+            "display_date": display_date,
+            "prev_mode": entry.get("prev_mode", ""),
+            "new_mode": entry.get("new_mode", ""),
+            "game_diffs": game_diffs,
+            "pick_changes": pick_changes,
+        })
+
+    total_days = len(days)
+    avg_wp = round(sum(all_wp_shifts) / len(all_wp_shifts), 1) if all_wp_shifts else 0.0
+    unchanged_pct = round(picks_unchanged / max(1, total_days) * 100) if total_days else 0
+
+    summary = {
+        "total_days": total_days,
+        "avg_wp_shift": str(avg_wp),
+        "picks_unchanged_pct": str(unchanged_pct),
+        "picks_added": total_added,
+        "picks_dropped": total_dropped,
+    }
+
+    return days, summary
 
 
 def _copy_static():

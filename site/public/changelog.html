@@ -3,29 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Ozzy Analytics{% endblock %}</title>
+    <title>Projection Changelog — Ozzy Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/style.css">
-    {% block head %}{% endblock %}
+    
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="index.html" class="logo">Ozzy Analytics</a>
             <div class="nav-links">
-                <a href="index.html" class="{% if active == 'picks' %}active{% endif %}">Today's Picks</a>
-                <a href="history.html" class="{% if active == 'history' %}active{% endif %}">History</a>
-                <a href="backtest.html" class="{% if active == 'backtest' %}active{% endif %}">Backtest</a>
-                <a href="changelog.html" class="{% if active == 'changelog' %}active{% endif %}">Changelog</a>
-                <a href="about.html" class="{% if active == 'about' %}active{% endif %}">About</a>
+                <a href="index.html" class="">Today's Picks</a>
+                <a href="history.html" class="">History</a>
+                <a href="backtest.html" class="">Backtest</a>
+                <a href="changelog.html" class="active">Changelog</a>
+                <a href="about.html" class="">About</a>
             </div>
         </div>
     </nav>
 
     <main class="container">
-        {% block content %}{% endblock %}
+        
+<section class="hero">
+    <h1 class="hero-date-big">Projection Changelog</h1>
+    <p class="hero-sub">Tracking how picks evolve from projected to confirmed lineups</p>
+</section>
+
+<section class="section fade-in">
+    <div class="about-card glass" style="margin-bottom: 1.5rem;">
+        <p>Every night at 9 PM ET, the model runs with projected lineups to generate preview picks. As confirmed lineups are released the next day, the model re-runs and picks may shift. This page tracks those changes — over time it reveals how reliable the night-before preview is and how much lineup confirmation actually moves the needle.</p>
+        <div class="about-stats-row" style="margin-top: 1rem;">
+            <div class="about-stat">
+                <span class="about-stat-value">0</span>
+                <span class="about-stat-label">Days Tracked</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">0.0%</span>
+                <span class="about-stat-label">Avg WP Shift</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">0%</span>
+                <span class="about-stat-label">Picks Unchanged</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">0</span>
+                <span class="about-stat-label">Picks Added/Dropped</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="no-picks fade-in">
+    <h2>No Data Yet</h2>
+    <p>The changelog will populate once we have both preview and final runs for the same day.</p>
+</section>
+
+
     </main>
 
     <section class="subscribe-section">
@@ -45,7 +81,7 @@
     <footer class="footer">
         <div class="container">
             <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
-            <p>{{ generated_at if generated_at else "" }}</p>
+            <p></p>
         </div>
     </footer>
 
@@ -94,6 +130,6 @@
     });
     </script>
 
-    {% block scripts %}{% endblock %}
+    
 </body>
 </html>

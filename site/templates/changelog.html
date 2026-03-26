@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% set active = "changelog" %}
+
+{% block title %}Projection Changelog — Ozzy Analytics{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1 class="hero-date-big">Projection Changelog</h1>
+    <p class="hero-sub">Tracking how picks evolve from projected to confirmed lineups</p>
+</section>
+
+<section class="section fade-in">
+    <div class="about-card glass" style="margin-bottom: 1.5rem;">
+        <p>Every night at 9 PM ET, the model runs with projected lineups to generate preview picks. As confirmed lineups are released the next day, the model re-runs and picks may shift. This page tracks those changes — over time it reveals how reliable the night-before preview is and how much lineup confirmation actually moves the needle.</p>
+        <div class="about-stats-row" style="margin-top: 1rem;">
+            <div class="about-stat">
+                <span class="about-stat-value">{{ summary.total_days }}</span>
+                <span class="about-stat-label">Days Tracked</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">{{ summary.avg_wp_shift }}%</span>
+                <span class="about-stat-label">Avg WP Shift</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">{{ summary.picks_unchanged_pct }}%</span>
+                <span class="about-stat-label">Picks Unchanged</span>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-value">{{ summary.picks_added + summary.picks_dropped }}</span>
+                <span class="about-stat-label">Picks Added/Dropped</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if changelog_days %}
+{% for day in changelog_days|reverse %}
+<section class="section fade-in">
+    <h2 class="section-title">{{ day.display_date }}</h2>
+
+    {% if day.pick_changes %}
+    <div class="about-card glass" style="margin-bottom: 0.75rem; border-left: 3px solid var(--accent);">
+        <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">Pick Changes</h3>
+        {% for change in day.pick_changes %}
+        <div class="cl-pick-change">
+            <span class="cl-change-badge {{ change.type }}">{{ change.type|upper }}</span>
+            <span class="cl-change-text">{{ change.description }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="about-card glass" style="margin-bottom: 0.75rem;">
+        <p style="color: var(--text-muted); font-size: 0.88rem;">No pick changes — preview matched final.</p>
+    </div>
+    {% endif %}
+
+    {% if day.game_diffs %}
+    <div class="table-card glass">
+        <table class="games-table cl-table">
+            <thead>
+                <tr>
+                    <th>Matchup</th>
+                    <th>Preview WP</th>
+                    <th>Final WP</th>
+                    <th>Shift</th>
+                    <th>Preview Edge</th>
+                    <th>Final Edge</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in day.game_diffs %}
+                <tr class="{% if g.wp_shift_abs >= 3 %}cl-big-shift{% endif %}">
+                    <td>
+                        <span class="team">{{ g.away }}</span>
+                        <span class="at">@</span>
+                        <span class="team">{{ g.home }}</span>
+                    </td>
+                    <td>
+                        {% if g.preview_fav %}
+                        <span class="fav-team">{{ g.preview_fav }}</span> {{ g.preview_fav_pct }}%
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if g.final_fav %}
+                        <span class="fav-team">{{ g.final_fav }}</span> {{ g.final_fav_pct }}%
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="{% if g.wp_shift_abs >= 3 %}edge{% elif g.wp_shift_abs >= 1 %}muted{% endif %}">
+                        {{ "%+.1f"|format(g.wp_shift) }}%
+                    </td>
+                    <td>{{ "%.1f"|format(g.preview_edge) if g.preview_edge else "—" }}%</td>
+                    <td>{{ "%.1f"|format(g.final_edge) if g.final_edge else "—" }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endfor %}
+{% else %}
+<section class="no-picks fade-in">
+    <h2>No Data Yet</h2>
+    <p>The changelog will populate once we have both preview and final runs for the same day.</p>
+</section>
+{% endif %}
+{% endblock %}
