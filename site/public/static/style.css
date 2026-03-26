@@ -490,6 +490,12 @@ body {
     border-color: rgba(107, 63, 160, 0.15);
 }
 /* Pinnacle — dark */
+/* Bovada — red/dark */
+.book-badge.bovada {
+    background: rgba(180, 30, 30, 0.08);
+    color: #9E1A1A;
+    border-color: rgba(180, 30, 30, 0.15);
+}
 .book-badge.pinnacle {
     background: rgba(28, 30, 33, 0.06);
     color: #444950;

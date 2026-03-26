@@ -117,10 +117,8 @@
                     <span class="metric-value edge">{{ pick.edge_pct }}%</span>
                 </div>
                 <div class="pick-metric">
-                    <span class="metric-label">Confidence</span>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" style="width: {{ (pick.confidence * 100)|int if pick.confidence else 70 }}%"></div>
-                    </div>
+                    <span class="metric-label">Model Win %</span>
+                    <span class="metric-value">{{ "%.0f"|format(pick.model_prob * 100) if pick.model_prob else "—" }}%</span>
                 </div>
                 <div class="pick-metric">
                     <span class="metric-label">Wager</span>
@@ -136,7 +134,7 @@
                 {% set odds_str = "+" ~ odds if odds > 0 else odds %}
                 {% set is_best = (odds|string == pick.odds|replace("+", "")|string) or (odds_str == pick.odds) %}
                 <span class="book-badge {{ book }} {% if is_best %}best-odds{% endif %}">
-                    <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("pinnacle", "Pinnacle") | replace("betrivers", "BetRivers") | replace("espnbet", "ESPN BET") | replace("fanatics", "Fanatics") }}</span>
+                    <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("bovada", "Bovada") | replace("pinnacle", "Pinnacle") | replace("betrivers", "BetRivers") | replace("espnbet", "ESPN BET") | replace("fanatics", "Fanatics") }}</span>
                     {{ odds_str }}
                 </span>
                 {% endfor %}

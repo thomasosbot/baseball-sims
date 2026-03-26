@@ -83,10 +83,14 @@ def fetch_mlb_odds(
     return resp.json()
 
 
+# Only include odds from these books
+ALLOWED_BOOKS = {"fanduel", "bovada", "betmgm", "draftkings", "williamhill_us"}
+
+
 def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
     """
     Flatten The Odds API response into one row per game with:
-    - best available odds for each side (across all books)
+    - best available odds for each side (across allowed books only)
     - Pinnacle line (sharpest / closest to true probability)
     - vig
     """
@@ -102,22 +106,29 @@ def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
 
         for bm in game.get("bookmakers", []):
             key = bm["key"]
+            # Skip books not in our allowed list (except pinnacle for sharp line)
+            is_allowed = key in ALLOWED_BOOKS
+            is_pinnacle = key == "pinnacle"
+            if not is_allowed and not is_pinnacle:
+                continue
             for mkt in bm.get("markets", []):
                 if mkt["key"] != "h2h":
                     continue
                 for oc in mkt["outcomes"]:
                     price = oc["price"]
                     if oc["name"] == home:
-                        books_home[key] = price
-                        if best_home_odds is None or price > best_home_odds:
+                        if is_allowed:
+                            books_home[key] = price
+                        if is_allowed and (best_home_odds is None or price > best_home_odds):
                             best_home_odds, best_home_book = price, key
-                        if key == "pinnacle":
+                        if is_pinnacle:
                             pin_home = price
                     elif oc["name"] == away:
-                        books_away[key] = price
-                        if best_away_odds is None or price > best_away_odds:
+                        if is_allowed:
+                            books_away[key] = price
+                        if is_allowed and (best_away_odds is None or price > best_away_odds):
                             best_away_odds, best_away_book = price, key
-                        if key == "pinnacle":
+                        if is_pinnacle:
                             pin_away = price
 
         if best_home_odds is None or best_away_odds is None:
