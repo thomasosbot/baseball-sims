@@ -2,6 +2,7 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
+    - cron: '0 1 * * *'     # 9 PM ET — preview run (RotoGrinders projected lineups)
     - cron: '15 15 27 3 *'  # 11:15 AM ET — Opening Day early run (Mar 27)
     - cron: '0 17 * * *'    # 1 PM ET — early run (projected lineups)
     - cron: '0 22 * * *'    # 6 PM ET — late run (confirmed lineups)
@@ -16,6 +17,7 @@ on:
         required: false
         type: choice
         options:
+          - preview
           - early
           - late
         default: late
@@ -60,11 +62,13 @@ jobs:
             exit 1
           fi
 
-      - name: Determine run mode
+      - name: Determine run mode and date
         id: mode
         run: |
           if [ -n "${{ inputs.mode }}" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 1 * * *" ]; then
+            echo "mode=preview" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.schedule }}" = "15 15 27 3 *" ]; then
             echo "mode=early" >> $GITHUB_OUTPUT
           elif [ "${{ github.event.schedule }}" = "0 17 * * *" ]; then
@@ -72,7 +76,15 @@ jobs:
           else
             echo "mode=late" >> $GITHUB_OUTPUT
           fi
-          echo "Run mode: $(cat $GITHUB_OUTPUT | grep mode | cut -d= -f2)"
+
+          # Preview mode runs at 9 PM ET for *tomorrow's* games
+          MODE=$(grep mode $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
+          if [ "$MODE" = "preview" ] && [ -z "${{ inputs.date }}" ]; then
+            TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d 2>/dev/null || date -u -v+1d +%Y-%m-%d)
+            echo "date=$TOMORROW" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Run mode: $MODE"
 
       - name: Update yesterday's results
         if: steps.mode.outputs.mode == 'early'
@@ -81,11 +93,13 @@ jobs:
 
       - name: Run daily pipeline
         run: |
+          DATE_FLAG=""
           if [ -n "${{ inputs.date }}" ]; then
-            python3 scripts/run_daily.py --date "${{ inputs.date }}" --mode ${{ steps.mode.outputs.mode }}
-          else
-            python3 scripts/run_daily.py --mode ${{ steps.mode.outputs.mode }}
+            DATE_FLAG="--date ${{ inputs.date }}"
+          elif [ -n "${{ steps.mode.outputs.date }}" ]; then
+            DATE_FLAG="--date ${{ steps.mode.outputs.date }}"
           fi
+          python3 scripts/run_daily.py $DATE_FLAG --mode ${{ steps.mode.outputs.mode }}
 
       - name: Generate website
         run: python3 site/generate.py

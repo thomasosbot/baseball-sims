@@ -25,7 +25,10 @@ from config import (
     KELLY_FRACTION, MAX_BET_FRACTION, HOME_FIELD_ADVANTAGE, ELO_BLEND_WEIGHT,
     DATA_DIR,
 )
-from src.data.fetch import fetch_daily_lineups, team_abbrev, TEAM_NAME_TO_ABBREV
+from src.data.fetch import (
+    fetch_daily_lineups, fetch_rotogrinders_lineups, resolve_rg_player_to_id,
+    team_abbrev, TEAM_NAME_TO_ABBREV,
+)
 from src.data.state import load_state, save_state
 from src.betting.odds import (
     fetch_mlb_odds, parse_odds_response,
@@ -87,6 +90,113 @@ _DEFAULT_BATTER = {
 }
 
 
+def _fetch_preview_lineups(date: str, cumulative, include_spring: bool) -> list:
+    """
+    Fetch projected lineups from RotoGrinders for night-before preview run.
+    Resolves player names to MLBAM IDs via cumulative state + MLB API.
+    Games not on RotoGrinders get platoon-projected lineups as fallback.
+    """
+    rg_games = fetch_rotogrinders_lineups(date)
+
+    # Also fetch full schedule from statsapi for all games
+    m, d, y = date[5:7], date[8:10], date[:4]
+    try:
+        schedule = statsapi.schedule(date=f"{m}/{d}/{y}")
+    except Exception:
+        schedule = []
+
+    # Build lookup: (home_abbr, away_abbr) → schedule entry
+    sched_lookup = {}
+    allowed_types = {"R", "S"} if include_spring else {"R"}
+    for g in schedule:
+        if g.get("game_type") not in allowed_types:
+            continue
+        ha = team_abbrev(g["home_name"])
+        aa = team_abbrev(g["away_name"])
+        sched_lookup[(ha, aa)] = g
+
+    # Build RG lookup: (home_abbr, away_abbr) → rg game
+    rg_lookup = {}
+    for rg in (rg_games or []):
+        rg_lookup[(rg["home_team"], rg["away_team"])] = rg
+
+    rg_count = 0
+    fallback_count = 0
+    results = []
+
+    for (home_abbr, away_abbr), sched in sched_lookup.items():
+        rg = rg_lookup.get((home_abbr, away_abbr))
+
+        if rg and len(rg["home_lineup"]) >= 1:
+            # Use RotoGrinders lineup
+            home_lineup_ids = []
+            for name in rg["home_lineup"][:9]:
+                pid = resolve_rg_player_to_id(name, cumulative)
+                if pid:
+                    home_lineup_ids.append(pid)
+
+            away_lineup_ids = []
+            for name in rg["away_lineup"][:9]:
+                pid = resolve_rg_player_to_id(name, cumulative)
+                if pid:
+                    away_lineup_ids.append(pid)
+
+            if rg["home_confirmed"] and rg["away_confirmed"]:
+                lineup_status = "confirmed"
+            else:
+                lineup_status = "projected"
+
+            resolved_pct = (len(home_lineup_ids) + len(away_lineup_ids)) / 18 * 100
+            print(f"  {away_abbr} @ {home_abbr}: RotoGrinders {len(away_lineup_ids)}+{len(home_lineup_ids)} IDs ({resolved_pct:.0f}%), "
+                  f"{'confirmed' if lineup_status == 'confirmed' else 'projected'}")
+            rg_count += 1
+
+            results.append({
+                "game_id": sched.get("game_id", 0),
+                "game_date": date,
+                "home_team": sched.get("home_name", home_abbr),
+                "away_team": sched.get("away_name", away_abbr),
+                "home_id": sched.get("home_id", 0),
+                "away_id": sched.get("away_id", 0),
+                "venue": sched.get("venue_name", ""),
+                "home_lineup": home_lineup_ids,
+                "away_lineup": away_lineup_ids,
+                "home_starter": rg["home_pitcher"],
+                "away_starter": rg["away_pitcher"],
+                "home_score": None,
+                "away_score": None,
+                "status": "Preview",
+                "lineup_status": lineup_status,
+            })
+        else:
+            # Fallback: use platoon-projected lineups
+            fallback_count += 1
+            # This game will be picked up by fetch_daily_lineups with platoon projection
+            pass
+
+    # For games not covered by RG, fall back to platoon projections
+    if fallback_count > 0 or not rg_games:
+        print(f"  {fallback_count} games not on RotoGrinders, using platoon projections...")
+        platoon_games = fetch_daily_lineups(
+            date, include_spring=include_spring,
+            use_projected=True, cumulative=cumulative,
+        )
+        # Merge: only add games not already covered by RG
+        rg_keys = {(r["home_team"], r["away_team"]) for r in rg_games or []}
+        for pg in platoon_games:
+            ha = team_abbrev(pg["home_team"])
+            aa = team_abbrev(pg["away_team"])
+            if (ha, aa) not in rg_keys:
+                pg["lineup_status"] = "projected"
+                results.append(pg)
+
+    total_rg = rg_count
+    total_platoon = len(results) - rg_count
+    print(f"  Total: {len(results)} games ({total_rg} RotoGrinders, {total_platoon} platoon projected)")
+
+    return results
+
+
 def run_daily(
     bankroll: float = 1000.0,
     date: str = None,
@@ -122,13 +232,18 @@ def run_daily(
     print(f"  {cumulative.num_batters} batters, {cumulative.num_pitchers} pitchers tracked")
 
     # --- 2. Fetch today's schedule + lineups ---
-    use_projected = (mode == "early")
+    use_projected = (mode in ("early", "preview"))
     print(f"\nFetching lineups for {today} (mode={mode}, projected={use_projected})...")
-    try:
-        games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=use_projected, cumulative=cumulative)
-    except Exception as e:
-        print(f"  Error fetching lineups: {e}")
-        return
+
+    if mode == "preview":
+        # Night-before run: use RotoGrinders projected lineups
+        games = _fetch_preview_lineups(today, cumulative, include_spring)
+    else:
+        try:
+            games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=use_projected, cumulative=cumulative)
+        except Exception as e:
+            print(f"  Error fetching lineups: {e}")
+            return
 
     if not games:
         print("  No games today.")
@@ -894,8 +1009,8 @@ if __name__ == "__main__":
                         help=f"Number of simulations per game (default: {N_SIMULATIONS})")
     parser.add_argument("--spring", action="store_true",
                         help="Include spring training games")
-    parser.add_argument("--mode", choices=["early", "late"], default="late",
-                        help="Run mode: early (projected lineups) or late (confirmed)")
+    parser.add_argument("--mode", choices=["preview", "early", "late"], default="late",
+                        help="Run mode: preview (RotoGrinders projected), early (day-of projected), late (confirmed)")
     args = parser.parse_args()
 
     bankroll = args.bankroll

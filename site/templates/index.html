@@ -54,7 +54,12 @@
     {% if today %}
     <h1 class="hero-date-big">{% if is_opening_day %}Opening Day Picks — {{ display_date }}{% else %}MLB Picks — {{ display_date }}{% endif %}</h1>
     <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
-    {% if today.run_mode == 'early' and not is_opening_day %}
+    {% if today.run_mode == 'preview' %}
+    <div class="preview-banner glass">
+        <span class="preview-badge">PREVIEW</span>
+        Night-before projections using expected lineups. Picks will update once lineups are confirmed.
+    </div>
+    {% elif today.run_mode == 'early' and not is_opening_day %}
     <div class="preliminary-banner glass">
         Preliminary picks using projected lineups. Final picks at 6 PM ET.
     </div>

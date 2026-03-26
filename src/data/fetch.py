@@ -454,6 +454,199 @@ def fetch_daily_lineups(date: str, include_spring: bool = False, use_projected: 
 
 
 # ---------------------------------------------------------------------------
+# RotoGrinders — projected lineups (night-before / pre-confirmed)
+# ---------------------------------------------------------------------------
+
+_RG_URL = "https://rotogrinders.com/lineups/mlb"
+
+# RotoGrinders team abbrev → our standard abbrevs
+_RG_TEAM_MAP = {
+    "ARI": "ARI", "ATL": "ATL", "BAL": "BAL", "BOS": "BOS",
+    "CHC": "CHC", "CHW": "CWS", "CIN": "CIN", "CLE": "CLE",
+    "COL": "COL", "DET": "DET", "HOU": "HOU", "KC": "KCR",
+    "LAA": "LAA", "LAD": "LAD", "MIA": "MIA", "MIL": "MIL",
+    "MIN": "MIN", "NYM": "NYM", "NYY": "NYY", "OAK": "OAK",
+    "PHI": "PHI", "PIT": "PIT", "SD": "SDP", "SF": "SFG",
+    "SEA": "SEA", "STL": "STL", "TB": "TBR", "TEX": "TEX",
+    "TOR": "TOR", "WSH": "WSN",
+}
+
+
+def fetch_rotogrinders_lineups(date: str = None) -> List[dict]:
+    """
+    Scrape projected lineups from RotoGrinders for a given date.
+
+    Returns list of dicts, each with:
+        away_team, home_team (standard abbrevs),
+        away_pitcher, home_pitcher, away_pitcher_throws, home_pitcher_throws,
+        away_lineup (list of player name strings in batting order),
+        home_lineup (list of player name strings in batting order),
+        away_confirmed (bool), home_confirmed (bool),
+        game_time (str like "7:05 PM ET")
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        print("  WARNING: beautifulsoup4 not installed, skipping RotoGrinders")
+        return []
+
+    params = {}
+    if date:
+        params["date"] = date
+    try:
+        resp = _requests.get(_RG_URL, params=params, timeout=15, headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        })
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"  WARNING: RotoGrinders fetch failed: {e}")
+        return []
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    game_cards = soup.select("div.game-card")
+    if not game_cards:
+        print("  WARNING: No game cards found on RotoGrinders")
+        return []
+
+    results = []
+    for card in game_cards:
+        try:
+            game = _parse_rg_game_card(card)
+            if game:
+                results.append(game)
+        except Exception:
+            continue
+
+    return results
+
+
+def _parse_rg_game_card(card) -> Optional[dict]:
+    """Parse a single RotoGrinders game card into a dict."""
+    # Team abbreviations (away first, home second)
+    team_plates = card.select("span.team-nameplate-title")
+    if len(team_plates) < 2:
+        return None
+    away_abbr_raw = team_plates[0].get("data-abbr", "")
+    home_abbr_raw = team_plates[1].get("data-abbr", "")
+    away_abbr = _RG_TEAM_MAP.get(away_abbr_raw, away_abbr_raw)
+    home_abbr = _RG_TEAM_MAP.get(home_abbr_raw, home_abbr_raw)
+
+    # Game time
+    weather_div = card.select_one("div.game-card-weather")
+    game_time = ""
+    if weather_div:
+        time_span = weather_div.select_one("span.small")
+        if time_span:
+            game_time = time_span.get_text(strip=True)
+
+    # Lineup cards (away first, home second)
+    lineup_cards = card.select("div.lineup-card")
+    if len(lineup_cards) < 2:
+        return None
+
+    away_data = _parse_rg_lineup_card(lineup_cards[0])
+    home_data = _parse_rg_lineup_card(lineup_cards[1])
+
+    return {
+        "away_team": away_abbr,
+        "home_team": home_abbr,
+        "away_pitcher": away_data["pitcher_name"],
+        "home_pitcher": home_data["pitcher_name"],
+        "away_pitcher_throws": away_data["pitcher_throws"],
+        "home_pitcher_throws": home_data["pitcher_throws"],
+        "away_lineup": away_data["batters"],
+        "home_lineup": home_data["batters"],
+        "away_confirmed": away_data["confirmed"],
+        "home_confirmed": home_data["confirmed"],
+        "game_time": game_time,
+    }
+
+
+def _parse_rg_lineup_card(card) -> dict:
+    """Parse one side's lineup card (pitcher + batters + confirmed status)."""
+    # Confirmed status
+    body = card.select_one("div.lineup-card-body")
+    confirmed = True
+    if body and "unconfirmed" in body.get("class", []):
+        confirmed = False
+    # Also check for the unconfirmed banner
+    if card.select_one("div.lineup-card-unconfirmed"):
+        confirmed = False
+
+    # Pitcher
+    pitcher_link = card.select_one("div.lineup-card-pitcher a.player-nameplate-name")
+    pitcher_name = pitcher_link.get_text(strip=True) if pitcher_link else "TBD"
+
+    pitcher_throws = "R"
+    pitcher_section = card.select_one("div.lineup-card-pitcher")
+    if pitcher_section:
+        stats_spans = pitcher_section.select("span.small")
+        for s in stats_spans:
+            txt = s.get_text(strip=True)
+            if txt in ("(L)", "(R)", "(S)"):
+                pitcher_throws = txt.strip("()")
+                break
+
+    # Batters in order
+    batters = []
+    players = card.select("li.lineup-card-player")
+    for player in players:
+        name_link = player.select_one("a.player-nameplate-name")
+        if name_link:
+            batters.append(name_link.get_text(strip=True))
+
+    return {
+        "pitcher_name": pitcher_name,
+        "pitcher_throws": pitcher_throws,
+        "batters": batters,
+        "confirmed": confirmed,
+    }
+
+
+def resolve_rg_player_to_id(player_name: str, cumulative=None) -> Optional[int]:
+    """
+    Resolve a RotoGrinders player name to an MLBAM ID.
+    Checks cumulative batter/pitcher names first, then MLB API search.
+    """
+    if not player_name or player_name == "TBD":
+        return None
+
+    name_lower = player_name.lower().strip()
+
+    # Check cumulative batter names
+    if cumulative is not None:
+        for bid, bname in cumulative._batter_names.items():
+            if bname.lower().strip() == name_lower:
+                return bid
+        # Partial match (last name + first initial)
+        parts = name_lower.split()
+        if len(parts) >= 2:
+            last = parts[-1]
+            first_init = parts[0][0]
+            for bid, bname in cumulative._batter_names.items():
+                bparts = bname.lower().strip().split()
+                if len(bparts) >= 2 and bparts[-1] == last and bparts[0][0] == first_init:
+                    return bid
+
+    # MLB API search fallback
+    try:
+        search_name = player_name.replace(" ", "+")
+        resp = _requests.get(
+            f"https://statsapi.mlb.com/api/v1/people/search?names={search_name}",
+            timeout=5,
+        )
+        if resp.ok:
+            people = resp.json().get("people", [])
+            if people:
+                return people[0]["id"]
+    except Exception:
+        pass
+
+    return None
+
+
+# ---------------------------------------------------------------------------
 # The Odds API — historical odds
 # ---------------------------------------------------------------------------
 
