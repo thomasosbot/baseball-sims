@@ -1,0 +1,856 @@
+{% extends "base.html" %}
+{% set active = "simulate" %}
+
+{% block title %}Game Simulator | Ozzy Analytics{% endblock %}
+
+{% block head %}
+<style>
+/* ── Simulate Page ── */
+.sim-page { padding: 1.5rem 0 6rem; }
+.sim-page h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; }
+
+/* ── Team Selector ── */
+.team-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+.team-selector .team-pick {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 140px;
+}
+.team-selector label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+.team-selector select {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%23606770' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+.team-selector select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.team-vs {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    padding-top: 1.1rem;
+}
+.starter-names {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+    min-height: 1.2em;
+}
+.btn-start {
+    padding: 0.6rem 1.5rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 0.9rem;
+}
+.btn-start:hover { background: #1565d8; transform: translateY(-1px); }
+.btn-start:active { transform: translateY(0); }
+
+/* ── Scoreboard ── */
+.scoreboard-wrap {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+}
+.scoreboard {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    min-width: 560px;
+}
+.scoreboard th, .scoreboard td {
+    text-align: center;
+    padding: 0.4rem 0.55rem;
+    border-bottom: 1px solid var(--border);
+}
+.scoreboard th {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+.scoreboard .team-cell {
+    text-align: left;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    min-width: 48px;
+    color: var(--text);
+}
+.scoreboard .total-cell {
+    font-weight: 700;
+    background: rgba(0,0,0,0.02);
+}
+.scoreboard .inning-active {
+    background: var(--accent-light);
+    border-radius: 4px;
+    font-weight: 700;
+    color: var(--accent);
+}
+.scoreboard .inning-future { color: var(--text-muted); opacity: 0.4; }
+
+/* ── Main Panel (diamond + probabilities) ── */
+.sim-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.diamond-card { padding: 1.25rem; display: flex; flex-direction: column; align-items: center; }
+.prob-card { padding: 1.25rem; }
+
+/* ── Diamond SVG ── */
+.diamond-svg { width: 100%; max-width: 400px; height: auto; }
+
+/* Base glow when occupied */
+.base-indicator { transition: fill 0.3s ease, filter 0.3s ease; }
+.base-indicator.occupied { fill: #FFD700; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
+
+/* Runner dots */
+.runner-dot {
+    fill: #FFD700;
+    opacity: 0;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0));
+}
+.runner-dot.visible {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+/* Outs indicator */
+.outs-row { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.75rem; }
+.out-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--text-muted);
+    background: transparent;
+    transition: background 0.25s, border-color 0.25s;
+}
+.out-dot.active { background: var(--red); border-color: var(--red); }
+.outs-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.35rem;
+}
+
+/* ── Probability Bars ── */
+.matchup-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+.matchup-text .vs { color: var(--text-muted); font-weight: 400; }
+.prob-bars { display: flex; flex-direction: column; gap: 0.4rem; }
+.prob-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.prob-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    width: 30px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.prob-bar-bg {
+    flex: 1;
+    height: 22px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+.prob-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease, opacity 0.3s ease;
+    min-width: 0;
+}
+.prob-bar-fill.pulse {
+    animation: barPulse 0.6s ease-in-out 3;
+}
+@keyframes barPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.prob-pct {
+    font-size: 0.7rem;
+    font-weight: 500;
+    width: 38px;
+    color: var(--text-muted);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* bar colors */
+.bar-HR  { background: #22c55e; }
+.bar-3B  { background: #4ade80; }
+.bar-2B  { background: #86efac; }
+.bar-1B  { background: #bbf7d0; }
+.bar-BB  { background: #3b82f6; }
+.bar-HBP { background: #60a5fa; }
+.bar-K   { background: #ef4444; }
+.bar-OUT { background: #94a3b8; }
+
+/* ── Play-by-Play ── */
+.play-log-card { padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.play-log-card h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+.play-log {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.play-entry {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.play-inning {
+    font-weight: 700;
+    font-size: 0.72rem;
+    min-width: 28px;
+    color: var(--accent);
+}
+.play-batter { font-weight: 600; color: var(--text); min-width: 100px; }
+.play-outcome { color: var(--text-secondary); }
+.play-outcome.outcome-HR  { color: #22c55e; font-weight: 700; }
+.play-outcome.outcome-3B  { color: #16a34a; font-weight: 600; }
+.play-outcome.outcome-2B  { color: #4ade80; font-weight: 600; }
+.play-outcome.outcome-1B  { color: #86efac; font-weight: 600; }
+.play-outcome.outcome-BB  { color: #3b82f6; }
+.play-outcome.outcome-HBP { color: #60a5fa; }
+.play-outcome.outcome-K   { color: #ef4444; }
+.play-outcome.outcome-OUT { color: #94a3b8; }
+.play-runs {
+    color: #eab308;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* ── Controls Bar ── */
+.controls-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 0.65rem 1.5rem;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.btn-next {
+    padding: 0.55rem 1.75rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.btn-next:hover { background: #1565d8; }
+.btn-next:disabled { opacity: 0.4; cursor: default; }
+.btn-auto {
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-auto.active { background: var(--accent); color: #fff; }
+.btn-sim-end {
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.btn-sim-end:hover { background: rgba(0,0,0,0.04); }
+.btn-sim-end:disabled { opacity: 0.4; cursor: default; }
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.speed-control input[type=range] {
+    width: 70px;
+    accent-color: var(--accent);
+}
+.status-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+.game-over-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    background: var(--green);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+    .sim-main { grid-template-columns: 1fr; }
+    .team-selector { flex-direction: column; align-items: stretch; }
+    .team-vs { text-align: center; padding-top: 0; }
+    .controls-bar { gap: 0.5rem; padding: 0.5rem 1rem; }
+    .btn-next { padding: 0.5rem 1.25rem; font-size: 0.85rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sim-page">
+    <h1>Game Simulator</h1>
+
+    <!-- Team Selector -->
+    <div class="glass team-selector">
+        <div class="team-pick">
+            <label>Away</label>
+            <select id="sel-away"></select>
+            <div class="starter-names" id="starter-away"></div>
+        </div>
+        <span class="team-vs">@</span>
+        <div class="team-pick">
+            <label>Home</label>
+            <select id="sel-home"></select>
+            <div class="starter-names" id="starter-home"></div>
+        </div>
+        <button class="btn-start" id="btn-start">Start Game</button>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="glass scoreboard-wrap">
+        <table class="scoreboard" id="scoreboard">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                    <th>6</th><th>7</th><th>8</th><th>9</th>
+                    <th id="extra-headers"></th>
+                    <th class="total-cell">R</th>
+                    <th class="total-cell">H</th>
+                    <th class="total-cell">E</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="row-away">
+                    <td class="team-cell" id="sb-away">---</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="total-cell" id="r-away">0</td>
+                    <td class="total-cell" id="h-away">0</td>
+                    <td class="total-cell" id="e-away">0</td>
+                </tr>
+                <tr id="row-home">
+                    <td class="team-cell" id="sb-home">---</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="inning-future">-</td><td class="inning-future">-</td><td class="inning-future">-</td>
+                    <td class="total-cell" id="r-home">0</td>
+                    <td class="total-cell" id="h-home">0</td>
+                    <td class="total-cell" id="e-home">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Diamond + Probabilities -->
+    <div class="sim-main">
+        <div class="glass diamond-card">
+            <svg class="diamond-svg" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="outfieldGrad" cx="50%" cy="40%" r="55%">
+                        <stop offset="0%" stop-color="#2d6a2d"/>
+                        <stop offset="100%" stop-color="#1a4d1a"/>
+                    </radialGradient>
+                    <linearGradient id="infieldGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+                        <stop offset="0%" stop-color="#3a8c3a"/>
+                        <stop offset="100%" stop-color="#2f7a2f"/>
+                    </linearGradient>
+                    <radialGradient id="dirtGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#c4a265"/>
+                        <stop offset="100%" stop-color="#a88c50"/>
+                    </radialGradient>
+                    <filter id="glowGold">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="shadowSm">
+                        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.2"/>
+                    </filter>
+                </defs>
+
+                <!-- Outfield -->
+                <path d="M 200 40 Q 370 40 360 200 L 310 200 L 200 130 L 90 200 L 40 200 Q 30 40 200 40 Z"
+                      fill="url(#outfieldGrad)" stroke="#1a4d1a" stroke-width="1"/>
+
+                <!-- Infield diamond fill -->
+                <polygon points="200,100 300,200 200,300 100,200"
+                         fill="url(#infieldGrad)" stroke="#256225" stroke-width="0.5" opacity="0.9"/>
+
+                <!-- Dirt/skin infield circle -->
+                <circle cx="200" cy="200" r="55" fill="url(#dirtGrad)" opacity="0.6"/>
+
+                <!-- Basepaths -->
+                <line x1="200" y1="300" x2="300" y2="200" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
+                <line x1="300" y1="200" x2="200" y2="100" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
+                <line x1="200" y1="100" x2="100" y2="200" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
+                <line x1="100" y1="200" x2="200" y2="300" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
+
+                <!-- Mound -->
+                <circle cx="200" cy="200" r="5" fill="#c4a265" stroke="#a88c50" stroke-width="1" filter="url(#shadowSm)"/>
+
+                <!-- Home plate (pentagon) -->
+                <polygon points="200,304 192,296 192,288 208,288 208,296"
+                         fill="#fff" stroke="#999" stroke-width="1" filter="url(#shadowSm)"/>
+
+                <!-- 1st base -->
+                <rect id="base-1" class="base-indicator" x="293" y="193" width="14" height="14"
+                      rx="2" transform="rotate(45 300 200)"
+                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+
+                <!-- 2nd base -->
+                <rect id="base-2" class="base-indicator" x="193" y="93" width="14" height="14"
+                      rx="2" transform="rotate(45 200 100)"
+                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+
+                <!-- 3rd base -->
+                <rect id="base-3" class="base-indicator" x="93" y="193" width="14" height="14"
+                      rx="2" transform="rotate(45 100 200)"
+                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+
+                <!-- Runner dots -->
+                <circle id="runner-1" class="runner-dot" cx="300" cy="200" r="8" filter="url(#glowGold)"/>
+                <circle id="runner-2" class="runner-dot" cx="200" cy="100" r="8" filter="url(#glowGold)"/>
+                <circle id="runner-3" class="runner-dot" cx="100" cy="200" r="8" filter="url(#glowGold)"/>
+
+                <!-- Base labels -->
+                <text x="320" y="205" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" opacity="0.6">1B</text>
+                <text x="200" y="82" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.6">2B</text>
+                <text x="72" y="205" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" opacity="0.6">3B</text>
+            </svg>
+            <div class="outs-row">
+                <div class="out-dot" id="out-1"></div>
+                <div class="out-dot" id="out-2"></div>
+                <div class="out-dot" id="out-3"></div>
+            </div>
+            <div class="outs-label">Outs</div>
+        </div>
+
+        <div class="glass prob-card">
+            <div class="matchup-text" id="matchup-text">Select teams to begin</div>
+            <div class="prob-bars" id="prob-bars">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Play-by-Play -->
+    <div class="glass play-log-card">
+        <h3>Play-by-Play</h3>
+        <div class="play-log" id="play-log">
+            <div class="play-entry" style="color:var(--text-muted); font-style:italic;">Select two teams and press Start Game.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Controls Bar -->
+<div class="controls-bar" id="controls-bar">
+    <button class="btn-next" id="btn-next" disabled>Next PA</button>
+    <button class="btn-auto" id="btn-auto" disabled>Auto-Play</button>
+    <div class="speed-control">
+        <span>Speed</span>
+        <input type="range" id="speed-slider" min="200" max="3000" value="800" step="100">
+        <span id="speed-label">0.8s</span>
+    </div>
+    <button class="btn-sim-end" id="btn-sim-end" disabled>Sim to End</button>
+    <span class="status-text" id="status-text">No game</span>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.SIM_DATA = {{ sim_data_json }};</script>
+<script src="static/sim.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    /* ── Constants ── */
+    const OUTCOMES = ['HR','3B','2B','1B','BB','HBP','K','OUT'];
+    const OUTCOME_LABELS = { HR:'Home Run', '3B':'Triple', '2B':'Double', '1B':'Single', BB:'Walk', HBP:'Hit By Pitch', K:'Strikeout', OUT:'Out' };
+    const HIT_OUTCOMES = new Set(['HR','3B','2B','1B']);
+
+    /* ── DOM refs ── */
+    const $  = id => document.getElementById(id);
+    const selAway = $('sel-away'), selHome = $('sel-home');
+    const btnStart = $('btn-start'), btnNext = $('btn-next'), btnAuto = $('btn-auto'), btnSimEnd = $('btn-sim-end');
+    const speedSlider = $('speed-slider'), speedLabel = $('speed-label');
+    const statusText = $('status-text');
+    const matchupText = $('matchup-text');
+    const probBarsEl = $('prob-bars');
+    const playLog = $('play-log');
+    const starterAway = $('starter-away'), starterHome = $('starter-home');
+
+    let game = null;
+    let autoInterval = null;
+    let isAuto = false;
+
+    /* ── Populate team selects ── */
+    function initSelects() {
+        const data = window.SIM_DATA;
+        if (!data || !data.teams) { console.warn('SIM_DATA not loaded'); return; }
+        const abbrs = Object.keys(data.teams).sort();
+        [selAway, selHome].forEach((sel, idx) => {
+            sel.innerHTML = '<option value="">-- Pick --</option>';
+            abbrs.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.textContent = a + ' - ' + data.teams[a].name;
+                sel.appendChild(opt);
+            });
+            // sensible defaults
+            if (idx === 0 && abbrs.includes('NYY')) sel.value = 'NYY';
+            if (idx === 1 && abbrs.includes('BOS')) sel.value = 'BOS';
+        });
+        updateStarterNames();
+    }
+
+    function updateStarterNames() {
+        const data = window.SIM_DATA;
+        if (!data) return;
+        const a = selAway.value, h = selHome.value;
+        starterAway.textContent = a && data.teams[a] ? 'SP: ' + data.teams[a].starter.name : '';
+        starterHome.textContent = h && data.teams[h] ? 'SP: ' + data.teams[h].starter.name : '';
+    }
+    selAway.addEventListener('change', updateStarterNames);
+    selHome.addEventListener('change', updateStarterNames);
+
+    /* ── Build probability bar rows ── */
+    function buildProbBars() {
+        probBarsEl.innerHTML = '';
+        OUTCOMES.forEach(o => {
+            const row = document.createElement('div');
+            row.className = 'prob-row';
+            row.innerHTML = `
+                <span class="prob-label">${o}</span>
+                <div class="prob-bar-bg"><div class="prob-bar-fill bar-${o}" id="bar-${o}" style="width:0%"></div></div>
+                <span class="prob-pct" id="pct-${o}">0%</span>`;
+            probBarsEl.appendChild(row);
+        });
+    }
+    buildProbBars();
+
+    /* ── Update probability display ── */
+    function showProbs(probs, highlight) {
+        OUTCOMES.forEach(o => {
+            const pct = ((probs[o] || 0) * 100);
+            const bar = $('bar-' + o);
+            const label = $('pct-' + o);
+            bar.style.width = pct.toFixed(1) + '%';
+            label.textContent = pct.toFixed(1) + '%';
+            bar.classList.remove('pulse');
+            if (highlight === o) {
+                // force reflow for re-animation
+                void bar.offsetWidth;
+                bar.classList.add('pulse');
+            }
+        });
+    }
+
+    /* ── Scoreboard ── */
+    function resetScoreboard(awayAbbr, homeAbbr) {
+        $('sb-away').textContent = awayAbbr;
+        $('sb-home').textContent = homeAbbr;
+        ['away','home'].forEach(side => {
+            const row = $('row-' + side);
+            const cells = row.querySelectorAll('td:not(.team-cell):not(.total-cell)');
+            cells.forEach(c => { c.textContent = '-'; c.className = 'inning-future'; });
+            $('r-' + side).textContent = '0';
+            $('h-' + side).textContent = '0';
+            $('e-' + side).textContent = '0';
+        });
+    }
+
+    function updateScoreboard(state) {
+        ['away','home'].forEach(side => {
+            const row = $('row-' + side);
+            const cells = row.querySelectorAll('td:not(.team-cell):not(.total-cell)');
+            const innings = state[side + 'Innings'];
+            for (let i = 0; i < cells.length; i++) {
+                if (i < innings.length) {
+                    cells[i].textContent = innings[i];
+                    cells[i].className = '';
+                } else if (i === state.inning - 1 && ((side === 'away' && state.isTop) || (side === 'home' && !state.isTop))) {
+                    cells[i].textContent = '';
+                    cells[i].className = 'inning-active';
+                } else {
+                    cells[i].textContent = '-';
+                    cells[i].className = 'inning-future';
+                }
+            }
+            $('r-' + side).textContent = state[side + 'Runs'];
+            $('h-' + side).textContent = state[side + 'Hits'];
+            $('e-' + side).textContent = state[side + 'Errors'] || 0;
+        });
+    }
+
+    /* ── Diamond ── */
+    function updateDiamond(bases, outs) {
+        [1,2,3].forEach(b => {
+            const occ = bases[b] || false;
+            $('base-' + b).classList.toggle('occupied', occ);
+            $('runner-' + b).classList.toggle('visible', occ);
+        });
+        for (let i = 1; i <= 3; i++) {
+            $('out-' + i).classList.toggle('active', i <= outs);
+        }
+    }
+
+    /* ── Play log ── */
+    function addPlayEntry(pa) {
+        // Remove placeholder
+        if (playLog.querySelector('[style]')) playLog.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'play-entry';
+        const arrow = pa.isTop ? '\u25B2' : '\u25BC';
+        let runsHtml = '';
+        if (pa.runsScored > 0) runsHtml = `<span class="play-runs">+${pa.runsScored} run${pa.runsScored > 1 ? 's' : ''}</span>`;
+        div.innerHTML = `
+            <span class="play-inning">${arrow}${pa.inning}</span>
+            <span class="play-batter">${pa.batterName}</span>
+            <span class="play-outcome outcome-${pa.outcome}">${OUTCOME_LABELS[pa.outcome] || pa.outcome}</span>
+            ${runsHtml}`;
+        playLog.prepend(div);
+    }
+
+    /* ── Status text ── */
+    function updateStatus(state) {
+        if (state.gameOver) {
+            const winner = state.awayRuns > state.homeRuns ? state.awayAbbr : state.homeAbbr;
+            statusText.innerHTML = `<span class="game-over-badge">Final</span> ${state.awayAbbr} ${state.awayRuns} - ${state.homeAbbr} ${state.homeRuns}`;
+        } else {
+            const half = state.isTop ? 'Top' : 'Bot';
+            const ordinal = state.inning === 1 ? '1st' : state.inning === 2 ? '2nd' : state.inning === 3 ? '3rd' : state.inning + 'th';
+            statusText.textContent = `${half} ${ordinal}, ${state.outs} Out${state.outs !== 1 ? 's' : ''}`;
+        }
+    }
+
+    /* ── Game start ── */
+    btnStart.addEventListener('click', () => {
+        const data = window.SIM_DATA;
+        if (!data) return;
+        const aKey = selAway.value, hKey = selHome.value;
+        if (!aKey || !hKey) { alert('Pick both teams'); return; }
+        if (aKey === hKey) { alert('Pick two different teams'); return; }
+
+        stopAuto();
+        const awayTeam = data.teams[aKey];
+        const homeTeam = data.teams[hKey];
+        const parkFac = (data.parkFactors && data.parkFactors[hKey]) || {};
+        const leagueRates = data.leagueRates || {};
+
+        game = new SimGame(
+            { abbr: aKey, ...awayTeam },
+            { abbr: hKey, ...homeTeam },
+            parkFac, leagueRates
+        );
+
+        resetScoreboard(aKey, hKey);
+        updateDiamond({}, 0);
+        playLog.innerHTML = '<div class="play-entry" style="color:var(--text-muted); font-style:italic;">Game started. Press Next PA.</div>';
+        buildProbBars();
+
+        // Show first matchup probabilities
+        const first = game.peekNextPA();
+        if (first) {
+            matchupText.innerHTML = `<strong>${first.batterName}</strong> <span class="vs">vs</span> <strong>${first.pitcherName}</strong>`;
+            showProbs(first.probs, null);
+        }
+
+        btnNext.disabled = false;
+        btnAuto.disabled = false;
+        btnSimEnd.disabled = false;
+        updateStatus(game.getState());
+    });
+
+    /* ── Next PA ── */
+    function doNextPA() {
+        if (!game) return;
+        const state = game.getState();
+        if (state.gameOver) { stopAuto(); return; }
+
+        const result = game.nextPA();
+        updateScoreboard(game.getState());
+        updateDiamond(game.getState().bases, game.getState().outs);
+        updateStatus(game.getState());
+        showProbs(result.probs, result.outcome);
+        addPlayEntry(result);
+
+        // Peek at next PA for matchup display
+        const next = game.peekNextPA();
+        if (next) {
+            setTimeout(() => {
+                matchupText.innerHTML = `<strong>${next.batterName}</strong> <span class="vs">vs</span> <strong>${next.pitcherName}</strong>`;
+                showProbs(next.probs, null);
+            }, 400);
+        }
+
+        if (game.getState().gameOver) {
+            stopAuto();
+            btnNext.disabled = true;
+            btnAuto.disabled = true;
+            btnSimEnd.disabled = true;
+        }
+    }
+
+    btnNext.addEventListener('click', doNextPA);
+
+    /* ── Auto-play ── */
+    function stopAuto() {
+        if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+        isAuto = false;
+        btnAuto.classList.remove('active');
+        btnAuto.textContent = 'Auto-Play';
+    }
+    function startAuto() {
+        isAuto = true;
+        btnAuto.classList.add('active');
+        btnAuto.textContent = 'Pause';
+        const ms = parseInt(speedSlider.value) || 800;
+        autoInterval = setInterval(() => {
+            if (!game || game.getState().gameOver) { stopAuto(); return; }
+            doNextPA();
+        }, ms);
+    }
+
+    btnAuto.addEventListener('click', () => {
+        if (isAuto) stopAuto(); else startAuto();
+    });
+
+    speedSlider.addEventListener('input', () => {
+        const ms = parseInt(speedSlider.value);
+        speedLabel.textContent = (ms / 1000).toFixed(1) + 's';
+        if (isAuto) { stopAuto(); startAuto(); }
+    });
+
+    /* ── Sim to End ── */
+    btnSimEnd.addEventListener('click', () => {
+        if (!game) return;
+        stopAuto();
+        let safety = 0;
+        while (!game.getState().gameOver && safety < 500) {
+            const result = game.nextPA();
+            addPlayEntry(result);
+            safety++;
+        }
+        const st = game.getState();
+        updateScoreboard(st);
+        updateDiamond(st.bases, st.outs);
+        updateStatus(st);
+        btnNext.disabled = true;
+        btnAuto.disabled = true;
+        btnSimEnd.disabled = true;
+
+        // Show final probs of last PA
+        matchupText.innerHTML = '<strong>Game Over</strong>';
+    });
+
+    /* ── Init ── */
+    if (window.SIM_DATA) {
+        initSelects();
+    } else {
+        // Wait for sim.js to load data
+        window.addEventListener('SIM_DATA_READY', initSelects);
+        // Fallback: check periodically
+        const poll = setInterval(() => {
+            if (window.SIM_DATA) { clearInterval(poll); initSelects(); }
+        }, 200);
+    }
+})();
+</script>
+{% endblock %}

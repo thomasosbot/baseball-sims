@@ -120,6 +120,16 @@ def generate_site():
     )
     (OUTPUT_DIR / "changelog.html").write_text(html)
 
+    # Simulate
+    sim_data = _build_sim_data()
+    template = env.get_template("simulate.html")
+    html = template.render(
+        sim_data_json=json.dumps(sim_data, separators=(',', ':')) if sim_data else "null",
+    )
+    (OUTPUT_DIR / "simulate.html").write_text(html)
+    if sim_data:
+        print(f"  simulate.html ({len(sim_data.get('teams', {}))} teams)")
+
     # About
     template = env.get_template("about.html")
     html = template.render(stats=stats)
@@ -654,6 +664,210 @@ def _build_opening_day_schedule(latest):
         schedule.append(entry)
 
     return schedule
+
+
+def _build_sim_data():
+    """Build team data for client-side game simulation."""
+    try:
+        from src.data.state import load_state
+        from src.features.batting import build_batter_profile
+        from src.features.pitching import build_pitcher_profile, build_tiered_bullpen_profiles
+        from src.features.park_factors import get_park_factors
+        from src.simulation.constants import LEAGUE_RATES
+
+        state = load_state()
+        if state is None:
+            return None
+
+        cumulative = state["cumulative"]
+        batter_speeds = state.get("batter_speeds", {})
+
+        # Build all profiles
+        batter_rates = cumulative.to_batter_rates_df()
+        pitcher_rates = cumulative.to_pitcher_rates_df()
+
+        batter_profiles = {}
+        for _, row in batter_rates.iterrows():
+            pid = int(row["batter_id"])
+            try:
+                batter_profiles[pid] = build_batter_profile(row)
+            except Exception:
+                continue
+
+        pitcher_profiles = {}
+        pitcher_meta = {}
+        for _, row in pitcher_rates.iterrows():
+            pid = int(row["pitcher_id"])
+            try:
+                pitcher_profiles[pid] = build_pitcher_profile(row)
+                pitcher_meta[pid] = {
+                    "name": cumulative._pitcher_names.get(pid, str(pid)),
+                    "throws": row.get("throws", "R"),
+                }
+            except Exception:
+                continue
+
+        batter_hands = cumulative.get_batter_handedness()
+
+        # Build bullpen profiles per team
+        team_reliever_rates = cumulative.get_team_reliever_rates()
+        team_bullpen_profiles = {}
+        for team, df in team_reliever_rates.items():
+            try:
+                bp = build_tiered_bullpen_profiles(df)
+                if isinstance(bp, tuple):
+                    team_bullpen_profiles[team] = {"hi": bp[0], "lo": bp[1]}
+                else:
+                    team_bullpen_profiles[team] = {"hi": bp, "lo": bp}
+            except Exception:
+                continue
+
+        # Team roster mapping — need to know which batters/pitchers belong to which team
+        # Use cumulative state's team tracking if available, otherwise use a simpler approach
+        # For now, build team data from the daily JSON if available, or use all 30 teams with defaults
+        TEAMS = [
+            "ARI", "ATL", "BAL", "BOS", "CHC", "CWS", "CIN", "CLE", "COL", "DET",
+            "HOU", "KCR", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", "NYY", "OAK",
+            "PHI", "PIT", "SDP", "SFG", "SEA", "STL", "TBR", "TEX", "TOR", "WSN",
+        ]
+
+        TEAM_NAMES = {
+            "ARI": "Arizona Diamondbacks", "ATL": "Atlanta Braves",
+            "BAL": "Baltimore Orioles", "BOS": "Boston Red Sox",
+            "CHC": "Chicago Cubs", "CWS": "Chicago White Sox",
+            "CIN": "Cincinnati Reds", "CLE": "Cleveland Guardians",
+            "COL": "Colorado Rockies", "DET": "Detroit Tigers",
+            "HOU": "Houston Astros", "KCR": "Kansas City Royals",
+            "LAA": "Los Angeles Angels", "LAD": "Los Angeles Dodgers",
+            "MIA": "Miami Marlins", "MIL": "Milwaukee Brewers",
+            "MIN": "Minnesota Twins", "NYM": "New York Mets",
+            "NYY": "New York Yankees", "OAK": "Oakland Athletics",
+            "PHI": "Philadelphia Phillies", "PIT": "Pittsburgh Pirates",
+            "SDP": "San Diego Padres", "SFG": "San Francisco Giants",
+            "SEA": "Seattle Mariners", "STL": "St. Louis Cardinals",
+            "TBR": "Tampa Bay Rays", "TEX": "Texas Rangers",
+            "TOR": "Toronto Blue Jays", "WSN": "Washington Nationals",
+        }
+
+        # Try to get recent lineups from today's JSON or use top batters
+        latest_json = None
+        daily_files = sorted(DAILY_DIR.glob("*.json"))
+        for f in reversed(daily_files):
+            if f.name not in ("results.json", "changelog.json"):
+                with open(f) as fh:
+                    latest_json = json.load(fh)
+                break
+
+        # Build per-team lineups from latest daily run
+        team_lineups = {}
+        if latest_json:
+            for g in latest_json.get("games", []):
+                for side in ("home", "away"):
+                    abbr = g.get(side, "")
+                    if abbr and abbr not in team_lineups:
+                        names = g.get(f"{side}_lineup_names", [])
+                        if len(names) >= 9:
+                            team_lineups[abbr] = names[:9]
+
+        def _round_rates(d):
+            return {k: round(v, 4) for k, v in d.items()}
+
+        def _make_pitcher_json(profile):
+            if not profile:
+                return {"throws": "R", "L": _round_rates(LEAGUE_RATES), "R": _round_rates(LEAGUE_RATES)}
+            return {
+                "throws": profile.get("throws", "R"),
+                "L": _round_rates(profile.get("L", LEAGUE_RATES)),
+                "R": _round_rates(profile.get("R", LEAGUE_RATES)),
+            }
+
+        # Default batter (league average)
+        default_batter = {
+            "name": "League Average",
+            "bats": "R",
+            "speed": 100,
+            "profile": {"R": _round_rates(LEAGUE_RATES), "L": _round_rates(LEAGUE_RATES)},
+        }
+
+        teams_data = {}
+        for abbr in TEAMS:
+            # Lineup: try to resolve from daily data or use defaults
+            lineup = []
+            lineup_names = team_lineups.get(abbr, [])
+
+            if lineup_names:
+                from src.data.fetch import resolve_rg_player_to_id
+                for name in lineup_names[:9]:
+                    pid = resolve_rg_player_to_id(name, cumulative)
+                    if pid and pid in batter_profiles:
+                        prof = batter_profiles[pid]
+                        lineup.append({
+                            "name": name,
+                            "bats": batter_hands.get(pid, "R"),
+                            "speed": batter_speeds.get(pid, 100),
+                            "profile": {
+                                "R": _round_rates(prof.get("R", LEAGUE_RATES)),
+                                "L": _round_rates(prof.get("L", LEAGUE_RATES)),
+                            },
+                        })
+                    else:
+                        lineup.append({**default_batter, "name": name})
+
+            # Pad to 9 with defaults
+            while len(lineup) < 9:
+                lineup.append(default_batter)
+
+            # Starter: use the pitcher from today's data if available
+            starter_name = "Unknown"
+            starter_profile = None
+            if latest_json:
+                from src.data.fetch import resolve_rg_player_to_id
+                for g in latest_json.get("games", []):
+                    for side in ("home", "away"):
+                        if g.get(side) == abbr:
+                            sp_name = g.get(f"{side}_pitcher", "")
+                            if sp_name and sp_name not in ("TBD", "Unknown"):
+                                starter_name = sp_name
+                                pid = resolve_rg_player_to_id(sp_name, cumulative)
+                                if pid and pid in pitcher_profiles:
+                                    starter_profile = pitcher_profiles[pid]
+
+            # Bullpen
+            bp = team_bullpen_profiles.get(abbr)
+            bullpen_hi = _make_pitcher_json(bp["hi"] if bp else None)
+            bullpen_lo = _make_pitcher_json(bp["lo"] if bp else None)
+
+            starter_json = _make_pitcher_json(starter_profile)
+            starter_json["name"] = starter_name
+
+            teams_data[abbr] = {
+                "name": TEAM_NAMES.get(abbr, abbr),
+                "lineup": lineup,
+                "starter": starter_json,
+                "bullpenHi": bullpen_hi,
+                "bullpenLo": bullpen_lo,
+            }
+
+        # Park factors
+        park_factors = {}
+        for abbr in TEAMS:
+            try:
+                pf = get_park_factors(abbr)
+                park_factors[abbr] = {k: round(v, 3) for k, v in pf.items() if isinstance(v, (int, float))}
+            except Exception:
+                park_factors[abbr] = {}
+
+        return {
+            "teams": teams_data,
+            "parkFactors": park_factors,
+            "leagueRates": _round_rates(LEAGUE_RATES),
+        }
+
+    except Exception as e:
+        print(f"  WARNING: Could not build sim data: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 
 def _load_changelog():
