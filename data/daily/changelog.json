@@ -1,0 +1,160 @@
+[
+  {
+    "date": "2026-03-26",
+    "prev_mode": "preview",
+    "new_mode": "late",
+    "timestamp": "2026-03-26T17:43:49.152653",
+    "game_diffs": [
+      {
+        "away": "ARI",
+        "home": "LAD",
+        "preview_fav": "LAD",
+        "preview_fav_pct": 56.6,
+        "final_fav": null,
+        "final_fav_pct": null,
+        "wp_shift": -56.6,
+        "wp_shift_abs": 56.6,
+        "preview_edge": 10.9,
+        "final_edge": 0
+      },
+      {
+        "away": "BOS",
+        "home": "CIN",
+        "preview_fav": "BOS",
+        "preview_fav_pct": 53.5,
+        "final_fav": "BOS",
+        "final_fav_pct": 53.7,
+        "wp_shift": -0.2,
+        "wp_shift_abs": 0.2,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "CLE",
+        "home": "SEA",
+        "preview_fav": "SEA",
+        "preview_fav_pct": 59.0,
+        "final_fav": null,
+        "final_fav_pct": null,
+        "wp_shift": -59.0,
+        "wp_shift_abs": 59.0,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "CWS",
+        "home": "MIL",
+        "preview_fav": "MIL",
+        "preview_fav_pct": 64.5,
+        "final_fav": "MIL",
+        "final_fav_pct": 64.2,
+        "wp_shift": -0.4,
+        "wp_shift_abs": 0.4,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "DET",
+        "home": "SDP",
+        "preview_fav": "SDP",
+        "preview_fav_pct": 54.9,
+        "final_fav": "SDP",
+        "final_fav_pct": 55.2,
+        "wp_shift": 0.4,
+        "wp_shift_abs": 0.4,
+        "preview_edge": 7.2,
+        "final_edge": 6.5
+      },
+      {
+        "away": "LAA",
+        "home": "HOU",
+        "preview_fav": "HOU",
+        "preview_fav_pct": 57.5,
+        "final_fav": "HOU",
+        "final_fav_pct": 57.7,
+        "wp_shift": 0.2,
+        "wp_shift_abs": 0.2,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "MIN",
+        "home": "BAL",
+        "preview_fav": "BAL",
+        "preview_fav_pct": 55.9,
+        "final_fav": "BAL",
+        "final_fav_pct": 55.6,
+        "wp_shift": -0.3,
+        "wp_shift_abs": 0.3,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "PIT",
+        "home": "NYM",
+        "preview_fav": "NYM",
+        "preview_fav_pct": 50.4,
+        "final_fav": "NYM",
+        "final_fav_pct": 51.0,
+        "wp_shift": 0.6,
+        "wp_shift_abs": 0.6,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "TBR",
+        "home": "STL",
+        "preview_fav": "STL",
+        "preview_fav_pct": 57.4,
+        "final_fav": "STL",
+        "final_fav_pct": 57.4,
+        "wp_shift": 0.0,
+        "wp_shift_abs": 0.0,
+        "preview_edge": 7.6,
+        "final_edge": 7.9
+      },
+      {
+        "away": "TEX",
+        "home": "PHI",
+        "preview_fav": "PHI",
+        "preview_fav_pct": 52.7,
+        "final_fav": "PHI",
+        "final_fav_pct": 52.5,
+        "wp_shift": -0.1,
+        "wp_shift_abs": 0.1,
+        "preview_edge": 0,
+        "final_edge": 6.5
+      },
+      {
+        "away": "WSN",
+        "home": "CHC",
+        "preview_fav": "CHC",
+        "preview_fav_pct": 58.7,
+        "final_fav": "CHC",
+        "final_fav_pct": 60.8,
+        "wp_shift": 2.1,
+        "wp_shift_abs": 2.1,
+        "preview_edge": 7.3,
+        "final_edge": 0
+      }
+    ],
+    "pick_changes": [
+      {
+        "type": "dropped",
+        "description": "ARI ML dropped (was +210 at 10.9% edge)"
+      },
+      {
+        "type": "shifted",
+        "description": "SDP ML edge 7.2% \u2192 6.5% (-0.7%)"
+      },
+      {
+        "type": "added",
+        "description": "TEX ML added (+144 at 6.5% edge)"
+      },
+      {
+        "type": "dropped",
+        "description": "WSN ML dropped (was +192 at 7.3% edge)"
+      }
+    ]
+  }
+]
