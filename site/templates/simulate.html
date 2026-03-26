@@ -371,6 +371,32 @@
     letter-spacing: 0.04em;
 }
 
+/* ── Box Score ── */
+.boxscore-card { padding: 0; margin-bottom: 1rem; overflow: hidden; }
+.boxscore-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.bx-tab {
+    flex: 1; padding: 0.6rem 1rem; font-family: inherit; font-size: 0.82rem;
+    font-weight: 600; border: none; background: none; cursor: pointer;
+    color: var(--text-muted); transition: color 0.2s, box-shadow 0.2s;
+}
+.bx-tab.active { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+.bx-panel { padding: 0; }
+.bx-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.bx-table th {
+    text-align: center; padding: 0.5rem 0.4rem; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
+    font-weight: 600; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.01);
+}
+.bx-table th.bx-name { text-align: left; padding-left: 1rem; }
+.bx-table td {
+    text-align: center; padding: 0.4rem; border-bottom: 1px solid rgba(0,0,0,0.03);
+    font-family: 'Inter', monospace; font-size: 0.82rem;
+}
+.bx-table td.bx-name-cell { text-align: left; padding-left: 1rem; font-weight: 500; font-family: 'Inter', sans-serif; }
+.bx-table td.bx-name-cell .bx-pos { font-size: 0.65rem; color: var(--text-muted); margin-left: 4px; }
+.bx-table tbody tr:last-child td { border-bottom: none; }
+.bx-table tbody tr:hover { background: rgba(24, 119, 242, 0.03); }
+
 /* ── Responsive ── */
 @media (max-width: 720px) {
     .sim-main { grid-template-columns: 1fr; }
@@ -530,6 +556,20 @@
         </div>
     </div>
 
+    <!-- Box Score -->
+    <div class="glass boxscore-card" id="boxscore-card" style="display:none;">
+        <div class="boxscore-tabs">
+            <button class="bx-tab active" data-side="away" id="bx-tab-away">Away</button>
+            <button class="bx-tab" data-side="home" id="bx-tab-home">Home</button>
+        </div>
+        <div id="bx-away" class="bx-panel">
+            <table class="bx-table"><thead><tr><th class="bx-name">Batter</th><th>AB</th><th>R</th><th>H</th><th>RBI</th><th>BB</th><th>K</th><th>AVG</th></tr></thead><tbody id="bx-away-body"></tbody></table>
+        </div>
+        <div id="bx-home" class="bx-panel" style="display:none;">
+            <table class="bx-table"><thead><tr><th class="bx-name">Batter</th><th>AB</th><th>R</th><th>H</th><th>RBI</th><th>BB</th><th>K</th><th>AVG</th></tr></thead><tbody id="bx-home-body"></tbody></table>
+        </div>
+    </div>
+
     <!-- Play-by-Play -->
     <div class="glass play-log-card">
         <h3>Play-by-Play</h3>
@@ -560,12 +600,10 @@
 (function() {
     'use strict';
 
-    /* ── Constants ── */
-    const OUTCOMES = ['HR','3B','2B','1B','BB','HBP','K','OUT'];
+    const PROB_ORDER = ['HR','3B','2B','1B','BB','HBP','K','OUT'];
     const OUTCOME_LABELS = { HR:'Home Run', '3B':'Triple', '2B':'Double', '1B':'Single', BB:'Walk', HBP:'Hit By Pitch', K:'Strikeout', OUT:'Out' };
-    const HIT_OUTCOMES = new Set(['HR','3B','2B','1B']);
+    const HIT_SET = new Set(['HR','3B','2B','1B']);
 
-    /* ── DOM refs ── */
     const $  = id => document.getElementById(id);
     const selAway = $('sel-away'), selHome = $('sel-home');
     const btnStart = $('btn-start'), btnNext = $('btn-next'), btnAuto = $('btn-auto'), btnSimEnd = $('btn-sim-end');
@@ -579,21 +617,31 @@
     let game = null;
     let autoInterval = null;
     let isAuto = false;
+    let awayAbbr = '', homeAbbr = '';
 
-    /* ── Populate team selects ── */
+    // Tracking state the sim.js doesn't expose
+    let awayInningRuns = [], homeInningRuns = [];
+    let awayHits = 0, homeHits = 0;
+    let awayErrors = 0, homeErrors = 0;
+    let lastInning = 1, lastHalf = 'top';
+    let currentInningRuns = 0;
+
+    // Box score tracking: per-batter stats
+    let boxAway = []; // [{name, ab, r, h, rbi, bb, k}, ...]
+    let boxHome = [];
+
     function initSelects() {
         const data = window.SIM_DATA;
-        if (!data || !data.teams) { console.warn('SIM_DATA not loaded'); return; }
+        if (!data || !data.teams) return;
         const abbrs = Object.keys(data.teams).sort();
         [selAway, selHome].forEach((sel, idx) => {
             sel.innerHTML = '<option value="">-- Pick --</option>';
             abbrs.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a;
-                opt.textContent = a + ' - ' + data.teams[a].name;
+                opt.textContent = a + ' — ' + data.teams[a].name;
                 sel.appendChild(opt);
             });
-            // sensible defaults
             if (idx === 0 && abbrs.includes('NYY')) sel.value = 'NYY';
             if (idx === 1 && abbrs.includes('BOS')) sel.value = 'BOS';
         });
@@ -601,8 +649,7 @@
     }
 
     function updateStarterNames() {
-        const data = window.SIM_DATA;
-        if (!data) return;
+        const data = window.SIM_DATA; if (!data) return;
         const a = selAway.value, h = selHome.value;
         starterAway.textContent = a && data.teams[a] ? 'SP: ' + data.teams[a].starter.name : '';
         starterHome.textContent = h && data.teams[h] ? 'SP: ' + data.teams[h].starter.name : '';
@@ -610,40 +657,32 @@
     selAway.addEventListener('change', updateStarterNames);
     selHome.addEventListener('change', updateStarterNames);
 
-    /* ── Build probability bar rows ── */
     function buildProbBars() {
         probBarsEl.innerHTML = '';
-        OUTCOMES.forEach(o => {
+        PROB_ORDER.forEach(o => {
             const row = document.createElement('div');
             row.className = 'prob-row';
-            row.innerHTML = `
-                <span class="prob-label">${o}</span>
-                <div class="prob-bar-bg"><div class="prob-bar-fill bar-${o}" id="bar-${o}" style="width:0%"></div></div>
-                <span class="prob-pct" id="pct-${o}">0%</span>`;
+            row.innerHTML = `<span class="prob-label">${o}</span><div class="prob-bar-bg"><div class="prob-bar-fill bar-${o}" id="bar-${o}" style="width:0%"></div></div><span class="prob-pct" id="pct-${o}">0%</span>`;
             probBarsEl.appendChild(row);
         });
     }
     buildProbBars();
 
-    /* ── Update probability display ── */
     function showProbs(probs, highlight) {
-        OUTCOMES.forEach(o => {
+        if (!probs) return;
+        PROB_ORDER.forEach(o => {
             const pct = ((probs[o] || 0) * 100);
             const bar = $('bar-' + o);
             const label = $('pct-' + o);
-            bar.style.width = pct.toFixed(1) + '%';
+            if (!bar || !label) return;
+            bar.style.width = Math.min(pct, 100).toFixed(1) + '%';
             label.textContent = pct.toFixed(1) + '%';
             bar.classList.remove('pulse');
-            if (highlight === o) {
-                // force reflow for re-animation
-                void bar.offsetWidth;
-                bar.classList.add('pulse');
-            }
+            if (highlight === o) { void bar.offsetWidth; bar.classList.add('pulse'); }
         });
     }
 
-    /* ── Scoreboard ── */
-    function resetScoreboard(awayAbbr, homeAbbr) {
+    function resetScoreboard() {
         $('sb-away').textContent = awayAbbr;
         $('sb-home').textContent = homeAbbr;
         ['away','home'].forEach(side => {
@@ -656,71 +695,164 @@
         });
     }
 
-    function updateScoreboard(state) {
+    function updateScoreboard() {
+        if (!game) return;
         ['away','home'].forEach(side => {
+            const innings = side === 'away' ? awayInningRuns : homeInningRuns;
             const row = $('row-' + side);
             const cells = row.querySelectorAll('td:not(.team-cell):not(.total-cell)');
-            const innings = state[side + 'Innings'];
             for (let i = 0; i < cells.length; i++) {
                 if (i < innings.length) {
                     cells[i].textContent = innings[i];
                     cells[i].className = '';
-                } else if (i === state.inning - 1 && ((side === 'away' && state.isTop) || (side === 'home' && !state.isTop))) {
-                    cells[i].textContent = '';
+                } else if (i === game._inning - 1 && ((side === 'away' && game._halfInning === 'top') || (side === 'home' && game._halfInning === 'bottom'))) {
+                    cells[i].textContent = currentInningRuns;
                     cells[i].className = 'inning-active';
                 } else {
                     cells[i].textContent = '-';
                     cells[i].className = 'inning-future';
                 }
             }
-            $('r-' + side).textContent = state[side + 'Runs'];
-            $('h-' + side).textContent = state[side + 'Hits'];
-            $('e-' + side).textContent = state[side + 'Errors'] || 0;
+            $('r-' + side).textContent = game._score[side === 'away' ? 0 : 1];
+            $('h-' + side).textContent = side === 'away' ? awayHits : homeHits;
+            $('e-' + side).textContent = side === 'away' ? awayErrors : homeErrors;
         });
     }
 
-    /* ── Diamond ── */
     function updateDiamond(bases, outs) {
-        [1,2,3].forEach(b => {
-            const occ = bases[b] || false;
-            $('base-' + b).classList.toggle('occupied', occ);
-            $('runner-' + b).classList.toggle('visible', occ);
+        [0,1,2].forEach(i => {
+            const occ = bases ? bases[i] : false;
+            const baseId = i + 1;
+            $('base-' + baseId).classList.toggle('occupied', !!occ);
+            $('runner-' + baseId).classList.toggle('visible', !!occ);
         });
         for (let i = 1; i <= 3; i++) {
-            $('out-' + i).classList.toggle('active', i <= outs);
+            $('out-' + i).classList.toggle('active', i <= (outs || 0));
         }
     }
 
-    /* ── Play log ── */
-    function addPlayEntry(pa) {
-        // Remove placeholder
+    function addPlayEntry(ev) {
         if (playLog.querySelector('[style]')) playLog.innerHTML = '';
         const div = document.createElement('div');
         div.className = 'play-entry';
-        const arrow = pa.isTop ? '\u25B2' : '\u25BC';
+        const arrow = ev.halfInning === 'top' ? '\u25B2' : '\u25BC';
+        const name = ev.batter ? ev.batter.name : '';
+        const outcome = ev.outcome || '';
         let runsHtml = '';
-        if (pa.runsScored > 0) runsHtml = `<span class="play-runs">+${pa.runsScored} run${pa.runsScored > 1 ? 's' : ''}</span>`;
-        div.innerHTML = `
-            <span class="play-inning">${arrow}${pa.inning}</span>
-            <span class="play-batter">${pa.batterName}</span>
-            <span class="play-outcome outcome-${pa.outcome}">${OUTCOME_LABELS[pa.outcome] || pa.outcome}</span>
-            ${runsHtml}`;
+        if (ev.runsScored > 0) runsHtml = `<span class="play-runs">+${ev.runsScored}</span>`;
+        div.innerHTML = `<span class="play-inning">${arrow}${ev.inning}</span><span class="play-batter">${name}</span><span class="play-outcome outcome-${outcome}">${OUTCOME_LABELS[outcome] || outcome || 'CS'}</span>${runsHtml}`;
         playLog.prepend(div);
     }
 
-    /* ── Status text ── */
-    function updateStatus(state) {
-        if (state.gameOver) {
-            const winner = state.awayRuns > state.homeRuns ? state.awayAbbr : state.homeAbbr;
-            statusText.innerHTML = `<span class="game-over-badge">Final</span> ${state.awayAbbr} ${state.awayRuns} - ${state.homeAbbr} ${state.homeRuns}`;
+    function updateStatus() {
+        if (!game) { statusText.textContent = 'No game'; return; }
+        if (game.isGameOver) {
+            statusText.innerHTML = `<span class="game-over-badge">Final</span> ${awayAbbr} ${game._score[0]} - ${homeAbbr} ${game._score[1]}`;
         } else {
-            const half = state.isTop ? 'Top' : 'Bot';
-            const ordinal = state.inning === 1 ? '1st' : state.inning === 2 ? '2nd' : state.inning === 3 ? '3rd' : state.inning + 'th';
-            statusText.textContent = `${half} ${ordinal}, ${state.outs} Out${state.outs !== 1 ? 's' : ''}`;
+            const half = game._halfInning === 'top' ? 'Top' : 'Bot';
+            const inn = game._inning;
+            const ord = inn === 1 ? '1st' : inn === 2 ? '2nd' : inn === 3 ? '3rd' : inn + 'th';
+            const outs = game._outs || 0;
+            statusText.textContent = `${half} ${ord}, ${outs} Out${outs !== 1 ? 's' : ''}`;
         }
     }
 
-    /* ── Game start ── */
+    // Box score
+    function initBoxScore(awayTeam, homeTeam) {
+        boxAway = awayTeam.lineup.map(b => ({ name: b.name, ab: 0, r: 0, h: 0, rbi: 0, bb: 0, k: 0 }));
+        boxHome = homeTeam.lineup.map(b => ({ name: b.name, ab: 0, r: 0, h: 0, rbi: 0, bb: 0, k: 0 }));
+        $('boxscore-card').style.display = '';
+        $('bx-tab-away').textContent = awayAbbr;
+        $('bx-tab-home').textContent = homeAbbr;
+        $('bx-tab-away').classList.add('active');
+        $('bx-tab-home').classList.remove('active');
+        $('bx-away').style.display = '';
+        $('bx-home').style.display = 'none';
+        renderBoxScore();
+    }
+
+    function updateBoxFromEvent(ev) {
+        if (!ev || !ev.outcome || !ev.batter) return;
+        const isTop = ev.halfInning === 'top';
+        const box = isTop ? boxAway : boxHome;
+        const slot = ev.batter.slot;
+        if (slot == null || !box[slot]) return;
+        const b = box[slot];
+        const o = ev.outcome;
+
+        if (o === 'BB' || o === 'HBP') {
+            b.bb++;
+        } else {
+            b.ab++;
+            if (HIT_SET.has(o)) b.h++;
+            if (o === 'K') b.k++;
+        }
+        // RBI = runs scored on this PA outcome (excluding pre-PA events like WP/SB)
+        const preScore = ev.prePlay.score[0] + ev.prePlay.score[1];
+        const postScore = ev.postPlay.score[0] + ev.postPlay.score[1];
+        b.rbi += (postScore - preScore);
+
+        // Runs scored: check if any previously-on-base runners scored
+        // (We track runs simply as score changes for now)
+    }
+
+    function trackRunsScored(ev) {
+        // Award runs to batters who were on base and scored
+        // Simple heuristic: if bases had runners that are now gone and score increased
+        if (!ev || !ev.postPlay) return;
+        const isTop = ev.halfInning === 'top';
+        const box = isTop ? boxAway : boxHome;
+        // Runs scored tracked globally, not per-batter for 'R' column
+        // We'll update 'R' after each inning ends based on score
+    }
+
+    function renderBoxScore() {
+        ['away','home'].forEach(side => {
+            const box = side === 'away' ? boxAway : boxHome;
+            const tbody = $('bx-' + side + '-body');
+            tbody.innerHTML = '';
+            box.forEach((b, i) => {
+                const avg = b.ab > 0 ? (b.h / b.ab).toFixed(3) : '.000';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="bx-name-cell">${b.name} <span class="bx-pos">${i+1}</span></td><td>${b.ab}</td><td>${b.r}</td><td>${b.h}</td><td>${b.rbi}</td><td>${b.bb}</td><td>${b.k}</td><td>${avg}</td>`;
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    // Box score tab switching
+    $('bx-tab-away').addEventListener('click', () => {
+        $('bx-tab-away').classList.add('active'); $('bx-tab-home').classList.remove('active');
+        $('bx-away').style.display = ''; $('bx-home').style.display = 'none';
+    });
+    $('bx-tab-home').addEventListener('click', () => {
+        $('bx-tab-home').classList.add('active'); $('bx-tab-away').classList.remove('active');
+        $('bx-home').style.display = ''; $('bx-away').style.display = 'none';
+    });
+
+    // Inning tracking
+    function checkInningChange(ev) {
+        if (!ev) return;
+        const inn = ev.inning;
+        const half = ev.halfInning;
+        if (inn !== lastInning || half !== lastHalf) {
+            // Previous half-inning ended — record runs
+            if (lastHalf === 'top') {
+                awayInningRuns.push(currentInningRuns);
+            } else {
+                homeInningRuns.push(currentInningRuns);
+            }
+            currentInningRuns = 0;
+            lastInning = inn;
+            lastHalf = half;
+        }
+        // Track runs in current half-inning
+        const preTotal = ev.prePlay.score[0] + ev.prePlay.score[1];
+        const postTotal = ev.postPlay.score[0] + ev.postPlay.score[1];
+        currentInningRuns += (postTotal - preTotal);
+    }
+
+    // Start game
     btnStart.addEventListener('click', () => {
         const data = window.SIM_DATA;
         if (!data) return;
@@ -729,68 +861,88 @@
         if (aKey === hKey) { alert('Pick two different teams'); return; }
 
         stopAuto();
+        awayAbbr = aKey; homeAbbr = hKey;
         const awayTeam = data.teams[aKey];
         const homeTeam = data.teams[hKey];
         const parkFac = (data.parkFactors && data.parkFactors[hKey]) || {};
-        const leagueRates = data.leagueRates || {};
 
-        game = new SimGame(
-            { abbr: aKey, ...awayTeam },
-            { abbr: hKey, ...homeTeam },
-            parkFac, leagueRates
-        );
+        // SimGame(homeTeam, awayTeam, parkFactors, seed)
+        game = new SimGame(homeTeam, awayTeam, parkFac);
 
-        resetScoreboard(aKey, hKey);
-        updateDiamond({}, 0);
+        // Reset tracking
+        awayInningRuns = []; homeInningRuns = [];
+        awayHits = 0; homeHits = 0;
+        awayErrors = 0; homeErrors = 0;
+        lastInning = 1; lastHalf = 'top'; currentInningRuns = 0;
+
+        resetScoreboard();
+        updateDiamond(null, 0);
         playLog.innerHTML = '<div class="play-entry" style="color:var(--text-muted); font-style:italic;">Game started. Press Next PA.</div>';
         buildProbBars();
-
-        // Show first matchup probabilities
-        const first = game.peekNextPA();
-        if (first) {
-            matchupText.innerHTML = `<strong>${first.batterName}</strong> <span class="vs">vs</span> <strong>${first.pitcherName}</strong>`;
-            showProbs(first.probs, null);
-        }
+        initBoxScore(awayTeam, homeTeam);
+        matchupText.textContent = 'Press Next PA to begin';
 
         btnNext.disabled = false;
         btnAuto.disabled = false;
         btnSimEnd.disabled = false;
-        updateStatus(game.getState());
+        updateStatus();
     });
 
-    /* ── Next PA ── */
+    // Process one PA
     function doNextPA() {
-        if (!game) return;
-        const state = game.getState();
-        if (state.gameOver) { stopAuto(); return; }
+        if (!game || game.isGameOver) { stopAuto(); return; }
 
-        const result = game.nextPA();
-        updateScoreboard(game.getState());
-        updateDiamond(game.getState().bases, game.getState().outs);
-        updateStatus(game.getState());
-        showProbs(result.probs, result.outcome);
-        addPlayEntry(result);
+        const ev = game.nextPA();
+        if (!ev) { stopAuto(); return; }
 
-        // Peek at next PA for matchup display
-        const next = game.peekNextPA();
-        if (next) {
-            setTimeout(() => {
-                matchupText.innerHTML = `<strong>${next.batterName}</strong> <span class="vs">vs</span> <strong>${next.pitcherName}</strong>`;
-                showProbs(next.probs, null);
-            }, 400);
+        // Track inning changes
+        checkInningChange(ev);
+
+        // Track hits and errors
+        if (ev.outcome && HIT_SET.has(ev.outcome)) {
+            if (ev.halfInning === 'top') awayHits++; else homeHits++;
+        }
+        // Detect error: OUT outcome but no out was added
+        if (ev.outcome === 'OUT' && ev.postPlay.outs === ev.prePlay.outs) {
+            if (ev.halfInning === 'top') homeErrors++; else awayErrors++; // fielding team gets error
         }
 
-        if (game.getState().gameOver) {
+        // Update box score
+        updateBoxFromEvent(ev);
+        renderBoxScore();
+
+        // Update UI
+        updateScoreboard();
+        updateDiamond(ev.postPlay.bases, ev.postPlay.outs);
+        updateStatus();
+        if (ev.probs) showProbs(ev.probs, ev.outcome);
+        addPlayEntry(ev);
+
+        // Update matchup text
+        const isTop = ev.halfInning === 'top';
+        const batterName = ev.batter ? ev.batter.name : '?';
+        matchupText.innerHTML = ev.description || `${batterName}: ${ev.outcome}`;
+
+        // Game over?
+        if (ev.gameOver || game.isGameOver) {
+            // Flush current inning runs
+            if (game._halfInning === 'top' || lastHalf === 'top') {
+                awayInningRuns.push(currentInningRuns);
+            } else {
+                homeInningRuns.push(currentInningRuns);
+            }
+            updateScoreboard();
             stopAuto();
             btnNext.disabled = true;
             btnAuto.disabled = true;
             btnSimEnd.disabled = true;
+            matchupText.innerHTML = '<strong>Game Over</strong>';
+            updateStatus();
         }
     }
 
     btnNext.addEventListener('click', doNextPA);
 
-    /* ── Auto-play ── */
     function stopAuto() {
         if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
         isAuto = false;
@@ -803,14 +955,11 @@
         btnAuto.textContent = 'Pause';
         const ms = parseInt(speedSlider.value) || 800;
         autoInterval = setInterval(() => {
-            if (!game || game.getState().gameOver) { stopAuto(); return; }
+            if (!game || game.isGameOver) { stopAuto(); return; }
             doNextPA();
         }, ms);
     }
-
-    btnAuto.addEventListener('click', () => {
-        if (isAuto) stopAuto(); else startAuto();
-    });
+    btnAuto.addEventListener('click', () => { if (isAuto) stopAuto(); else startAuto(); });
 
     speedSlider.addEventListener('input', () => {
         const ms = parseInt(speedSlider.value);
@@ -818,39 +967,19 @@
         if (isAuto) { stopAuto(); startAuto(); }
     });
 
-    /* ── Sim to End ── */
     btnSimEnd.addEventListener('click', () => {
         if (!game) return;
         stopAuto();
         let safety = 0;
-        while (!game.getState().gameOver && safety < 500) {
-            const result = game.nextPA();
-            addPlayEntry(result);
+        while (!game.isGameOver && safety < 500) {
+            doNextPA();
             safety++;
         }
-        const st = game.getState();
-        updateScoreboard(st);
-        updateDiamond(st.bases, st.outs);
-        updateStatus(st);
-        btnNext.disabled = true;
-        btnAuto.disabled = true;
-        btnSimEnd.disabled = true;
-
-        // Show final probs of last PA
-        matchupText.innerHTML = '<strong>Game Over</strong>';
     });
 
-    /* ── Init ── */
-    if (window.SIM_DATA) {
-        initSelects();
-    } else {
-        // Wait for sim.js to load data
-        window.addEventListener('SIM_DATA_READY', initSelects);
-        // Fallback: check periodically
-        const poll = setInterval(() => {
-            if (window.SIM_DATA) { clearInterval(poll); initSelects(); }
-        }, 200);
-    }
+    // Init
+    if (window.SIM_DATA) { initSelects(); }
+    else { const poll = setInterval(() => { if (window.SIM_DATA) { clearInterval(poll); initSelects(); } }, 200); }
 })();
 </script>
 {% endblock %}
