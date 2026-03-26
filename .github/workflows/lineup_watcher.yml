@@ -1,0 +1,86 @@
+name: Lineup Watcher
+
+on:
+  schedule:
+    # Every 15 minutes, 10 AM – 8 PM ET (14:00–00:00 UTC)
+    # GitHub Actions cron doesn't support ranges in step, so we use
+    # two rules to cover the window:
+    - cron: '*/15 14-23 * * *'  # 10 AM – 7:45 PM ET
+    - cron: '0 0 * * *'         # 8 PM ET (midnight UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check-lineups:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    # Only run during MLB season (late March through October)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'schedule')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up environment
+        run: |
+          echo "ODDS_API_KEY=${{ secrets.ODDS_API_KEY }}" >> .env
+
+      - name: Check for new lineups
+        id: check
+        run: |
+          set +e
+          OUTPUT=$(python3 scripts/check_lineups.py 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          set -e
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+
+            # Determine mode: if most games confirmed, run as late (final)
+            # Otherwise run as early (update with what we have)
+            CONFIRMED=$(echo "$OUTPUT" | grep "Games:" | grep -oP '\d+(?=/)')
+            TOTAL=$(echo "$OUTPUT" | grep "Games:" | grep -oP '(?<=/)\d+')
+            PREV_MODE=$(echo "$OUTPUT" | grep "Previous run:" | awk '{print $NF}')
+
+            if [ -n "$CONFIRMED" ] && [ -n "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
+              PCT=$((CONFIRMED * 100 / TOTAL))
+              echo "  Confirmation rate: ${PCT}%"
+
+              if [ "$PCT" -ge 80 ]; then
+                echo "mode=late" >> $GITHUB_OUTPUT
+              else
+                echo "mode=early" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "mode=early" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger full pipeline
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MODE="${{ steps.check.outputs.mode }}"
+          echo "Triggering daily pipeline in ${MODE} mode..."
+          gh workflow run daily_picks.yml \
+            -f mode="${MODE}" \
+            --repo ${{ github.repository }}
