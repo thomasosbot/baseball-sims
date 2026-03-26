@@ -268,6 +268,7 @@
     color: var(--accent);
 }
 .play-batter { font-weight: 600; color: var(--text); min-width: 100px; }
+.play-desc { flex: 1; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4; }
 .play-outcome { color: var(--text-secondary); }
 .play-outcome.outcome-HR  { color: #22c55e; font-weight: 700; }
 .play-outcome.outcome-3B  { color: #16a34a; font-weight: 600; }
@@ -436,7 +437,6 @@
                     <th></th>
                     <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
                     <th>6</th><th>7</th><th>8</th><th>9</th>
-                    <th id="extra-headers"></th>
                     <th class="total-cell">R</th>
                     <th class="total-cell">H</th>
                     <th class="total-cell">E</th>
@@ -510,6 +510,8 @@
 
                 <!-- Mound -->
                 <circle cx="200" cy="200" r="5" fill="#c4a265" stroke="#a88c50" stroke-width="1" filter="url(#shadowSm)"/>
+                <!-- Pitcher name -->
+                <text id="pitcher-name" x="200" y="222" font-size="9" fill="#fff" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.8"></text>
 
                 <!-- Home plate (pentagon) -->
                 <polygon points="200,304 192,296 192,288 208,288 208,296"
@@ -534,6 +536,11 @@
                 <circle id="runner-1" class="runner-dot" cx="300" cy="200" r="8" filter="url(#glowGold)"/>
                 <circle id="runner-2" class="runner-dot" cx="200" cy="100" r="8" filter="url(#glowGold)"/>
                 <circle id="runner-3" class="runner-dot" cx="100" cy="200" r="8" filter="url(#glowGold)"/>
+
+                <!-- Runner name labels -->
+                <text id="runner-name-1" x="300" y="185" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
+                <text id="runner-name-2" x="200" y="88" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
+                <text id="runner-name-3" x="100" y="185" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
 
                 <!-- Base labels -->
                 <text x="320" y="205" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" opacity="0.6">1B</text>
@@ -719,16 +726,194 @@
         });
     }
 
+    // Runner name tracking: [1B, 2B, 3B] — null or last name string
+    let baseRunners = [null, null, null];
+
+    function getLastName(fullName) {
+        if (!fullName) return '';
+        const parts = fullName.split(' ');
+        return parts[parts.length - 1];
+    }
+
     function updateDiamond(bases, outs) {
         [0,1,2].forEach(i => {
             const occ = bases ? bases[i] : false;
             const baseId = i + 1;
             $('base-' + baseId).classList.toggle('occupied', !!occ);
             $('runner-' + baseId).classList.toggle('visible', !!occ);
+            const nameEl = $('runner-name-' + baseId);
+            if (occ && baseRunners[i]) {
+                nameEl.textContent = baseRunners[i];
+                nameEl.setAttribute('opacity', '1');
+            } else {
+                nameEl.textContent = '';
+                nameEl.setAttribute('opacity', '0');
+            }
         });
         for (let i = 1; i <= 3; i++) {
             $('out-' + i).classList.toggle('active', i <= (outs || 0));
         }
+    }
+
+    function updatePitcherName(ev) {
+        if (!ev || !game) return;
+        const isTop = ev.halfInning === 'top';
+        const pitchingTeam = isTop ? game.homeTeam : game.awayTeam;
+        let name = '';
+        if (ev.pitcherType === 'starter') {
+            name = pitchingTeam.starter ? pitchingTeam.starter.name || '' : '';
+        } else {
+            name = 'Bullpen';
+        }
+        $('pitcher-name').textContent = getLastName(name);
+    }
+
+    function updateBaseRunners(ev) {
+        if (!ev || !ev.outcome) return;
+        const batterName = ev.batter ? getLastName(ev.batter.name) : '';
+        const preBases = ev.prePlay.bases;
+        const postBases = ev.postPlay.bases;
+        const outcome = ev.outcome;
+
+        // Figure out new runner positions based on outcome
+        // Start with previous runners, then advance based on what happened
+        const newRunners = [null, null, null];
+
+        if (outcome === 'HR') {
+            // Everyone scores, bases empty
+        } else if (outcome === 'BB' || outcome === 'HBP') {
+            // Walk: push runners forward on forced bases, batter to 1B
+            if (preBases[0]) {
+                if (preBases[1]) {
+                    if (preBases[2]) {
+                        // Bases loaded: 3B scores, everyone shifts
+                        newRunners[2] = baseRunners[1];
+                    } else {
+                        newRunners[2] = baseRunners[1];
+                    }
+                    newRunners[1] = baseRunners[0];
+                } else {
+                    newRunners[1] = baseRunners[0];
+                }
+            }
+            newRunners[0] = batterName;
+            // Keep non-forced runners
+            if (postBases[2] && !newRunners[2]) newRunners[2] = baseRunners[2];
+        } else if (HIT_SET.has(outcome)) {
+            // Hit: batter goes to the base, runners advance
+            // We can't perfectly track who went where, so use postPlay bases
+            // Put existing runners on their new bases (best effort)
+            // Runners advance from 3B→2B→1B order
+            let prevNames = [];
+            for (let i = 2; i >= 0; i--) {
+                if (preBases[i] && baseRunners[i]) prevNames.push(baseRunners[i]);
+            }
+            // Place batter
+            if (outcome === '1B' && postBases[0]) newRunners[0] = batterName;
+            if (outcome === '2B' && postBases[1]) newRunners[1] = batterName;
+            if (outcome === '3B' && postBases[2]) newRunners[2] = batterName;
+            // Fill remaining occupied bases with previous runners
+            for (let i = 2; i >= 0; i--) {
+                if (postBases[i] && !newRunners[i] && prevNames.length > 0) {
+                    newRunners[i] = prevNames.shift();
+                }
+            }
+        } else if (outcome === 'OUT') {
+            // Out: runners may advance, stay, or be out
+            // Use postPlay to see who's still on base
+            let prevNames = [];
+            for (let i = 2; i >= 0; i--) {
+                if (preBases[i] && baseRunners[i]) prevNames.push(baseRunners[i]);
+            }
+            // Error: batter reaches 1B
+            if (ev.postPlay.outs === ev.prePlay.outs) {
+                newRunners[0] = batterName;
+                for (let i = 2; i >= 1; i--) {
+                    if (postBases[i] && prevNames.length > 0) newRunners[i] = prevNames.shift();
+                }
+            } else {
+                // Normal out or DP: just carry forward whoever is still on base
+                for (let i = 2; i >= 0; i--) {
+                    if (postBases[i] && prevNames.length > 0) newRunners[i] = prevNames.shift();
+                }
+            }
+        } else if (outcome === 'K') {
+            // Strikeout: runners stay put (unless steal/WP moved them pre-PA)
+            for (let i = 0; i < 3; i++) {
+                if (postBases[i]) newRunners[i] = baseRunners[i];
+            }
+        }
+
+        // Handle pre-PA events (SB, WP) that moved runners before the outcome
+        // For SB: a runner moved bases before the PA
+        if (ev.events && ev.events.length > 0) {
+            for (const e of ev.events) {
+                if (e === 'sb_success' || e === 'wild_pitch') {
+                    // Runners already moved in preBases vs the state before events
+                    // Best effort: just use whatever is on the post-state bases
+                }
+            }
+        }
+
+        baseRunners = newRunners;
+    }
+
+    function buildRichDescription(ev) {
+        if (!ev || !ev.batter) return '';
+        const name = ev.batter.name || '?';
+        const o = ev.outcome;
+        const runs = ev.runsScored || 0;
+        const score = ev.postPlay.score;
+        const parts = [];
+
+        // Pre-PA events
+        if (ev.events) {
+            for (const e of ev.events) {
+                if (e === 'sb_success') parts.push('Stolen base!');
+                if (e === 'sb_caught') parts.push('Caught stealing!');
+                if (e === 'wild_pitch') parts.push('Wild pitch — runners advance.');
+            }
+        }
+
+        // Main outcome
+        if (o === 'HR') {
+            const rbi = runs;
+            if (rbi === 1) parts.push(`${name} launches a solo home run!`);
+            else if (rbi === 4) parts.push(`${name} hits a GRAND SLAM!`);
+            else parts.push(`${name} hits a ${rbi}-run homer!`);
+        } else if (o === '3B') {
+            parts.push(`${name} triples to the gap!`);
+        } else if (o === '2B') {
+            parts.push(`${name} doubles off the wall!`);
+        } else if (o === '1B') {
+            parts.push(`${name} lines a single.`);
+        } else if (o === 'BB') {
+            parts.push(`${name} draws a walk.`);
+        } else if (o === 'HBP') {
+            parts.push(`${name} is hit by a pitch.`);
+        } else if (o === 'K') {
+            parts.push(`${name} strikes out swinging.`);
+        } else if (o === 'OUT') {
+            if (ev.postPlay.outs === ev.prePlay.outs) {
+                parts.push(`${name} reaches on an error!`);
+            } else if (ev.postPlay.outs - ev.prePlay.outs >= 2) {
+                parts.push(`${name} grounds into a double play.`);
+            } else if (runs > 0) {
+                parts.push(`${name} hits a sac fly, run scores.`);
+            } else {
+                parts.push(`${name} grounds out.`);
+            }
+        }
+
+        // Scoring context
+        if (runs > 0 && o !== 'HR') {
+            parts.push(`${runs} run${runs > 1 ? 's' : ''} score${runs === 1 ? 's' : ''}.`);
+        }
+        if (runs > 0) {
+            parts.push(`Score: ${awayAbbr} ${score[0]}, ${homeAbbr} ${score[1]}.`);
+        }
+
+        return parts.join(' ');
     }
 
     function addPlayEntry(ev) {
@@ -736,11 +921,11 @@
         const div = document.createElement('div');
         div.className = 'play-entry';
         const arrow = ev.halfInning === 'top' ? '\u25B2' : '\u25BC';
-        const name = ev.batter ? ev.batter.name : '';
+        const desc = buildRichDescription(ev);
         const outcome = ev.outcome || '';
         let runsHtml = '';
         if (ev.runsScored > 0) runsHtml = `<span class="play-runs">+${ev.runsScored}</span>`;
-        div.innerHTML = `<span class="play-inning">${arrow}${ev.inning}</span><span class="play-batter">${name}</span><span class="play-outcome outcome-${outcome}">${OUTCOME_LABELS[outcome] || outcome || 'CS'}</span>${runsHtml}`;
+        div.innerHTML = `<span class="play-inning">${arrow}${ev.inning}</span><span class="play-desc">${desc}</span>${runsHtml}`;
         playLog.prepend(div);
     }
 
@@ -875,8 +1060,10 @@
         awayErrors = 0; homeErrors = 0;
         lastInning = 1; lastHalf = 'top'; currentInningRuns = 0;
 
+        baseRunners = [null, null, null];
         resetScoreboard();
         updateDiamond(null, 0);
+        $('pitcher-name').textContent = getLastName(homeTeam.starter ? homeTeam.starter.name : '');
         playLog.innerHTML = '<div class="play-entry" style="color:var(--text-muted); font-style:italic;">Game started. Press Next PA.</div>';
         buildProbBars();
         initBoxScore(awayTeam, homeTeam);
@@ -911,17 +1098,17 @@
         updateBoxFromEvent(ev);
         renderBoxScore();
 
-        // Update UI
-        updateScoreboard();
+        // Update runner names tracking + diamond + pitcher
+        updateBaseRunners(ev);
         updateDiamond(ev.postPlay.bases, ev.postPlay.outs);
+        updatePitcherName(ev);
+        updateScoreboard();
         updateStatus();
         if (ev.probs) showProbs(ev.probs, ev.outcome);
         addPlayEntry(ev);
 
-        // Update matchup text
-        const isTop = ev.halfInning === 'top';
-        const batterName = ev.batter ? ev.batter.name : '?';
-        matchupText.innerHTML = ev.description || `${batterName}: ${ev.outcome}`;
+        // Update matchup text with rich description
+        matchupText.innerHTML = buildRichDescription(ev);
 
         // Game over?
         if (ev.gameOver || game.isGameOver) {
