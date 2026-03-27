@@ -56,6 +56,18 @@
 </section>
 {% endif %}
 
+<section class="intro-section fade-in">
+    <div class="intro-card glass">
+        <h2 class="intro-headline">Every game. 10,000 simulations. Zero gut feelings.</h2>
+        <p class="intro-text">Ozzy Analytics runs a full Monte Carlo simulation engine on every MLB game — modeling each plate appearance from Statcast data, blending batter-pitcher matchups, and comparing the results to sportsbook lines. When the model finds an edge, you'll see it here.</p>
+        <div class="intro-links">
+            <a href="about.html" class="intro-link glass">How It Works &rarr;</a>
+            <a href="backtest.html" class="intro-link glass">2025 Backtest Results &rarr;</a>
+            <a href="simulate.html" class="intro-link glass accent">Run Your Own Sim &rarr;</a>
+        </div>
+    </div>
+</section>
+
 <section class="hero">
     {% if today %}
     <h1 class="hero-date-big">{% if is_opening_day %}Opening Day Picks — {{ display_date }}{% else %}MLB Picks — {{ display_date }}{% endif %}</h1>
@@ -150,6 +162,16 @@
     <p>The model didn't find any bets meeting the edge threshold today.</p>
 </section>
 {% endif %}
+
+<section class="sim-promo fade-in">
+    <div class="promo-card glass">
+        <div class="promo-content">
+            <h3 class="promo-title">Pick any matchup. Simulate it yourself.</h3>
+            <p class="promo-text">Our interactive simulator lets you pick two teams, set lineups, and watch 1,000 games play out pitch by pitch — complete with a live diamond, box score, and play-by-play. It's the same engine that powers these picks, running right in your browser.</p>
+            <a href="simulate.html" class="promo-btn">Launch Simulator &rarr;</a>
+        </div>
+    </div>
+</section>
 
 {% if today and today.games %}
 <section class="section fade-in">
