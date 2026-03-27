@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "date": "2026-03-26",
+    "games_played": 11,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 145.3,
+    "bankroll": 10322.49,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 211.03,
+        "profit": 407.29,
+        "odds": "+193",
+        "actual_score": "WSN 10 - CHC 4"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 379.15,
+        "profit": 417.06,
+        "odds": "+110",
+        "actual_score": "TBR 7 - STL 9"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 293.72,
+        "profit": -293.72,
+        "odds": "+136",
+        "actual_score": "TEX 3 - PHI 5"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 385.33,
+        "profit": -385.33,
+        "odds": "+214",
+        "actual_score": "ARI 2 - LAD 8"
+      }
+    ]
+  }
+]
