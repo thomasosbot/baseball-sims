@@ -2,8 +2,8 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    - cron: '0 1 * * *'     # 9 PM ET — preview run (RotoGrinders projected lineups)
-    - cron: '0 22 * * *'    # 6 PM ET — late run (confirmed lineups, guaranteed anchor)
+    - cron: '0 1 * * *'     # 9 PM ET — preview run for tomorrow
+    - cron: '0 22 * * *'    # 6 PM ET — final run (confirmed lineups)
   workflow_dispatch:
     inputs:
       date:
@@ -22,6 +22,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
 
 jobs:
   daily-pipeline:
@@ -51,7 +55,6 @@ jobs:
 
       - name: Restore state from repo
         run: |
-          # State pickles are committed to data/state/
           if ls data/state/state_*.pkl 1>/dev/null 2>&1; then
             echo "State files found"
             ls -la data/state/
@@ -68,7 +71,6 @@ jobs:
           elif [ "${{ github.event.schedule }}" = "0 1 * * *" ]; then
             echo "mode=preview" >> $GITHUB_OUTPUT
           else
-            # 6 PM ET cron or watcher-triggered dispatch
             echo "mode=late" >> $GITHUB_OUTPUT
           fi
 
@@ -81,10 +83,15 @@ jobs:
 
           echo "Run mode: $MODE"
 
-      - name: Update yesterday's results
-        if: steps.mode.outputs.mode == 'early'
+      - name: Grade yesterday's results (always, before any pipeline run)
         run: python3 scripts/update_results.py
         continue-on-error: true
+
+      - name: Pull latest before pipeline (avoid conflicts)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase || true
 
       - name: Run daily pipeline
         run: |
@@ -99,7 +106,7 @@ jobs:
       - name: Generate website
         run: python3 site/generate.py
 
-      - name: Send newsletter
+      - name: Send newsletter (late run only)
         if: steps.mode.outputs.mode == 'late'
         run: |
           python3 -c "
@@ -108,12 +115,11 @@ jobs:
           from pathlib import Path
           from src.newsletter.sender import send_daily_picks
 
-          # Find today's picks file
           daily_dir = Path('data/daily')
-          files = sorted(daily_dir.glob('*.json'))
-          picks_files = [f for f in files if f.name != 'results.json']
-          if picks_files:
-              with open(picks_files[-1]) as f:
+          files = sorted(f for f in daily_dir.glob('2026-*.json')
+                         if not f.name.startswith('odds_cache'))
+          if files:
+              with open(files[-1]) as f:
                   picks = json.load(f)
               if picks.get('picks'):
                   send_daily_picks(picks)
@@ -124,8 +130,6 @@ jobs:
 
       - name: Commit and push updates
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/state/ data/daily/ site/public/
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -133,5 +137,6 @@ jobs:
             MODE="${{ steps.mode.outputs.mode }}"
             DATE=$(date +%Y-%m-%d)
             git commit -m "Daily pipeline ($MODE): ${DATE}"
+            git pull --rebase || true
             git push
           fi

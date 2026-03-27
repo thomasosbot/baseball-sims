@@ -59,7 +59,14 @@ def generate_site():
         if "picks" in day:
             day["picks"] = [p for p in day["picks"] if p.get("type", "moneyline") != "totals"]
 
+    # Show the most relevant day: prefer today's non-preview over tomorrow's preview
     latest = all_days[-1] if all_days else None
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    if latest and latest.get("run_mode") == "preview" and len(all_days) >= 2:
+        # If latest is a preview for tomorrow and we have today's data, show today
+        prev = all_days[-2]
+        if prev.get("date") == today_str and prev.get("run_mode") != "preview":
+            latest = prev
 
     # Format the display date (e.g. "March 17, 2026")
     display_date = ""

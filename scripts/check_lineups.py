@@ -48,6 +48,12 @@ def check_lineups(date: str = None) -> dict:
             key = f"{g['away']}@{g['home']}"
             prev_statuses[key] = g.get("lineup_status", "pending")
 
+    # If last run was already 'late' (final), no need to check again
+    if prev_run_mode == "late":
+        print("  Last run was already 'late' (final) — no update needed.")
+        return {"changed": False, "new_confirmations": [], "total_confirmed": 0,
+                "total_games": 0, "prev_run_mode": prev_run_mode}
+
     # Fetch current lineup status from MLB API (lightweight — no boxscores)
     m, d, y = today[5:7], today[8:10], today[:4]
     try:
