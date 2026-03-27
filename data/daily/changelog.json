@@ -1,1 +1,124 @@
-[]
+[
+  {
+    "date": "2026-03-27",
+    "prev_mode": "early",
+    "new_mode": "late",
+    "timestamp": "2026-03-27T23:49:05.061751",
+    "game_diffs": [
+      {
+        "away": "ARI",
+        "home": "LAD",
+        "preview_fav": "LAD",
+        "preview_fav_pct": 61.1,
+        "final_fav": "LAD",
+        "final_fav_pct": 62.3,
+        "wp_shift": 1.2,
+        "wp_shift_abs": 1.2,
+        "preview_edge": 6.9,
+        "final_edge": 0
+      },
+      {
+        "away": "Athletics",
+        "home": "TOR",
+        "preview_fav": "TOR",
+        "preview_fav_pct": 55.6,
+        "final_fav": "TOR",
+        "final_fav_pct": 55.7,
+        "wp_shift": 0.0,
+        "wp_shift_abs": 0.0,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "CLE",
+        "home": "SEA",
+        "preview_fav": "SEA",
+        "preview_fav_pct": 53.6,
+        "final_fav": "SEA",
+        "final_fav_pct": 52.1,
+        "wp_shift": -1.5,
+        "wp_shift_abs": 1.5,
+        "preview_edge": 7.0,
+        "final_edge": 8.3
+      },
+      {
+        "away": "COL",
+        "home": "MIA",
+        "preview_fav": "MIA",
+        "preview_fav_pct": 63.0,
+        "final_fav": "MIA",
+        "final_fav_pct": 62.9,
+        "wp_shift": -0.1,
+        "wp_shift_abs": 0.1,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "DET",
+        "home": "SDP",
+        "preview_fav": "SDP",
+        "preview_fav_pct": 52.0,
+        "final_fav": "SDP",
+        "final_fav_pct": 50.5,
+        "wp_shift": -1.5,
+        "wp_shift_abs": 1.5,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "KCR",
+        "home": "ATL",
+        "preview_fav": "ATL",
+        "preview_fav_pct": 56.3,
+        "final_fav": "ATL",
+        "final_fav_pct": 56.0,
+        "wp_shift": -0.3,
+        "wp_shift_abs": 0.3,
+        "preview_edge": 0,
+        "final_edge": 0
+      },
+      {
+        "away": "LAA",
+        "home": "HOU",
+        "preview_fav": "HOU",
+        "preview_fav_pct": 51.6,
+        "final_fav": "HOU",
+        "final_fav_pct": 50.5,
+        "wp_shift": -1.1,
+        "wp_shift_abs": 1.1,
+        "preview_edge": 7.1,
+        "final_edge": 8.1
+      },
+      {
+        "away": "NYY",
+        "home": "SFG",
+        "preview_fav": "NYY",
+        "preview_fav_pct": 56.1,
+        "final_fav": "NYY",
+        "final_fav_pct": 55.5,
+        "wp_shift": 0.6,
+        "wp_shift_abs": 0.6,
+        "preview_edge": 0,
+        "final_edge": 0
+      }
+    ],
+    "pick_changes": [
+      {
+        "type": "dropped",
+        "description": "ARI ML dropped (was +209 at 6.9% edge)"
+      },
+      {
+        "type": "shifted",
+        "description": "Athletics +1.5 edge 8.8% \u2192 8.2% (-0.6%)"
+      },
+      {
+        "type": "shifted",
+        "description": "CLE ML edge 7.0% \u2192 8.3% (+1.3%)"
+      },
+      {
+        "type": "shifted",
+        "description": "LAA ML edge 7.1% \u2192 8.1% (+1.0%)"
+      }
+    ]
+  }
+]
