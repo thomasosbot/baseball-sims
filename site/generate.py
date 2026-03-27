@@ -95,12 +95,18 @@ def generate_site():
     )
     (OUTPUT_DIR / "index.html").write_text(html)
 
-    # History
+    # History — build pick-by-pick log from results
+    all_picks = []
+    for day in season_results:
+        for pick in day.get("picks", []):
+            all_picks.append({**pick, "date": day["date"]})
+
     template = env.get_template("history.html")
     html = template.render(
         results=season_results,
         stats=stats,
         all_days=all_days,
+        all_picks=all_picks,
     )
     (OUTPUT_DIR / "history.html").write_text(html)
 
@@ -868,7 +874,11 @@ def _load_changelog():
         except (ValueError, TypeError):
             display_date = d
 
-        game_diffs = entry.get("game_diffs", [])
+        # Filter out games with null final data (game wasn't in final run)
+        game_diffs = [
+            g for g in entry.get("game_diffs", [])
+            if g.get("final_fav") is not None
+        ]
         pick_changes = entry.get("pick_changes", [])
 
         for g in game_diffs:

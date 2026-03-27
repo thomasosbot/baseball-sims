@@ -2,7 +2,7 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    - cron: '0 1 * * *'     # 9 PM ET — preview run for tomorrow
+    - cron: '0 3 * * *'     # 11 PM ET — preview run for tomorrow + newsletter
     - cron: '0 22 * * *'    # 6 PM ET — final run (confirmed lineups)
   workflow_dispatch:
     inputs:
@@ -52,6 +52,7 @@ jobs:
           echo "ODDS_API_KEY=${{ secrets.ODDS_API_KEY }}" >> .env
           echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
           echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
+          echo "RESEND_AUDIENCE_ID=${{ secrets.RESEND_AUDIENCE_ID }}" >> .env
 
       - name: Restore state from repo
         run: |
@@ -68,7 +69,7 @@ jobs:
         run: |
           if [ -n "${{ inputs.mode }}" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "0 1 * * *" ]; then
+          elif [ "${{ github.event.schedule }}" = "0 3 * * *" ]; then
             echo "mode=preview" >> $GITHUB_OUTPUT
           else
             echo "mode=late" >> $GITHUB_OUTPUT
@@ -106,8 +107,8 @@ jobs:
       - name: Generate website
         run: python3 site/generate.py
 
-      - name: Send newsletter (late run only)
-        if: steps.mode.outputs.mode == 'late'
+      - name: Send newsletter (preview run — 11 PM ET)
+        if: steps.mode.outputs.mode == 'preview'
         run: |
           python3 -c "
           import json, sys

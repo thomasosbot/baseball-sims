@@ -4,65 +4,147 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { margin: 0; padding: 0; background: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #18181b; }
     .wrapper { max-width: 600px; margin: 0 auto; background: #ffffff; }
-    .header { background: #0f1117; color: #ffffff; padding: 24px; text-align: center; }
-    .header h1 { margin: 0; font-size: 24px; }
-    .header .date { color: #a1a1aa; font-size: 14px; margin-top: 4px; }
-    .stats-row { display: flex; justify-content: center; gap: 24px; padding: 16px 24px; background: #f9fafb; border-bottom: 1px solid #e4e4e7; }
-    .stat { text-align: center; }
-    .stat-val { font-size: 20px; font-weight: 700; }
-    .stat-lbl { font-size: 11px; color: #71717a; text-transform: uppercase; }
+    .header { background: linear-gradient(135deg, #0f1117 0%, #1e293b 100%); color: #ffffff; padding: 32px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .header .tagline { color: #94a3b8; font-size: 14px; margin-top: 6px; font-style: italic; }
+    .header .date { color: #cbd5e1; font-size: 13px; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Season stats banner */
+    .season-bar { display: flex; justify-content: center; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 14px 24px; }
+    .season-bar .stat { text-align: center; padding: 0 16px; }
+    .season-bar .stat + .stat { border-left: 1px solid #e2e8f0; }
+    .stat-val { font-size: 20px; font-weight: 800; }
+    .stat-lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
     .green { color: #16a34a; }
     .red { color: #dc2626; }
+
     .content { padding: 24px; }
-    .pick-card { border: 1px solid #e4e4e7; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .pick-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .pick-name { font-size: 18px; font-weight: 700; }
-    .pick-odds { background: #f4f4f5; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-weight: 600; }
-    .pick-meta { font-size: 13px; color: #71717a; margin-bottom: 4px; }
-    .pick-meta strong { color: #16a34a; }
-    .explanation { font-size: 14px; color: #52525b; line-height: 1.5; }
-    .no-picks { text-align: center; padding: 32px; color: #71717a; }
-    .footer { padding: 16px 24px; text-align: center; font-size: 12px; color: #a1a1aa; border-top: 1px solid #e4e4e7; }
-    .footer a { color: #3b82f6; }
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; margin-bottom: 12px; }
+
+    /* Recap section */
+    .recap-intro { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 16px; }
+    .recap-card { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; font-size: 14px; }
+    .recap-win { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .recap-loss { background: #fef2f2; border: 1px solid #fecaca; }
+    .recap-push { background: #f8fafc; border: 1px solid #e2e8f0; }
+    .recap-team { font-weight: 700; }
+    .recap-score { color: #64748b; font-size: 13px; }
+    .recap-result { font-weight: 700; font-size: 13px; }
+    .recap-profit { font-family: monospace; font-weight: 700; font-size: 13px; }
+
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+
+    /* Picks section */
+    .pick-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 12px; background: #ffffff; }
+    .pick-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pick-name { font-size: 20px; font-weight: 800; }
+    .pick-odds { background: #0f1117; color: #ffffff; padding: 5px 14px; border-radius: 6px; font-family: monospace; font-weight: 700; font-size: 14px; }
+    .pick-meta { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+    .pick-meta .edge { color: #16a34a; font-weight: 700; }
+    .pick-meta .wager { color: #0f1117; font-weight: 700; }
+    .books-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .book-badge { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 3px 8px; font-size: 11px; color: #475569; font-family: monospace; }
+    .book-best { background: #ecfdf5; border-color: #a7f3d0; color: #16a34a; font-weight: 600; }
+    .explanation { font-size: 14px; color: #475569; line-height: 1.6; }
+    .no-picks { text-align: center; padding: 32px; color: #64748b; }
+
+    .footer { padding: 20px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+    .footer a { color: #3b82f6; text-decoration: none; }
+    .footer .disclaimer { margin-bottom: 8px; font-style: italic; }
+    .footer .site-link { font-weight: 600; }
     @media (max-width: 600px) {
-        .stats-row { gap: 12px; padding: 12px; }
+        .season-bar { padding: 10px 12px; }
+        .season-bar .stat { padding: 0 10px; }
         .stat-val { font-size: 16px; }
+        .recap-card { flex-wrap: wrap; gap: 4px; }
     }
 </style>
 </head>
 <body>
 <div class="wrapper">
     <div class="header">
-        <h1>MLB Model Picks</h1>
+        <h1>Ozzy Analytics</h1>
+        <div class="tagline">{{ tagline }}</div>
         <div class="date">{{ date }}</div>
     </div>
 
     {% if stats %}
-    <div class="stats-row">
+    <div class="season-bar">
         <div class="stat">
             <div class="stat-val">{{ stats.wins|default(0) }}-{{ stats.losses|default(0) }}</div>
             <div class="stat-lbl">Record</div>
         </div>
         <div class="stat">
             <div class="stat-val {% if stats.total_profit|default(0) >= 0 %}green{% else %}red{% endif %}">
-                ${{ "%.0f"|format(stats.total_profit|default(0)) }}
+                {% if stats.total_profit|default(0) >= 0 %}+{% endif %}${{ "%.0f"|format(stats.total_profit|default(0)) }}
             </div>
-            <div class="stat-lbl">Season P&L</div>
+            <div class="stat-lbl">Season P&amp;L</div>
         </div>
         <div class="stat">
-            <div class="stat-val">{{ stats.roi|default(0) }}%</div>
+            <div class="stat-val {% if stats.roi|default(0) >= 0 %}green{% else %}red{% endif %}">
+                {{ stats.roi|default(0) }}%
+            </div>
             <div class="stat-lbl">ROI</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val">${{ "%.0f"|format(stats.bankroll|default(10000)) }}</div>
+            <div class="stat-lbl">Bankroll</div>
         </div>
     </div>
     {% endif %}
 
     <div class="content">
+        {# ── YESTERDAY'S RECAP ── #}
+        {% if yesterday and yesterday.picks %}
+        <div class="section-label">Yesterday's Recap</div>
+        <div class="recap-intro">{{ recap_blurb }}</div>
+
+        {% for pick in yesterday.picks %}
+        <div class="recap-card {% if pick.won %}recap-win{% elif pick.won == false %}recap-loss{% else %}recap-push{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span>
+                    <span class="recap-team">{{ pick.pick }}</span>
+                    <span class="recap-score">({{ pick.odds }})</span>
+                    {% if pick.actual_score %}
+                    <span class="recap-score">&mdash; {{ pick.actual_score }}</span>
+                    {% endif %}
+                </span>
+                <span>
+                    {% if pick.won %}
+                    <span class="recap-result green">W</span>
+                    <span class="recap-profit green">+${{ "%.0f"|format(pick.profit) }}</span>
+                    {% elif pick.won == false %}
+                    <span class="recap-result red">L</span>
+                    <span class="recap-profit red">-${{ "%.0f"|format(pick.profit|abs) }}</span>
+                    {% else %}
+                    <span class="recap-result" style="color:#64748b;">P</span>
+                    {% endif %}
+                </span>
+            </div>
+            {% if pick.narrative %}
+            <div style="font-size: 13px; color: #475569; line-height: 1.5; margin-top: 6px; font-style: italic;">
+                {{ pick.narrative }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="text-align: center; margin-top: 12px; font-size: 14px; font-weight: 700;">
+            Day P&L:
+            <span class="{% if yesterday.day_profit >= 0 %}green{% else %}red{% endif %}">
+                {% if yesterday.day_profit >= 0 %}+{% endif %}${{ "%.0f"|format(yesterday.day_profit) }}
+            </span>
+        </div>
+
+        <hr class="divider">
+        {% endif %}
+
+        {# ── TODAY'S PICKS ── #}
         {% if today.picks %}
-        <p style="margin-bottom: 16px; font-size: 15px;">
-            <strong>{{ today.picks|length }} pick{{ 's' if today.picks|length != 1 else '' }} today</strong>
-        </p>
+        <div class="section-label">Today's Picks</div>
+        <div class="recap-intro">{{ picks_blurb }}</div>
 
         {% for pick in today.picks %}
         <div class="pick-card">
@@ -71,10 +153,23 @@
                 <span class="pick-odds">{{ pick.odds }}</span>
             </div>
             <div class="pick-meta">
-                Edge: <strong>{{ pick.edge_pct }}%</strong>
+                Edge: <span class="edge">{{ pick.edge_pct }}%</span>
                 &nbsp;&middot;&nbsp;
-                Wager: ${{ "%.0f"|format(pick.wager) if pick.wager else "—" }}
+                Model Win: <span class="wager">{{ "%.1f"|format(pick.model_prob * 100) }}%</span>
+                &nbsp;&middot;&nbsp;
+                Wager: <span class="wager">${{ "%.0f"|format(pick.wager) }}</span>
             </div>
+            {% if pick.sportsbook_odds %}
+            <div class="books-row">
+                {% set best_odds = pick.sportsbook_odds.values()|list|max %}
+                {% for book, odds in pick.sportsbook_odds.items() %}
+                <span class="book-badge {% if odds == best_odds %}book-best{% endif %}">
+                    {{ book|replace('williamhill_us','caesars')|replace('_',' ')|title }}
+                    {% if odds > 0 %}+{% endif %}{{ odds }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% if pick.explanation %}
             <div class="explanation">{{ pick.explanation }}</div>
             {% endif %}
@@ -82,16 +177,28 @@
         {% endfor %}
 
         {% else %}
+        <div class="section-label">Today's Picks</div>
         <div class="no-picks">
-            <p><strong>No edges found today.</strong></p>
-            <p>The model didn't find any bets meeting the minimum 7% edge threshold.</p>
+            <p style="font-size: 18px;">No edges today.</p>
+            <p>The model ran 10,000 simulations per game and didn't find any bets clearing the edge threshold. Sometimes the sharpest move is no move at all.</p>
         </div>
         {% endif %}
     </div>
 
+    <div style="padding: 16px 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <div style="display: inline-block; margin: 0 8px;"><a href="https://ozzyanalytics.com" style="color: #0f1117; text-decoration: none; font-size: 13px; font-weight: 600;">Today's Picks</a></div>
+        <span style="color: #cbd5e1;">&middot;</span>
+        <div style="display: inline-block; margin: 0 8px;"><a href="https://ozzyanalytics.com/history.html" style="color: #0f1117; text-decoration: none; font-size: 13px; font-weight: 600;">History</a></div>
+        <span style="color: #cbd5e1;">&middot;</span>
+        <div style="display: inline-block; margin: 0 8px;"><a href="https://ozzyanalytics.com/simulate.html" style="color: #0f1117; text-decoration: none; font-size: 13px; font-weight: 600;">Simulate</a></div>
+        <span style="color: #cbd5e1;">&middot;</span>
+        <div style="display: inline-block; margin: 0 8px;"><a href="https://ozzyanalytics.com/backtest.html" style="color: #0f1117; text-decoration: none; font-size: 13px; font-weight: 600;">Backtest</a></div>
+    </div>
+
     <div class="footer">
-        <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
-        <p><a href="#">Unsubscribe</a></p>
+        <div class="disclaimer">Monte Carlo simulation model. Not financial advice. Gamble responsibly.</div>
+        <p><a href="https://ozzyanalytics.com" class="site-link">ozzyanalytics.com</a></p>
+        <p><a href="https://ozzyanalytics.com/unsubscribe">Unsubscribe</a></p>
     </div>
 </div>
 </body>
