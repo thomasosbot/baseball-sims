@@ -102,6 +102,10 @@ The Odds API        →  park factors                             →  ROI / CLV
 | **Three-tier pipeline** (v1.4) | Preview (9 PM, projected) → Watcher-triggered (day-of, as lineups confirm) → Late (6 PM, guaranteed final). Replaces fixed 1 PM cron with reactive lineup watcher every 15 min. |
 | **Projection changelog** (v1.4) | Tracks how picks drift between preview and confirmed runs. Captures per-game WP shifts and pick adds/drops/shifts. Builds historical dataset on preview reliability. |
 | **Interactive game simulator** (v1.4) | Client-side JS port of the full MC engine. Users pick two teams and step through a game PA-by-PA with animated SVG diamond, probability bars, MLB-style linescore, box score, and rich play-by-play narrative. All 30 teams with real player profiles embedded at build time (~90KB JSON). |
+| **Odds caching** (v1.4) | Pre-game odds cached to `data/daily/odds_cache_YYYY-MM-DD.json` on first fetch of the day. All subsequent re-runs (watcher-triggered) reuse cached odds to prevent live/in-play odds from contaminating picks. Preview mode always fetches fresh. |
+| **Pipeline reliability** (v1.4) | Results grading runs on every invocation (not just early mode). Concurrency group prevents racing runs. Watcher stops triggering after final late run. Homepage prefers today's confirmed picks over tomorrow's preview. |
+| **Five-book filter** (v1.4) | Odds restricted to FanDuel, Bovada, BetMGM, DraftKings, and Caesars only. Other books excluded from odds fetching, edge calculation, and display. Pinnacle retained internally as sharp line reference. |
+| **Model Win % replaces Confidence** (v1.4) | Pick cards show the model's actual win probability instead of an opaque 0-1 confidence score. More meaningful to users. |
 
 ## Operationalization (v1.1)
 
