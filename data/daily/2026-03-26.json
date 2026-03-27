@@ -172,27 +172,15 @@
         "draftkings": -120,
         "betmgm": -120,
         "bovada": -117,
-        "fanatics": -120,
         "fanduel": -116,
-        "betrivers": -121,
-        "williamhill_us": -120,
-        "mybookieag": -120,
-        "lowvig": -115,
-        "betonlineag": -115,
-        "betus": -115
+        "williamhill_us": -120
       },
       "books_away": {
         "draftkings": 100,
         "betmgm": 100,
         "bovada": -103,
-        "fanatics": 100,
         "fanduel": -102,
-        "betrivers": -103,
-        "williamhill_us": 100,
-        "mybookieag": 103,
-        "lowvig": 104,
-        "betonlineag": 104,
-        "betus": 105
+        "williamhill_us": 100
       },
       "confidence": 0.951
     },
@@ -362,27 +350,15 @@
         "draftkings": -186,
         "bovada": -195,
         "betmgm": -185,
-        "fanatics": -180,
         "fanduel": -184,
-        "betrivers": -195,
-        "williamhill_us": -190,
-        "mybookieag": -185,
-        "lowvig": -175,
-        "betonlineag": -175,
-        "betus": -175
+        "williamhill_us": -190
       },
       "books_away": {
         "draftkings": 153,
         "bovada": 160,
         "betmgm": 155,
-        "fanatics": 150,
         "fanduel": 154,
-        "betrivers": 155,
-        "williamhill_us": 158,
-        "mybookieag": 155,
-        "lowvig": 158,
-        "betonlineag": 158,
-        "betus": 154
+        "williamhill_us": 158
       },
       "confidence": 1.0
     },
@@ -556,26 +532,14 @@
         "bovada": -230,
         "betmgm": -225,
         "draftkings": -232,
-        "fanatics": -225,
-        "betrivers": -230,
-        "williamhill_us": -235,
-        "mybookieag": -227,
-        "betonlineag": -215,
-        "lowvig": -215,
-        "betus": -220
+        "williamhill_us": -235
       },
       "books_away": {
         "fanduel": 184,
         "bovada": 190,
         "betmgm": 185,
         "draftkings": 189,
-        "fanatics": 185,
-        "betrivers": 180,
-        "williamhill_us": 192,
-        "mybookieag": 188,
-        "betonlineag": 193,
-        "lowvig": 193,
-        "betus": 190
+        "williamhill_us": 192
       },
       "confidence": 1.0,
       "pick": "WSN ML",
@@ -753,27 +717,15 @@
         "draftkings": -143,
         "betmgm": -140,
         "bovada": -148,
-        "fanatics": -145,
         "fanduel": -134,
-        "betrivers": -143,
-        "williamhill_us": -140,
-        "mybookieag": -141,
-        "lowvig": -135,
-        "betonlineag": -135,
-        "betus": -135
+        "williamhill_us": -140
       },
       "books_away": {
         "draftkings": 119,
         "betmgm": 118,
         "bovada": 124,
-        "fanatics": 120,
         "fanduel": 116,
-        "betrivers": 116,
-        "williamhill_us": 118,
-        "mybookieag": 120,
-        "lowvig": 122,
-        "betonlineag": 122,
-        "betus": 122
+        "williamhill_us": 118
       },
       "confidence": 1.0
     },
@@ -947,26 +899,14 @@
         "bovada": 133,
         "betmgm": 135,
         "draftkings": 135,
-        "fanatics": 130,
-        "betrivers": 130,
-        "williamhill_us": 135,
-        "mybookieag": 136,
-        "lowvig": 136,
-        "betonlineag": 136,
-        "betus": 134
+        "williamhill_us": 135
       },
       "books_away": {
         "fanduel": -158,
         "bovada": -159,
         "betmgm": -160,
         "draftkings": -163,
-        "fanatics": -155,
-        "betrivers": -162,
-        "williamhill_us": -160,
-        "mybookieag": -161,
-        "lowvig": -150,
-        "betonlineag": -150,
-        "betus": -150
+        "williamhill_us": -160
       },
       "confidence": 1.0
     },
@@ -1137,26 +1077,14 @@
         "bovada": -181,
         "betmgm": -185,
         "draftkings": -186,
-        "fanatics": -180,
-        "betrivers": -186,
-        "williamhill_us": -178,
-        "mybookieag": -182,
-        "lowvig": -172,
-        "betonlineag": -172,
-        "betus": -172
+        "williamhill_us": -178
       },
       "books_away": {
         "fanduel": 154,
         "bovada": 149,
         "betmgm": 150,
         "draftkings": 153,
-        "fanatics": 150,
-        "betrivers": 148,
-        "williamhill_us": 150,
-        "mybookieag": 153,
-        "lowvig": 155,
-        "betonlineag": 155,
-        "betus": 152
+        "williamhill_us": 150
       },
       "confidence": 1.0
     },
@@ -1324,27 +1252,15 @@
         "draftkings": 109,
         "betmgm": 110,
         "bovada": 113,
-        "fanatics": 110,
         "fanduel": 110,
-        "betrivers": 112,
-        "williamhill_us": 110,
-        "mybookieag": 111,
-        "lowvig": 115,
-        "betonlineag": 115,
-        "betus": 116
+        "williamhill_us": 110
       },
       "books_away": {
         "draftkings": -131,
         "betmgm": -130,
         "bovada": -135,
-        "fanatics": -130,
         "fanduel": -130,
-        "betrivers": -139,
-        "williamhill_us": -130,
-        "mybookieag": -130,
-        "lowvig": -127,
-        "betonlineag": -127,
-        "betus": -127
+        "williamhill_us": -130
       },
       "confidence": 0.854
     },
@@ -1518,26 +1434,14 @@
         "betmgm": 105,
         "bovada": 106,
         "fanduel": 106,
-        "fanatics": 105,
-        "betrivers": 108,
-        "williamhill_us": 105,
-        "mybookieag": 105,
-        "lowvig": 110,
-        "betonlineag": 110,
-        "betus": 110
+        "williamhill_us": 105
       },
       "books_away": {
         "draftkings": -126,
         "betmgm": -125,
         "bovada": -126,
         "fanduel": -124,
-        "fanatics": -125,
-        "betrivers": -134,
-        "williamhill_us": -125,
-        "mybookieag": -123,
-        "lowvig": -121,
-        "betonlineag": -121,
-        "betus": -121
+        "williamhill_us": -125
       },
       "confidence": 0.728,
       "pick": "STL ML",
@@ -1715,27 +1619,15 @@
         "draftkings": -163,
         "betmgm": -155,
         "bovada": -157,
-        "fanatics": -155,
         "fanduel": -154,
-        "betrivers": -155,
-        "williamhill_us": -160,
-        "mybookieag": -159,
-        "lowvig": -150,
-        "betonlineag": -150,
-        "betus": -150
+        "williamhill_us": -160
       },
       "books_away": {
         "draftkings": 135,
         "betmgm": 130,
         "bovada": 131,
-        "fanatics": 130,
         "fanduel": 130,
-        "betrivers": 125,
-        "williamhill_us": 135,
-        "mybookieag": 134,
-        "lowvig": 136,
-        "betonlineag": 136,
-        "betus": 134
+        "williamhill_us": 135
       },
       "confidence": 1.0,
       "pick": "TEX ML",
@@ -1914,26 +1806,14 @@
         "bovada": -250,
         "betmgm": -250,
         "draftkings": -259,
-        "fanatics": -255,
-        "betrivers": -275,
-        "williamhill_us": -260,
-        "mybookieag": -256,
-        "betonlineag": -240,
-        "lowvig": -240,
-        "betus": -240
+        "williamhill_us": -260
       },
       "books_away": {
         "fanduel": 200,
         "bovada": 205,
         "betmgm": 200,
         "draftkings": 209,
-        "fanatics": 205,
-        "betrivers": 210,
-        "williamhill_us": 210,
-        "mybookieag": 212,
-        "betonlineag": 214,
-        "lowvig": 214,
-        "betus": 206
+        "williamhill_us": 210
       },
       "confidence": 1.0,
       "pick": "ARI ML",
@@ -2108,27 +1988,15 @@
         "draftkings": -193,
         "betmgm": -185,
         "bovada": -182,
-        "fanatics": -190,
         "fanduel": -188,
-        "betrivers": -180,
-        "williamhill_us": -190,
-        "mybookieag": -189,
-        "lowvig": -179,
-        "betonlineag": -179,
-        "betus": -180
+        "williamhill_us": -190
       },
       "books_away": {
         "draftkings": 159,
         "betmgm": 155,
         "bovada": 150,
-        "fanatics": 155,
         "fanduel": 158,
-        "betrivers": 143,
-        "williamhill_us": 158,
-        "mybookieag": 159,
-        "lowvig": 161,
-        "betonlineag": 161,
-        "betus": 158
+        "williamhill_us": 158
       },
       "confidence": 1.0
     }
@@ -2151,13 +2019,7 @@
         "bovada": 190,
         "betmgm": 185,
         "draftkings": 189,
-        "fanatics": 185,
-        "betrivers": 180,
-        "williamhill_us": 192,
-        "mybookieag": 188,
-        "betonlineag": 193,
-        "lowvig": 193,
-        "betus": 190
+        "williamhill_us": 192
       },
       "lineup_status": "projected",
       "model_prob": 0.403
@@ -2179,13 +2041,7 @@
         "betmgm": 105,
         "bovada": 106,
         "fanduel": 106,
-        "fanatics": 105,
-        "betrivers": 108,
-        "williamhill_us": 105,
-        "mybookieag": 105,
-        "lowvig": 110,
-        "betonlineag": 110,
-        "betus": 110
+        "williamhill_us": 105
       },
       "lineup_status": "projected",
       "model_prob": 0.601
@@ -2206,14 +2062,8 @@
         "draftkings": 135,
         "betmgm": 130,
         "bovada": 131,
-        "fanatics": 130,
         "fanduel": 130,
-        "betrivers": 125,
-        "williamhill_us": 135,
-        "mybookieag": 134,
-        "lowvig": 136,
-        "betonlineag": 136,
-        "betus": 134
+        "williamhill_us": 135
       },
       "lineup_status": "projected",
       "model_prob": 0.499
@@ -2235,13 +2085,7 @@
         "bovada": 205,
         "betmgm": 200,
         "draftkings": 209,
-        "fanatics": 205,
-        "betrivers": 210,
-        "williamhill_us": 210,
-        "mybookieag": 212,
-        "betonlineag": 214,
-        "lowvig": 214,
-        "betus": 206
+        "williamhill_us": 210
       },
       "lineup_status": "projected",
       "model_prob": 0.434
