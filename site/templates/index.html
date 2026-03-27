@@ -116,7 +116,7 @@
             <div class="pick-header">
                 <div class="pick-title-row">
                     <span class="pick-name">{{ pick.pick }}</span>
-                    <span class="pick-type-badge {{ pick.type|default('moneyline') }}">{{ pick.type|default('ML')|upper }}</span>
+                    <span class="pick-type-badge {{ pick.type|default('moneyline') }}">{{ "RL" if pick.type == "run_line" else "ML" }}</span>
                 </div>
                 <span class="pick-odds">{{ pick.odds }}</span>
                 {% if pick.lineup_status == 'projected' %}

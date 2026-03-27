@@ -185,6 +185,43 @@ def _grade_pick(pick, final_games):
                     "actual_score": f"{away_abbr} {away_score} - {home_abbr} {home_score}",
                 }
 
+    elif pick_type == "run_line":
+        team = pick.get("team", "")
+        side = pick.get("side", "")
+
+        for g in final_games:
+            home_abbr = team_abbrev(g["home_name"])
+            away_abbr = team_abbrev(g["away_name"])
+
+            if (side == "home" and home_abbr == team) or \
+               (side == "away" and away_abbr == team):
+                home_score = g.get("home_score", 0) or 0
+                away_score = g.get("away_score", 0) or 0
+                if home_score == away_score:
+                    continue
+
+                # Run line is +1.5 for the dog
+                margin = home_score - away_score
+                if side == "home":
+                    won = (margin + 1.5) > 0  # home +1.5 covers
+                else:
+                    won = (-margin + 1.5) > 0  # away +1.5 covers
+
+                odds_str = pick.get("odds", "+100")
+                decimal_odds = american_to_decimal(int(odds_str.replace("+", "")))
+                wager = pick.get("wager", 0)
+                profit = wager * (decimal_odds - 1) if won else -wager
+
+                return {
+                    "pick": pick["pick"],
+                    "type": "run_line",
+                    "won": won,
+                    "wager": wager,
+                    "profit": round(profit, 2),
+                    "odds": odds_str,
+                    "actual_score": f"{away_abbr} {away_score} - {home_abbr} {home_score}",
+                }
+
     elif pick_type == "totals":
         pick_str = pick.get("pick", "")
         # Parse "NYY@BOS OVER 8.5" format

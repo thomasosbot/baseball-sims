@@ -159,3 +159,62 @@ def parse_odds_response(odds_data: List[Dict]) -> pd.DataFrame:
         })
 
     return pd.DataFrame(rows)
+
+
+def parse_spreads_response(odds_data: List[Dict]) -> pd.DataFrame:
+    """
+    Flatten The Odds API spreads response into one row per game with
+    best spread odds for each side (run line is almost always +-1.5).
+    """
+    rows = []
+    for game in odds_data:
+        home = game["home_team"]
+        away = game["away_team"]
+
+        best_home_odds, best_away_odds = None, None
+        home_spread, away_spread = None, None
+        books_home, books_away = {}, {}
+
+        for bm in game.get("bookmakers", []):
+            key = bm["key"]
+            if key not in ALLOWED_BOOKS:
+                continue
+            for mkt in bm.get("markets", []):
+                if mkt["key"] != "spreads":
+                    continue
+                for oc in mkt["outcomes"]:
+                    price = oc["price"]
+                    point = oc.get("point", 0)
+                    if oc["name"] == home:
+                        books_home[key] = {"odds": price, "spread": point}
+                        if best_home_odds is None or price > best_home_odds:
+                            best_home_odds = price
+                            home_spread = point
+                    elif oc["name"] == away:
+                        books_away[key] = {"odds": price, "spread": point}
+                        if best_away_odds is None or price > best_away_odds:
+                            best_away_odds = price
+                            away_spread = point
+
+        if best_home_odds is None or best_away_odds is None:
+            continue
+
+        h_imp = american_to_prob(best_home_odds)
+        a_imp = american_to_prob(best_away_odds)
+        h_nv, a_nv = remove_vig(h_imp, a_imp)
+
+        rows.append({
+            "game_id":             game["id"],
+            "home_team":           home,
+            "away_team":           away,
+            "home_spread":         home_spread,
+            "away_spread":         away_spread,
+            "best_home_odds":      best_home_odds,
+            "best_away_odds":      best_away_odds,
+            "home_cover_nv_prob":  h_nv,
+            "away_cover_nv_prob":  a_nv,
+            "books_home":          books_home,
+            "books_away":          books_away,
+        })
+
+    return pd.DataFrame(rows)

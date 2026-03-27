@@ -660,6 +660,7 @@ body {
     letter-spacing: 0.05em;
 }
 .pick-type-badge.moneyline { background: var(--accent-light); color: var(--accent); }
+.pick-type-badge.run_line { background: #fef3c7; color: #b45309; }
 .pick-type-badge.totals { background: var(--green-light); color: var(--green); }
 
 /* ── Game Row Cards ── */

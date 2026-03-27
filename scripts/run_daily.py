@@ -21,6 +21,7 @@ import statsapi
 from config import (
     N_SIMULATIONS,
     ML_MIN_EDGE, ML_MAX_EDGE, ML_MIN_CONFIDENCE, ML_ALPHA,
+    SPREAD_MIN_EDGE, SPREAD_MAX_EDGE, SPREAD_MIN_CONFIDENCE, SPREAD_ALPHA,
     TOTALS_MIN_EDGE, TOTALS_MAX_EDGE, TOTALS_MIN_CONFIDENCE, TOTALS_ALPHA,
     KELLY_FRACTION, MAX_BET_FRACTION, HOME_FIELD_ADVANTAGE, ELO_BLEND_WEIGHT,
     DATA_DIR,
@@ -31,7 +32,7 @@ from src.data.fetch import (
 )
 from src.data.state import load_state, save_state
 from src.betting.odds import (
-    fetch_mlb_odds, parse_odds_response,
+    fetch_mlb_odds, parse_odds_response, parse_spreads_response,
     american_to_prob, american_to_decimal, remove_vig, prob_to_american,
 )
 from src.betting.edge import calculate_edge, compute_game_confidence
@@ -287,6 +288,27 @@ def run_daily(
         print("\nFetching moneyline odds...")
         odds_h2h = _fetch_and_cache_odds(sport_key, odds_cache_path)
 
+    # Fetch spread (run line) odds
+    spread_cache_path = DAILY_DIR / f"spread_cache_{today}.json"
+    if spread_cache_path.exists() and mode != "preview":
+        print("\nUsing cached spread odds...")
+        try:
+            odds_spreads = pd.read_json(spread_cache_path)
+            print(f"  {len(odds_spreads)} games with cached spread odds")
+        except Exception:
+            odds_spreads = pd.DataFrame()
+    else:
+        print("\nFetching run line odds...")
+        try:
+            raw_spreads = fetch_mlb_odds(markets="spreads", sport_key=sport_key)
+            odds_spreads = parse_spreads_response(raw_spreads)
+            if not odds_spreads.empty:
+                odds_spreads.to_json(spread_cache_path)
+                print(f"  Spread odds cached ({len(odds_spreads)} games)")
+        except Exception as e:
+            print(f"  Error fetching spread odds: {e}")
+            odds_spreads = pd.DataFrame()
+
     # Totals odds fetch disabled for 2026 (totals betting consistently negative)
     odds_totals = pd.DataFrame()
 
@@ -514,6 +536,20 @@ def run_daily(
                 game_out["explanation"] = pick["explanation"]
                 picks.append(pick)
                 total_wagered += pick.get("wager", 0)
+
+        # --- Run Line (spread) ---
+        spread_row = _match_live_spreads(odds_spreads, g["home_team"], g["away_team"])
+        if spread_row is not None and margin_dist is not None:
+            spread_pick = _evaluate_spread_edge(
+                margin_dist, spread_row, confidence, bankroll,
+                home_abbr, away_abbr,
+                g.get("home_starter", ""), g.get("away_starter", ""),
+                game_out=game_out,
+            )
+            if spread_pick:
+                spread_pick["lineup_status"] = lineup_status
+                picks.append(spread_pick)
+                total_wagered += spread_pick.get("wager", 0)
 
         # --- Totals --- DISABLED for 2026: totals betting consistently negative
         # totals_row = _match_live_totals(odds_totals, g["home_team"], g["away_team"])
@@ -918,6 +954,127 @@ def _fetch_game_weather(home_abbr: str, game_date: str) -> dict:
         }
     except Exception:
         return {}
+
+
+def _match_live_spreads(spreads_df, home_team_full, away_team_full):
+    """Match a game to live spread (run line) odds."""
+    if spreads_df is None or spreads_df.empty:
+        return None
+    mask = (
+        (spreads_df["home_team"] == home_team_full)
+        & (spreads_df["away_team"] == away_team_full)
+    )
+    matches = spreads_df[mask]
+    if not matches.empty:
+        return matches.iloc[0]
+    # Fuzzy: try abbreviation matching
+    home_abbr = TEAM_NAME_TO_ABBREV.get(home_team_full, "")
+    away_abbr = TEAM_NAME_TO_ABBREV.get(away_team_full, "")
+    for _, row in spreads_df.iterrows():
+        if (TEAM_NAME_TO_ABBREV.get(row["home_team"]) == home_abbr
+                and TEAM_NAME_TO_ABBREV.get(row["away_team"]) == away_abbr):
+            return row
+    return None
+
+
+def _evaluate_spread_edge(
+    margin_dist, spread_row, confidence, bankroll,
+    home_abbr, away_abbr,
+    home_pitcher, away_pitcher,
+    game_out=None,
+):
+    """
+    Evaluate run line edges using the simulation margin distribution.
+    Only bets the underdog side (+1.5) — favorite -1.5 historically -25.9% ROI.
+    """
+    home_spread = spread_row["home_spread"]
+    away_spread = spread_row["away_spread"]
+    home_spread_odds = spread_row["best_home_odds"]
+    away_spread_odds = spread_row["best_away_odds"]
+    home_cover_nv = spread_row["home_cover_nv_prob"]
+    away_cover_nv = spread_row["away_cover_nv_prob"]
+
+    # Compute model cover probabilities from margin distribution
+    n = len(margin_dist)
+    # margin_dist is home margin (positive = home wins by that many)
+    # Home covers when margin + home_spread > 0
+    home_cover_prob = float(np.sum(margin_dist + home_spread > 0)) / n
+    away_cover_prob = float(np.sum(-margin_dist + away_spread > 0)) / n
+
+    # Only allow dog (+1.5) spread bets
+    allow_home = home_spread > 0  # home is underdog
+    allow_away = away_spread > 0  # away is underdog
+
+    # Check home spread (dog only)
+    if allow_home:
+        home_edge_info = calculate_edge(home_cover_prob, home_cover_nv, home_spread_odds, confidence, alpha=SPREAD_ALPHA)
+        if (SPREAD_MIN_EDGE <= home_edge_info["edge"] <= SPREAD_MAX_EDGE
+                and home_edge_info["ev_per_unit"] > 0
+                and confidence >= SPREAD_MIN_CONFIDENCE):
+            sizing = size_bet(home_edge_info["adjusted_prob"], american_to_decimal(home_spread_odds),
+                              bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
+            if sizing["bet_dollars"] > 0:
+                odds_str = f"+{int(home_spread_odds)}" if home_spread_odds > 0 else str(int(home_spread_odds))
+                # Per-sportsbook odds
+                books = spread_row.get("books_home", {})
+                sportsbook_odds = {}
+                if isinstance(books, dict):
+                    for bk, info in books.items():
+                        if isinstance(info, dict):
+                            sportsbook_odds[bk] = int(info["odds"])
+                        else:
+                            sportsbook_odds[bk] = int(info)
+                return {
+                    "pick": f"{home_abbr} +1.5",
+                    "side": "home",
+                    "team": home_abbr,
+                    "opponent": away_abbr,
+                    "edge_pct": round(home_edge_info["edge"] * 100, 1),
+                    "model_prob": round(home_cover_prob, 3),
+                    "confidence": round(confidence, 3),
+                    "odds": odds_str,
+                    "kelly_fraction": round(sizing["bet_fraction"], 4),
+                    "wager": sizing["bet_dollars"],
+                    "explanation": f"{home_abbr} is getting +1.5 at {odds_str}. The sim gives them a {home_cover_prob*100:.0f}% chance of covering — {home_edge_info['edge']*100:.1f}% edge. Run line bets are higher variance, but the model sees value here.",
+                    "type": "run_line",
+                    "sportsbook_odds": sportsbook_odds,
+                }
+
+    # Check away spread (dog only)
+    if allow_away:
+        away_edge_info = calculate_edge(away_cover_prob, away_cover_nv, away_spread_odds, confidence, alpha=SPREAD_ALPHA)
+        if (SPREAD_MIN_EDGE <= away_edge_info["edge"] <= SPREAD_MAX_EDGE
+                and away_edge_info["ev_per_unit"] > 0
+                and confidence >= SPREAD_MIN_CONFIDENCE):
+            sizing = size_bet(away_edge_info["adjusted_prob"], american_to_decimal(away_spread_odds),
+                              bankroll, KELLY_FRACTION, MAX_BET_FRACTION)
+            if sizing["bet_dollars"] > 0:
+                odds_str = f"+{int(away_spread_odds)}" if away_spread_odds > 0 else str(int(away_spread_odds))
+                books = spread_row.get("books_away", {})
+                sportsbook_odds = {}
+                if isinstance(books, dict):
+                    for bk, info in books.items():
+                        if isinstance(info, dict):
+                            sportsbook_odds[bk] = int(info["odds"])
+                        else:
+                            sportsbook_odds[bk] = int(info)
+                return {
+                    "pick": f"{away_abbr} +1.5",
+                    "side": "away",
+                    "team": away_abbr,
+                    "opponent": home_abbr,
+                    "edge_pct": round(away_edge_info["edge"] * 100, 1),
+                    "model_prob": round(away_cover_prob, 3),
+                    "confidence": round(confidence, 3),
+                    "odds": odds_str,
+                    "kelly_fraction": round(sizing["bet_fraction"], 4),
+                    "wager": sizing["bet_dollars"],
+                    "explanation": f"{away_abbr} is getting +1.5 at {odds_str}. The sim gives them a {away_cover_prob*100:.0f}% chance of covering — {away_edge_info['edge']*100:.1f}% edge. Run line bets are higher variance, but the model sees value here.",
+                    "type": "run_line",
+                    "sportsbook_odds": sportsbook_odds,
+                }
+
+    return None
 
 
 def _evaluate_ml_edge(
