@@ -90,6 +90,25 @@ _DEFAULT_BATTER = {
 }
 
 
+def _fetch_and_cache_odds(sport_key, cache_path):
+    """Fetch odds from the API and cache to disk for reuse on re-runs."""
+    try:
+        raw_h2h = fetch_mlb_odds(markets="h2h", sport_key=sport_key)
+        odds_h2h = parse_odds_response(raw_h2h)
+    except Exception as e:
+        print(f"  Error fetching odds: {e}")
+        return pd.DataFrame()
+
+    if not odds_h2h.empty:
+        try:
+            odds_h2h.to_json(cache_path)
+            print(f"  Odds cached for reuse ({len(odds_h2h)} games)")
+        except Exception:
+            pass
+
+    return odds_h2h
+
+
 def _fetch_preview_lineups(date: str, cumulative, include_spring: bool) -> list:
     """
     Fetch projected lineups from RotoGrinders for night-before preview run.
@@ -250,15 +269,23 @@ def run_daily(
         return
     print(f"  {len(games)} games found")
 
-    # --- 3. Fetch live odds ---
+    # --- 3. Fetch odds (cached per day to avoid live/stale odds on re-runs) ---
+    odds_cache_path = DAILY_DIR / f"odds_cache_{today}.json"
     sport_key = "baseball_mlb_preseason" if include_spring else None
-    print("\nFetching moneyline odds...")
-    try:
-        raw_h2h = fetch_mlb_odds(markets="h2h", sport_key=sport_key)
-        odds_h2h = parse_odds_response(raw_h2h)
-    except Exception as e:
-        print(f"  Error fetching odds: {e}")
-        odds_h2h = pd.DataFrame()
+
+    if odds_cache_path.exists() and mode != "preview":
+        # Reuse cached pre-game odds from first run of the day
+        print("\nUsing cached pre-game odds (avoiding live odds contamination)...")
+        try:
+            cached = pd.read_json(odds_cache_path)
+            odds_h2h = cached
+            print(f"  {len(odds_h2h)} games with cached odds")
+        except Exception as e:
+            print(f"  Cache read failed ({e}), fetching fresh...")
+            odds_h2h = _fetch_and_cache_odds(sport_key, odds_cache_path)
+    else:
+        print("\nFetching moneyline odds...")
+        odds_h2h = _fetch_and_cache_odds(sport_key, odds_cache_path)
 
     # Totals odds fetch disabled for 2026 (totals betting consistently negative)
     odds_totals = pd.DataFrame()
