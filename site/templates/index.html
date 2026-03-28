@@ -202,15 +202,17 @@
             </div>
 
             {# Teams + Win Prob #}
+            {% set away_wp = game.model_away_wp|default(0.5) %}
+            {% set home_wp = game.model_home_wp|default(0.5) %}
             <div class="slate-matchup">
-                <div class="slate-side {% if game.model_away_wp > game.model_home_wp %}slate-fav{% endif %}">
+                <div class="slate-side {% if away_wp > home_wp %}slate-fav{% endif %}">
                     <span class="slate-team-name">{{ game.away }}</span>
-                    <span class="slate-wp">{{ (game.model_away_wp * 100)|round|int }}%</span>
+                    <span class="slate-wp">{{ (away_wp * 100)|round|int }}%</span>
                 </div>
                 <div class="slate-at">@</div>
-                <div class="slate-side {% if game.model_home_wp > game.model_away_wp %}slate-fav{% endif %}">
+                <div class="slate-side {% if home_wp > away_wp %}slate-fav{% endif %}">
                     <span class="slate-team-name">{{ game.home }}</span>
-                    <span class="slate-wp">{{ (game.model_home_wp * 100)|round|int }}%</span>
+                    <span class="slate-wp">{{ (home_wp * 100)|round|int }}%</span>
                 </div>
             </div>
 
