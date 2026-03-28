@@ -92,7 +92,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase || true
+          git stash --include-untracked || true
+          git pull --rebase || git reset --hard origin/main
+          git stash pop || true
 
       - name: Run daily pipeline
         run: |
@@ -138,6 +140,6 @@ jobs:
             MODE="${{ steps.mode.outputs.mode }}"
             DATE=$(date +%Y-%m-%d)
             git commit -m "Daily pipeline ($MODE): ${DATE}"
-            git pull --rebase || true
-            git push
+            git pull --rebase || (git rebase --abort 2>/dev/null; git stash && git pull --rebase && git stash pop)
+            git push || echo "Push failed — will retry on next run"
           fi

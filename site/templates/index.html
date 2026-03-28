@@ -72,6 +72,7 @@
     {% if today %}
     <h1 class="hero-date-big">{% if is_opening_day %}Opening Day Picks — {{ display_date }}{% else %}MLB Picks — {{ display_date }}{% endif %}</h1>
     <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
+    {% if not is_past %}
     {% if today.run_mode == 'preview' %}
     <div class="preview-banner glass">
         <span class="preview-badge">PREVIEW</span>
@@ -82,6 +83,7 @@
         <span class="preview-badge" style="background: rgba(24, 119, 242, 0.12); color: var(--accent);">UPDATING</span>
         Picks are updating as lineups are confirmed. The model re-runs automatically when new lineups are posted.
     </div>
+    {% endif %}
     {% endif %}
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
@@ -119,7 +121,7 @@
                     <span class="pick-type-badge {{ pick.type|default('moneyline') }}">{{ "RL" if pick.type == "run_line" else "ML" }}</span>
                 </div>
                 <span class="pick-odds">{{ pick.odds }}</span>
-                {% if pick.lineup_status == 'projected' %}
+                {% if pick.lineup_status == 'projected' and not is_past %}
                 <span class="lineup-badge projected">projected lineup</span>
                 {% endif %}
             </div>
@@ -191,12 +193,12 @@
             </thead>
             <tbody>
                 {% for game in today.games %}
-                <tr class="game-row {% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' %}projected-row{% endif %}" data-game-idx="{{ loop.index0 }}">
+                <tr class="game-row {% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' and not is_past %}projected-row{% endif %}" data-game-idx="{{ loop.index0 }}">
                     <td>
                         <span class="team">{{ game.away }}</span>
                         <span class="at">@</span>
                         <span class="team">{{ game.home }}</span>
-                        {% if game.lineup_status == 'projected' %}
+                        {% if game.lineup_status == 'projected' and not is_past %}
                         <span class="lineup-badge projected">projected</span>
                         {% endif %}
                     </td>

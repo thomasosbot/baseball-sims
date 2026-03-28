@@ -9,6 +9,63 @@
 .sim-page { padding: 1.5rem 0 6rem; }
 .sim-page h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; }
 
+/* ── Today's Matchup Buttons ── */
+.today-matchups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.today-matchups .matchup-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+.matchup-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+}
+.matchup-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+.matchup-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+.any-matchup-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+}
+.any-matchup-btn:hover { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 480px) {
+    .matchup-btn { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
+}
+
 /* ── Team Selector ── */
 .team-selector {
     display: flex;
@@ -112,6 +169,15 @@
 .scoreboard .total-cell {
     font-weight: 700;
     background: rgba(0,0,0,0.02);
+    transition: transform 0.3s ease;
+}
+.scoreboard .total-cell.run-flash {
+    animation: runScorePop 0.5s ease;
+}
+@keyframes runScorePop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.5); color: #eab308; }
+    100% { transform: scale(1); }
 }
 .scoreboard .inning-active {
     background: var(--accent-light);
@@ -128,18 +194,98 @@
     gap: 1.25rem;
     margin-bottom: 1.25rem;
 }
+.diamond-col { display: flex; flex-direction: column; gap: 1rem; }
 .diamond-card { padding: 1.25rem; display: flex; flex-direction: column; align-items: center; }
 .sim-right-col { display: flex; flex-direction: column; gap: 1rem; }
-.prob-card { padding: 1.25rem; }
 .sim-right-col .play-log-card { flex: 1; }
-.sim-right-col .play-log { max-height: 320px; }
+.sim-right-col .play-log { max-height: 550px; }
+
+/* ── At-Bat Display ── */
+.at-bat-display {
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(24, 119, 242, 0.04);
+    border-radius: var(--radius-sm);
+    min-height: 2.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.at-bat-display .now-batting-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+.at-bat-display .batter-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ── PA Odds Collapsible ── */
+.pa-odds-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    transition: background 0.15s;
+    width: 100%;
+    justify-content: center;
+}
+.pa-odds-toggle:hover { background: rgba(0,0,0,0.03); }
+.pa-odds-toggle .toggle-arrow {
+    transition: transform 0.2s ease;
+    font-size: 0.6rem;
+}
+.pa-odds-toggle.open .toggle-arrow { transform: rotate(180deg); }
+.pa-odds-section {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.pa-odds-section.open {
+    max-height: 300px;
+    padding-top: 0.5rem;
+}
+.prob-card {
+    padding: 0.75rem;
+}
 
 /* ── Diamond SVG ── */
 .diamond-svg { width: 100%; max-width: 400px; height: auto; }
 
+/* Grass stripe pattern */
+.grass-stripe-dark { fill: #2aab2a; }
+.grass-stripe-light { fill: #33cc33; }
+
 /* Base glow when occupied */
 .base-indicator { transition: fill 0.3s ease, filter 0.3s ease; }
-.base-indicator.occupied { fill: #FFD700; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
+.base-indicator.occupied {
+    fill: #FFD700;
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9));
+    animation: baseGlow 1.2s ease-in-out infinite;
+}
+@keyframes baseGlow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)); }
+    50% { filter: drop-shadow(0 0 16px rgba(255, 215, 0, 1)); }
+}
 
 /* Runner dots */
 .runner-dot {
@@ -150,7 +296,24 @@
 }
 .runner-dot.visible {
     opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9));
+    animation: runnerBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes runnerBounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mound pulse on pitch */
+.mound-circle { transition: all 0.3s ease; }
+.mound-circle.pitching {
+    animation: moundPulse 0.6s ease-out;
+}
+@keyframes moundPulse {
+    0% { r: 7; opacity: 1; }
+    50% { r: 12; opacity: 0.6; }
+    100% { r: 7; opacity: 1; }
 }
 
 /* Outs indicator */
@@ -160,9 +323,19 @@
     border-radius: 50%;
     border: 2px solid var(--text-muted);
     background: transparent;
-    transition: background 0.25s, border-color 0.25s;
+    transition: background 0.25s, border-color 0.25s, transform 0.2s;
 }
 .out-dot.active { background: var(--red); border-color: var(--red); }
+.out-dot.shake {
+    animation: outShake 0.4s ease;
+}
+@keyframes outShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-3px) rotate(-5deg); }
+    40% { transform: translateX(3px) rotate(5deg); }
+    60% { transform: translateX(-2px) rotate(-3deg); }
+    80% { transform: translateX(2px) rotate(3deg); }
+}
 .outs-label {
     font-size: 0.7rem;
     font-weight: 600;
@@ -173,40 +346,40 @@
     margin-top: 0.35rem;
 }
 
-/* ── Probability Bars ── */
+/* ── Probability Bars (de-emphasized) ── */
 .matchup-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--text);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.35rem;
     text-align: center;
 }
 .matchup-text .vs { color: var(--text-muted); font-weight: 400; }
-.prob-bars { display: flex; flex-direction: column; gap: 0.4rem; }
+.prob-bars { display: flex; flex-direction: column; gap: 0.2rem; }
 .prob-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
 }
 .prob-label {
-    font-size: 0.72rem;
+    font-size: 0.6rem;
     font-weight: 600;
-    width: 30px;
+    width: 26px;
     text-align: right;
     color: var(--text-secondary);
     font-family: 'SF Mono', 'Fira Code', monospace;
 }
 .prob-bar-bg {
     flex: 1;
-    height: 22px;
+    height: 10px;
     background: rgba(0,0,0,0.04);
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
     position: relative;
 }
 .prob-bar-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 3px;
     transition: width 0.4s ease, opacity 0.3s ease;
     min-width: 0;
 }
@@ -218,9 +391,9 @@
     50% { opacity: 0.5; }
 }
 .prob-pct {
-    font-size: 0.7rem;
+    font-size: 0.58rem;
     font-weight: 500;
-    width: 38px;
+    width: 32px;
     color: var(--text-muted);
     font-family: 'SF Mono', 'Fira Code', monospace;
 }
@@ -238,32 +411,70 @@
 /* ── Play-by-Play ── */
 .play-log-card { padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
 .play-log-card h3 {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-muted);
+    color: var(--accent);
     margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
+.play-log-card h3::before { content: '\26BE'; font-size: 1rem; }
 .play-log {
-    max-height: 260px;
+    max-height: 550px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.3rem;
 }
 .play-entry {
     display: flex;
     gap: 0.5rem;
-    font-size: 0.82rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    animation: slideIn 0.2s ease;
+    font-size: 0.84rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    animation: slideIn 0.25s ease;
+    line-height: 1.45;
+    border-left: 3px solid transparent;
 }
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
+    from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Play entry type styles */
+.play-entry.play-hr {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(34, 197, 94, 0.08));
+    border-left-color: #FFD700;
+    font-weight: 600;
+    font-size: 0.9rem;
+    animation: slideIn 0.25s ease, hrCelebrate 0.8s ease;
+}
+@keyframes hrCelebrate {
+    0% { background: rgba(255, 215, 0, 0.4); }
+    50% { background: rgba(255, 215, 0, 0.25); }
+    100% { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(34, 197, 94, 0.08)); }
+}
+.play-entry.play-scoring {
+    background: rgba(234, 179, 8, 0.08);
+    border-left-color: #eab308;
+    animation: slideIn 0.25s ease, scoringPulse 0.6s ease;
+}
+@keyframes scoringPulse {
+    0% { background: rgba(234, 179, 8, 0.25); }
+    100% { background: rgba(234, 179, 8, 0.08); }
+}
+.play-entry.play-strikeout {
+    border-left-color: #ef4444;
+    animation: slideIn 0.25s ease, kFlash 0.4s ease;
+}
+@keyframes kFlash {
+    0% { background: rgba(239, 68, 68, 0.15); }
+    100% { background: transparent; }
+}
+
 .play-inning {
     font-weight: 700;
     font-size: 0.72rem;
@@ -271,17 +482,20 @@
     color: var(--accent);
 }
 .play-batter { font-weight: 600; color: var(--text); min-width: 100px; }
-.play-desc { flex: 1; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.4; }
+.play-desc { flex: 1; color: var(--text-secondary); font-size: 0.84rem; line-height: 1.45; }
 .play-entry.inning-change {
-    border-bottom: 1px solid var(--border);
-    padding: 0.4rem 0;
-    margin-bottom: 0.2rem;
+    border-bottom: 2px solid var(--accent);
+    border-left: none;
+    padding: 0.55rem 0.6rem;
+    margin: 0.3rem 0;
+    background: rgba(24, 119, 242, 0.04);
+    border-radius: 6px;
 }
 .inning-change-text {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     color: var(--accent);
 }
 .play-outcome { color: var(--text-secondary); }
@@ -297,6 +511,11 @@
     color: #eab308;
     font-weight: 700;
     margin-left: auto;
+    white-space: nowrap;
+}
+.play-icon {
+    font-size: 0.9rem;
+    margin-right: 0.2rem;
 }
 
 /* ── Controls Bar ── */
@@ -377,14 +596,20 @@
 }
 .game-over-badge {
     display: inline-block;
-    padding: 0.15rem 0.6rem;
+    padding: 0.2rem 0.75rem;
     background: var(--green);
     color: #fff;
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 700;
     border-radius: 100px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    animation: finalPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes finalPopIn {
+    0% { transform: scale(0.4); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 /* ── Box Score ── */
@@ -412,7 +637,7 @@
 .bx-table td.bx-name-cell .bx-pos { font-size: 0.65rem; color: var(--text-muted); margin-left: 4px; }
 .bx-table tbody tr:last-child td { border-bottom: none; }
 .bx-table tbody tr:hover { background: rgba(24, 119, 242, 0.03); }
-.bx-totals-row td { border-top: 2px solid var(--border); font-weight: 600; }
+.bx-table .bx-totals-row td { border-top: 2px solid var(--border); font-weight: 600; }
 .bx-summary {
     padding: 0.5rem 1rem 0.75rem;
     font-size: 0.78rem;
@@ -428,6 +653,7 @@
     .team-vs { text-align: center; padding-top: 0; }
     .controls-bar { gap: 0.5rem; padding: 0.5rem 1rem; }
     .btn-next { padding: 0.5rem 1.25rem; font-size: 0.85rem; }
+    .sim-right-col .play-log { max-height: 450px; }
 }
 </style>
 {% endblock %}
@@ -435,6 +661,9 @@
 {% block content %}
 <div class="sim-page">
     <h1>Game Simulator</h1>
+
+    <!-- Today's Matchups -->
+    <div class="today-matchups" id="today-matchups"></div>
 
     <!-- Team Selector -->
     <div class="glass team-selector">
@@ -488,105 +717,136 @@
         </table>
     </div>
 
-    <!-- Diamond + Probabilities -->
+    <!-- Diamond + Play-by-Play -->
     <div class="sim-main">
-        <div class="glass diamond-card">
-            <svg class="diamond-svg" viewBox="0 0 400 350" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <radialGradient id="outfieldGrad" cx="50%" cy="40%" r="55%">
-                        <stop offset="0%" stop-color="#2d6a2d"/>
-                        <stop offset="100%" stop-color="#1a4d1a"/>
-                    </radialGradient>
-                    <linearGradient id="infieldGrad" x1="50%" y1="0%" x2="50%" y2="100%">
-                        <stop offset="0%" stop-color="#3a8c3a"/>
-                        <stop offset="100%" stop-color="#2f7a2f"/>
-                    </linearGradient>
-                    <radialGradient id="dirtGrad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#c4a265"/>
-                        <stop offset="100%" stop-color="#a88c50"/>
-                    </radialGradient>
-                    <filter id="glowGold">
-                        <feGaussianBlur stdDeviation="3" result="blur"/>
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                    <filter id="shadowSm">
-                        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.2"/>
-                    </filter>
-                </defs>
+        <div class="diamond-col">
+            <div class="glass diamond-card">
+                <svg class="diamond-svg" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="outfieldGrad" cx="50%" cy="40%" r="55%">
+                            <stop offset="0%" stop-color="#3eda3e"/>
+                            <stop offset="100%" stop-color="#22a822"/>
+                        </radialGradient>
+                        <linearGradient id="infieldGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+                            <stop offset="0%" stop-color="#4ae04a"/>
+                            <stop offset="100%" stop-color="#38c438"/>
+                        </linearGradient>
+                        <radialGradient id="dirtGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#d4b06a"/>
+                            <stop offset="100%" stop-color="#b8964f"/>
+                        </radialGradient>
+                        <!-- Grass stripe pattern -->
+                        <pattern id="grassStripes" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                            <rect width="12" height="6" fill="#3eda3e" opacity="0.3"/>
+                            <rect y="6" width="12" height="6" fill="#34c834" opacity="0.3"/>
+                        </pattern>
+                        <filter id="glowGold">
+                            <feGaussianBlur stdDeviation="4" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                        <filter id="shadowSm">
+                            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.25"/>
+                        </filter>
+                        <filter id="baseShadow">
+                            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+                        </filter>
+                    </defs>
 
-                <!-- Outfield -->
-                <path d="M 200 40 Q 370 40 360 200 L 310 200 L 200 130 L 90 200 L 40 200 Q 30 40 200 40 Z"
-                      fill="url(#outfieldGrad)" stroke="#1a4d1a" stroke-width="1"/>
+                    <!-- Outfield -->
+                    <path d="M 200 40 Q 370 40 360 200 L 310 200 L 200 130 L 90 200 L 40 200 Q 30 40 200 40 Z"
+                          fill="url(#outfieldGrad)" stroke="#1a8a1a" stroke-width="1.5"/>
+                    <!-- Grass stripes overlay on outfield -->
+                    <path d="M 200 40 Q 370 40 360 200 L 310 200 L 200 130 L 90 200 L 40 200 Q 30 40 200 40 Z"
+                          fill="url(#grassStripes)" opacity="0.5"/>
 
-                <!-- Infield diamond fill -->
-                <polygon points="200,100 300,200 200,300 100,200"
-                         fill="url(#infieldGrad)" stroke="#256225" stroke-width="0.5" opacity="0.9"/>
+                    <!-- Outfield wall arc -->
+                    <path d="M 45 195 Q 30 45 200 38 Q 370 45 355 195"
+                          fill="none" stroke="#1a6b1a" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
 
-                <!-- Dirt/skin infield circle -->
-                <circle cx="200" cy="200" r="55" fill="url(#dirtGrad)" opacity="0.6"/>
+                    <!-- Infield diamond fill -->
+                    <polygon points="200,100 300,200 200,300 100,200"
+                             fill="url(#infieldGrad)" stroke="#28a028" stroke-width="0.5" opacity="0.9"/>
+                    <!-- Infield grass stripes -->
+                    <polygon points="200,100 300,200 200,300 100,200"
+                             fill="url(#grassStripes)" opacity="0.3"/>
 
-                <!-- Basepaths -->
-                <line x1="200" y1="300" x2="300" y2="200" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
-                <line x1="300" y1="200" x2="200" y2="100" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
-                <line x1="200" y1="100" x2="100" y2="200" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
-                <line x1="100" y1="200" x2="200" y2="300" stroke="#d4a84b" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Dirt/skin infield circle -->
+                    <circle cx="200" cy="200" r="58" fill="url(#dirtGrad)" opacity="0.65"/>
 
-                <!-- Mound -->
-                <circle cx="200" cy="200" r="5" fill="#c4a265" stroke="#a88c50" stroke-width="1" filter="url(#shadowSm)"/>
-                <!-- Pitcher name -->
-                <text id="pitcher-name" x="200" y="222" font-size="9" fill="#fff" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.8"></text>
+                    <!-- Basepaths -->
+                    <line x1="200" y1="300" x2="300" y2="200" stroke="#d4a84b" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="300" y1="200" x2="200" y2="100" stroke="#d4a84b" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="200" y1="100" x2="100" y2="200" stroke="#d4a84b" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="100" y1="200" x2="200" y2="300" stroke="#d4a84b" stroke-width="3.5" stroke-linecap="round"/>
 
-                <!-- Home plate (pentagon) -->
-                <polygon points="200,304 192,296 192,288 208,288 208,296"
-                         fill="#fff" stroke="#999" stroke-width="1" filter="url(#shadowSm)"/>
+                    <!-- Mound -->
+                    <circle id="mound-circle" class="mound-circle" cx="200" cy="200" r="7" fill="#d4b06a" stroke="#b8964f" stroke-width="1.5" filter="url(#shadowSm)"/>
+                    <!-- Pitcher name -->
+                    <text id="pitcher-name" x="200" y="225" font-size="9.5" fill="#fff" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.9" style="text-shadow: 0 1px 3px rgba(0,0,0,0.4);"></text>
 
-                <!-- 1st base -->
-                <rect id="base-1" class="base-indicator" x="293" y="193" width="14" height="14"
-                      rx="2" transform="rotate(45 300 200)"
-                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+                    <!-- Home plate (bigger, bolder pentagon) -->
+                    <polygon points="200,308 190,298 190,288 210,288 210,298"
+                             fill="#fff" stroke="#888" stroke-width="1.5" filter="url(#baseShadow)"/>
 
-                <!-- 2nd base -->
-                <rect id="base-2" class="base-indicator" x="193" y="93" width="14" height="14"
-                      rx="2" transform="rotate(45 200 100)"
-                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+                    <!-- 1st base (bigger) -->
+                    <rect id="base-1" class="base-indicator" x="292" y="192" width="16" height="16"
+                          rx="2" transform="rotate(45 300 200)"
+                          fill="#fff" stroke="#bbb" stroke-width="1.5" filter="url(#baseShadow)"/>
 
-                <!-- 3rd base -->
-                <rect id="base-3" class="base-indicator" x="93" y="193" width="14" height="14"
-                      rx="2" transform="rotate(45 100 200)"
-                      fill="#fff" stroke="#ccc" stroke-width="1" filter="url(#shadowSm)"/>
+                    <!-- 2nd base (bigger) -->
+                    <rect id="base-2" class="base-indicator" x="192" y="92" width="16" height="16"
+                          rx="2" transform="rotate(45 200 100)"
+                          fill="#fff" stroke="#bbb" stroke-width="1.5" filter="url(#baseShadow)"/>
 
-                <!-- Runner dots -->
-                <circle id="runner-1" class="runner-dot" cx="300" cy="200" r="8" filter="url(#glowGold)"/>
-                <circle id="runner-2" class="runner-dot" cx="200" cy="100" r="8" filter="url(#glowGold)"/>
-                <circle id="runner-3" class="runner-dot" cx="100" cy="200" r="8" filter="url(#glowGold)"/>
+                    <!-- 3rd base (bigger) -->
+                    <rect id="base-3" class="base-indicator" x="92" y="192" width="16" height="16"
+                          rx="2" transform="rotate(45 100 200)"
+                          fill="#fff" stroke="#bbb" stroke-width="1.5" filter="url(#baseShadow)"/>
 
-                <!-- Runner name labels -->
-                <text id="runner-name-1" x="300" y="185" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
-                <text id="runner-name-2" x="200" y="88" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
-                <text id="runner-name-3" x="100" y="185" font-size="8" fill="#FFD700" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0"></text>
+                    <!-- Runner dots (bigger) -->
+                    <circle id="runner-1" class="runner-dot" cx="300" cy="200" r="10" filter="url(#glowGold)"/>
+                    <circle id="runner-2" class="runner-dot" cx="200" cy="100" r="10" filter="url(#glowGold)"/>
+                    <circle id="runner-3" class="runner-dot" cx="100" cy="200" r="10" filter="url(#glowGold)"/>
 
-                <!-- Base labels -->
-                <text x="320" y="205" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" opacity="0.6">1B</text>
-                <text x="200" y="82" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.6">2B</text>
-                <text x="72" y="205" font-size="10" fill="#fff" font-weight="600" font-family="Inter, sans-serif" opacity="0.6">3B</text>
-            </svg>
-            <div class="outs-row">
-                <div class="out-dot" id="out-1"></div>
-                <div class="out-dot" id="out-2"></div>
-                <div class="out-dot" id="out-3"></div>
-            </div>
-            <div class="outs-label">Outs</div>
-        </div>
+                    <!-- Runner name labels -->
+                    <text id="runner-name-1" x="300" y="183" font-size="8.5" fill="#FFD700" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle" opacity="0" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5);"></text>
+                    <text id="runner-name-2" x="200" y="84" font-size="8.5" fill="#FFD700" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle" opacity="0" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5);"></text>
+                    <text id="runner-name-3" x="100" y="183" font-size="8.5" fill="#FFD700" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle" opacity="0" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5);"></text>
 
-        <div class="sim-right-col">
-            <div class="glass prob-card">
-                <div class="matchup-text" id="matchup-text">Select teams to begin</div>
-                <div class="prob-bars" id="prob-bars">
-                    <!-- Filled by JS -->
+                    <!-- Base labels -->
+                    <text x="322" y="206" font-size="10" fill="#fff" font-weight="700" font-family="Inter, sans-serif" opacity="0.7" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">1B</text>
+                    <text x="200" y="78" font-size="10" fill="#fff" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle" opacity="0.7" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">2B</text>
+                    <text x="68" y="206" font-size="10" fill="#fff" font-weight="700" font-family="Inter, sans-serif" opacity="0.7" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);">3B</text>
+                </svg>
+                <div class="outs-row">
+                    <div class="out-dot" id="out-1"></div>
+                    <div class="out-dot" id="out-2"></div>
+                    <div class="out-dot" id="out-3"></div>
+                </div>
+                <div class="outs-label">Outs</div>
+
+                <!-- At-Bat Display -->
+                <div class="at-bat-display" id="at-bat-display">
+                    <span style="color: var(--text-muted); font-style: italic; font-weight: 400;">Select teams to begin</span>
                 </div>
             </div>
 
-            <!-- Play-by-Play (next to diamond) -->
+            <!-- PA Odds (collapsible, below diamond) -->
+            <div class="glass prob-card">
+                <button class="pa-odds-toggle" id="pa-odds-toggle">
+                    <span class="toggle-arrow">&#9660;</span> PA Odds
+                </button>
+                <div class="pa-odds-section" id="pa-odds-section">
+                    <div class="matchup-text" id="matchup-text"></div>
+                    <div class="prob-bars" id="prob-bars">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sim-right-col">
+            <!-- Play-by-Play (primary right column content) -->
             <div class="glass play-log-card">
                 <h3>Play-by-Play</h3>
                 <div class="play-log" id="play-log">
@@ -626,7 +886,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script>window.SIM_DATA = {{ sim_data_json }};</script>
+<script>
+window.SIM_DATA = {{ sim_data_json }};
+window.TODAY_MATCHUPS = {{ today_matchups_json }};
+</script>
 <script src="static/sim.js"></script>
 <script>
 (function() {
@@ -635,6 +898,7 @@
     const PROB_ORDER = ['HR','3B','2B','1B','BB','HBP','K','OUT'];
     const OUTCOME_LABELS = { HR:'Home Run', '3B':'Triple', '2B':'Double', '1B':'Single', BB:'Walk', HBP:'Hit By Pitch', K:'Strikeout', OUT:'Out' };
     const HIT_SET = new Set(['HR','3B','2B','1B']);
+    const OUTCOME_ICONS = { HR:'\u26BE', '3B':'\u26A1', '2B':'\u2B50', '1B':'\u2714', BB:'\uD83D\uDEB6', HBP:'\uD83E\uDE78', K:'\u24C0', OUT:'\u274C' };
 
     const $  = id => document.getElementById(id);
     const selAway = $('sel-away'), selHome = $('sel-home');
@@ -645,6 +909,15 @@
     const probBarsEl = $('prob-bars');
     const playLog = $('play-log');
     const starterAway = $('starter-away'), starterHome = $('starter-home');
+    const atBatDisplay = $('at-bat-display');
+
+    // PA Odds toggle
+    const paOddsToggle = $('pa-odds-toggle');
+    const paOddsSection = $('pa-odds-section');
+    paOddsToggle.addEventListener('click', function() {
+        paOddsToggle.classList.toggle('open');
+        paOddsSection.classList.toggle('open');
+    });
 
     let game = null;
     let autoInterval = null;
@@ -657,6 +930,7 @@
     let awayErrors = 0, homeErrors = 0;
     let lastInning = 1, lastHalf = 'top';
     let currentInningRuns = 0;
+    let prevAwayRuns = 0, prevHomeRuns = 0;
 
     // Box score tracking: per-batter stats
     let boxAway = []; // [{name, ab, r, h, rbi, bb, k}, ...]
@@ -671,12 +945,51 @@
             abbrs.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a;
-                opt.textContent = a + ' — ' + data.teams[a].name;
+                opt.textContent = a + ' \u2014 ' + data.teams[a].name;
                 sel.appendChild(opt);
             });
-            if (idx === 0 && abbrs.includes('NYY')) sel.value = 'NYY';
-            if (idx === 1 && abbrs.includes('BOS')) sel.value = 'BOS';
         });
+
+        // Build today's matchup buttons
+        const matchups = window.TODAY_MATCHUPS || [];
+        const container = $('today-matchups');
+        if (matchups.length > 0 && container) {
+            container.innerHTML = '<div class="matchup-label">Today\'s Games</div>';
+            matchups.forEach((m, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'matchup-btn';
+                btn.textContent = m.away + ' @ ' + m.home;
+                btn.addEventListener('click', () => {
+                    // Deactivate all buttons
+                    container.querySelectorAll('.matchup-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selAway.value = m.away;
+                    selHome.value = m.home;
+                    updateStarterNames();
+                });
+                container.appendChild(btn);
+            });
+            // "Custom" button to pick any teams
+            const customBtn = document.createElement('button');
+            customBtn.className = 'any-matchup-btn';
+            customBtn.textContent = 'Custom matchup';
+            customBtn.addEventListener('click', () => {
+                container.querySelectorAll('.matchup-btn').forEach(b => b.classList.remove('active'));
+                customBtn.classList.add('active');
+                selAway.value = '';
+                selHome.value = '';
+                updateStarterNames();
+            });
+            container.appendChild(customBtn);
+
+            // Default to first matchup
+            const firstBtn = container.querySelector('.matchup-btn');
+            if (firstBtn) firstBtn.click();
+        } else {
+            // No matchups — default to NYY vs BOS
+            if (abbrs.includes('NYY')) selAway.value = 'NYY';
+            if (abbrs.includes('BOS')) selHome.value = 'BOS';
+        }
         updateStarterNames();
     }
 
@@ -727,8 +1040,18 @@
         });
     }
 
+    function flashRunTotal(side) {
+        const el = $('r-' + side);
+        el.classList.remove('run-flash');
+        void el.offsetWidth;
+        el.classList.add('run-flash');
+    }
+
     function updateScoreboard() {
         if (!game) return;
+        const newAwayRuns = game._score[0];
+        const newHomeRuns = game._score[1];
+
         ['away','home'].forEach(side => {
             const innings = side === 'away' ? awayInningRuns : homeInningRuns;
             const row = $('row-' + side);
@@ -749,6 +1072,12 @@
             $('h-' + side).textContent = side === 'away' ? awayHits : homeHits;
             $('e-' + side).textContent = side === 'away' ? awayErrors : homeErrors;
         });
+
+        // Flash run totals when runs score
+        if (newAwayRuns > prevAwayRuns) flashRunTotal('away');
+        if (newHomeRuns > prevHomeRuns) flashRunTotal('home');
+        prevAwayRuns = newAwayRuns;
+        prevHomeRuns = newHomeRuns;
     }
 
     // Runner name tracking: [1B, 2B, 3B] — null or last name string
@@ -765,7 +1094,13 @@
             const occ = bases ? bases[i] : false;
             const baseId = i + 1;
             $('base-' + baseId).classList.toggle('occupied', !!occ);
-            $('runner-' + baseId).classList.toggle('visible', !!occ);
+            const runnerEl = $('runner-' + baseId);
+            if (!!occ && !runnerEl.classList.contains('visible')) {
+                // New runner appearing — trigger bounce
+                runnerEl.classList.remove('visible');
+                void runnerEl.offsetWidth;
+            }
+            runnerEl.classList.toggle('visible', !!occ);
             const nameEl = $('runner-name-' + baseId);
             if (occ && baseRunners[i]) {
                 nameEl.textContent = baseRunners[i];
@@ -775,9 +1110,39 @@
                 nameEl.setAttribute('opacity', '0');
             }
         });
+        const prevOuts = document.querySelectorAll('.out-dot.active').length;
         for (let i = 1; i <= 3; i++) {
-            $('out-' + i).classList.toggle('active', i <= (outs || 0));
+            const dot = $('out-' + i);
+            const shouldBeActive = i <= (outs || 0);
+            const wasActive = dot.classList.contains('active');
+            dot.classList.toggle('active', shouldBeActive);
+            // Shake newly activated out dots
+            if (shouldBeActive && !wasActive) {
+                dot.classList.remove('shake');
+                void dot.offsetWidth;
+                dot.classList.add('shake');
+            }
         }
+    }
+
+    function pulseMound() {
+        const mound = $('mound-circle');
+        if (mound) {
+            mound.classList.remove('pitching');
+            void mound.offsetWidth;
+            mound.classList.add('pitching');
+        }
+    }
+
+    function updateAtBatDisplay(ev) {
+        if (!ev || !ev.batter) {
+            atBatDisplay.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-weight: 400;">Waiting...</span>';
+            return;
+        }
+        const name = ev.batter.name || '?';
+        const half = ev.halfInning === 'top' ? '\u25B2' : '\u25BC';
+        const team = ev.halfInning === 'top' ? awayAbbr : homeAbbr;
+        atBatDisplay.innerHTML = `<span class="now-batting-label">${half} ${team} Now Batting</span> <span class="batter-name">${name}</span>`;
     }
 
     function updatePitcherName(ev) {
@@ -801,17 +1166,14 @@
         const outcome = ev.outcome;
 
         // Figure out new runner positions based on outcome
-        // Start with previous runners, then advance based on what happened
         const newRunners = [null, null, null];
 
         if (outcome === 'HR') {
             // Everyone scores, bases empty
         } else if (outcome === 'BB' || outcome === 'HBP') {
-            // Walk: push runners forward on forced bases, batter to 1B
             if (preBases[0]) {
                 if (preBases[1]) {
                     if (preBases[2]) {
-                        // Bases loaded: 3B scores, everyone shifts
                         newRunners[2] = baseRunners[1];
                     } else {
                         newRunners[2] = baseRunners[1];
@@ -822,60 +1184,45 @@
                 }
             }
             newRunners[0] = batterName;
-            // Keep non-forced runners
             if (postBases[2] && !newRunners[2]) newRunners[2] = baseRunners[2];
         } else if (HIT_SET.has(outcome)) {
-            // Hit: batter goes to the base, runners advance
-            // We can't perfectly track who went where, so use postPlay bases
-            // Put existing runners on their new bases (best effort)
-            // Runners advance from 3B→2B→1B order
             let prevNames = [];
             for (let i = 2; i >= 0; i--) {
                 if (preBases[i] && baseRunners[i]) prevNames.push(baseRunners[i]);
             }
-            // Place batter
             if (outcome === '1B' && postBases[0]) newRunners[0] = batterName;
             if (outcome === '2B' && postBases[1]) newRunners[1] = batterName;
             if (outcome === '3B' && postBases[2]) newRunners[2] = batterName;
-            // Fill remaining occupied bases with previous runners
             for (let i = 2; i >= 0; i--) {
                 if (postBases[i] && !newRunners[i] && prevNames.length > 0) {
                     newRunners[i] = prevNames.shift();
                 }
             }
         } else if (outcome === 'OUT') {
-            // Out: runners may advance, stay, or be out
-            // Use postPlay to see who's still on base
             let prevNames = [];
             for (let i = 2; i >= 0; i--) {
                 if (preBases[i] && baseRunners[i]) prevNames.push(baseRunners[i]);
             }
-            // Error: batter reaches 1B
             if (ev.postPlay.outs === ev.prePlay.outs) {
                 newRunners[0] = batterName;
                 for (let i = 2; i >= 1; i--) {
                     if (postBases[i] && prevNames.length > 0) newRunners[i] = prevNames.shift();
                 }
             } else {
-                // Normal out or DP: just carry forward whoever is still on base
                 for (let i = 2; i >= 0; i--) {
                     if (postBases[i] && prevNames.length > 0) newRunners[i] = prevNames.shift();
                 }
             }
         } else if (outcome === 'K') {
-            // Strikeout: runners stay put (unless steal/WP moved them pre-PA)
             for (let i = 0; i < 3; i++) {
                 if (postBases[i]) newRunners[i] = baseRunners[i];
             }
         }
 
-        // Handle pre-PA events (SB, WP) that moved runners before the outcome
-        // For SB: a runner moved bases before the PA
         if (ev.events && ev.events.length > 0) {
             for (const e of ev.events) {
                 if (e === 'sb_success' || e === 'wild_pitch') {
-                    // Runners already moved in preBases vs the state before events
-                    // Best effort: just use whatever is on the post-state bases
+                    // Runners already moved
                 }
             }
         }
@@ -884,11 +1231,10 @@
     }
 
     function _findScoringRunner(ev) {
-        // Try to find who scored based on pre-play base runners
         const pre = ev.prePlay.bases;
-        if (pre[2] && baseRunners[2]) return baseRunners[2]; // 3B runner most likely to score
-        if (pre[1] && baseRunners[1]) return baseRunners[1]; // 2B runner
-        if (pre[0] && baseRunners[0]) return baseRunners[0]; // 1B runner
+        if (pre[2] && baseRunners[2]) return baseRunners[2];
+        if (pre[1] && baseRunners[1]) return baseRunners[1];
+        if (pre[0] && baseRunners[0]) return baseRunners[0];
         return null;
     }
 
@@ -905,7 +1251,7 @@
             for (const e of ev.events) {
                 if (e === 'sb_success') parts.push('Stolen base!');
                 if (e === 'sb_caught') parts.push('Caught stealing!');
-                if (e === 'wild_pitch') parts.push('Wild pitch — runners advance.');
+                if (e === 'wild_pitch') parts.push('Wild pitch \u2014 runners advance.');
             }
         }
 
@@ -935,7 +1281,6 @@
             } else if (runs > 0) {
                 parts.push(`${name} hits a sacrifice fly, run scores.`);
             } else {
-                // Vary out types randomly for realism
                 const outTypes = [
                     `${name} grounds out to short.`,
                     `${name} grounds out to second.`,
@@ -954,7 +1299,6 @@
 
         // Runner advancement context
         if (runs === 0 && o !== 'K' && o !== 'HR' && HIT_SET.has(o)) {
-            // Describe runner movement on hits with no runs
             const pre = ev.prePlay.bases;
             const post = ev.postPlay.bases;
             const advances = [];
@@ -967,7 +1311,6 @@
         // Scoring context
         if (runs > 0 && o !== 'HR') {
             if (runs === 1) {
-                // Try to name the scoring runner
                 const scorerName = _findScoringRunner(ev);
                 if (scorerName) parts.push(`${scorerName} scores.`);
                 else parts.push('1 run scores.');
@@ -985,13 +1328,18 @@
     function addPlayEntry(ev) {
         if (playLog.querySelector('[style]')) playLog.innerHTML = '';
         const div = document.createElement('div');
-        div.className = 'play-entry';
+        let extraClass = '';
+        const o = ev.outcome || '';
+        if (o === 'HR') extraClass = ' play-hr';
+        else if (o === 'K') extraClass = ' play-strikeout';
+        else if (ev.runsScored > 0) extraClass = ' play-scoring';
+        div.className = 'play-entry' + extraClass;
         const arrow = ev.halfInning === 'top' ? '\u25B2' : '\u25BC';
         const desc = buildRichDescription(ev);
-        const outcome = ev.outcome || '';
+        const icon = OUTCOME_ICONS[o] || '';
         let runsHtml = '';
-        if (ev.runsScored > 0) runsHtml = `<span class="play-runs">+${ev.runsScored}</span>`;
-        div.innerHTML = `<span class="play-inning">${arrow}${ev.inning}</span><span class="play-desc">${desc}</span>${runsHtml}`;
+        if (ev.runsScored > 0) runsHtml = `<span class="play-runs">+${ev.runsScored} \uD83C\uDFC3</span>`;
+        div.innerHTML = `<span class="play-inning">${arrow}${ev.inning}</span><span class="play-desc"><span class="play-icon">${icon}</span> ${desc}</span>${runsHtml}`;
         playLog.prepend(div);
     }
 
@@ -1034,7 +1382,7 @@
         const b = box[slot];
         const o = ev.outcome;
 
-        if (!o) return; // CS ending inning, no outcome
+        if (!o) return;
 
         if (o === 'BB' || o === 'HBP') {
             b.bb++;
@@ -1044,73 +1392,58 @@
             if (o === 'K') b.k++;
         }
 
-        // Track extra-base hits for the summary line
         if (o === '2B') b.doubles = (b.doubles || 0) + 1;
         if (o === '3B') b.triples = (b.triples || 0) + 1;
         if (o === 'HR') b.hr = (b.hr || 0) + 1;
 
-        // Figure out who scored — compare pre/post bases and score
         const sideIdx = isTop ? 0 : 1;
         const runsScored = ev.postPlay.score[sideIdx] - ev.prePlay.score[sideIdx];
 
-        // RBI (batter gets credit for runs scored on their PA, except on errors/DP)
         if (o !== 'OUT' || (o === 'OUT' && ev.postPlay.outs === ev.prePlay.outs)) {
-            // Not a normal out — error, sac fly, etc
             b.rbi += runsScored;
         } else if (o === 'OUT' && runsScored > 0) {
-            // Sac fly or productive out scoring a run
             b.rbi += runsScored;
         } else {
             b.rbi += runsScored;
         }
 
-        // Award runs scored to runners who were on base
         if (runsScored > 0) {
             const pre = ev.prePlay.bases;
             const post = ev.postPlay.bases;
-            // Check from 3B backward which runners scored
             let remaining = runsScored;
             for (let i = 2; i >= 0; i--) {
                 if (remaining <= 0) break;
                 if (pre[i] && !post[i] && baseSlots[i] != null) {
-                    // This runner likely scored
                     const scoredSlot = baseSlots[i];
                     if (box[scoredSlot]) { box[scoredSlot].r++; remaining--; }
                 }
             }
-            // If HR, batter also scores
             if (o === 'HR') {
                 b.r++;
             }
         }
 
-        // Update base slot tracking (who's on which base now)
         const newSlots = [null, null, null];
         if (o === 'HR') {
             // Bases cleared
         } else if (o === 'BB' || o === 'HBP') {
-            // Walk logic — push forced runners
             if (ev.prePlay.bases[0]) {
                 if (ev.prePlay.bases[1]) {
                     newSlots[2] = baseSlots[1];
                 } else {
                     newSlots[1] = baseSlots[0];
                 }
-                if (!ev.prePlay.bases[1]) { /* already handled */ }
+                if (!ev.prePlay.bases[1]) { }
                 else { newSlots[1] = baseSlots[0]; }
             }
             newSlots[0] = slot;
-            // Preserve non-forced runners
             if (ev.postPlay.bases[2] && newSlots[2] == null) newSlots[2] = baseSlots[2];
         } else if (HIT_SET.has(o)) {
-            // Batter goes to hit base
             if (o === '1B') newSlots[0] = slot;
             if (o === '2B') newSlots[1] = slot;
             if (o === '3B') newSlots[2] = slot;
-            // Advance previous runners
             for (let i = 2; i >= 0; i--) {
                 if (ev.postPlay.bases[i] && newSlots[i] == null) {
-                    // Find a previous runner to place here
                     for (let j = i - 1; j >= 0; j--) {
                         if (ev.prePlay.bases[j] && baseSlots[j] != null) {
                             newSlots[i] = baseSlots[j];
@@ -1120,11 +1453,9 @@
                 }
             }
         } else {
-            // Outs — keep whoever is still on base
             for (let i = 0; i < 3; i++) {
                 if (ev.postPlay.bases[i]) {
                     newSlots[i] = baseSlots[i] != null ? baseSlots[i] : null;
-                    // Check if runner advanced
                     if (newSlots[i] == null) {
                         for (let j = i - 1; j >= 0; j--) {
                             if (ev.prePlay.bases[j] && baseSlots[j] != null) {
@@ -1135,7 +1466,6 @@
                     }
                 }
             }
-            // Error: batter reaches 1B
             if (ev.postPlay.outs === ev.prePlay.outs) newSlots[0] = slot;
         }
         baseSlots = newSlots;
@@ -1155,14 +1485,12 @@
                 totals.ab += b.ab; totals.r += b.r; totals.h += b.h;
                 totals.rbi += b.rbi; totals.bb += b.bb; totals.k += b.k;
             });
-            // Totals row
             const totalAvg = totals.ab > 0 ? (totals.h / totals.ab).toFixed(3) : '.000';
             const trTotal = document.createElement('tr');
             trTotal.className = 'bx-totals-row';
             trTotal.innerHTML = `<td class="bx-name-cell" style="font-weight:700;">Totals</td><td><strong>${totals.ab}</strong></td><td><strong>${totals.r}</strong></td><td><strong>${totals.h}</strong></td><td><strong>${totals.rbi}</strong></td><td><strong>${totals.bb}</strong></td><td><strong>${totals.k}</strong></td><td><strong>${totalAvg}</strong></td>`;
             tbody.appendChild(trTotal);
 
-            // Extra base hit summary
             const extras = [];
             box.forEach(b => {
                 if (b.doubles) extras.push(`<strong>2B:</strong> ${b.name} (${b.doubles})`);
@@ -1190,13 +1518,12 @@
         $('bx-home').style.display = ''; $('bx-away').style.display = 'none';
     });
 
-    // Inning tracking — track runs per half-inning separately
+    // Inning tracking
     function checkInningChange(ev) {
         if (!ev) return;
         const inn = ev.inning;
         const half = ev.halfInning;
         if (inn !== lastInning || half !== lastHalf) {
-            // Previous half-inning ended — record runs + add separator to play log
             if (lastHalf === 'top') {
                 awayInningRuns.push(currentInningRuns);
             } else {
@@ -1206,13 +1533,10 @@
             lastInning = inn;
             lastHalf = half;
 
-            // Add inning change entry to play log
             addInningChangeEntry(inn, half);
-            // Reset base runners and base slots for new half-inning
             baseRunners = [null, null, null];
             baseSlots = [null, null, null];
         }
-        // Track runs scored by the BATTING team only
         const sideIdx = half === 'top' ? 0 : 1;
         const runsThisPA = ev.postPlay.score[sideIdx] - ev.prePlay.score[sideIdx];
         currentInningRuns += runsThisPA;
@@ -1243,14 +1567,13 @@
         const homeTeam = data.teams[hKey];
         const parkFac = (data.parkFactors && data.parkFactors[hKey]) || {};
 
-        // SimGame(homeTeam, awayTeam, parkFactors, seed)
         game = new SimGame(homeTeam, awayTeam, parkFac);
 
-        // Reset tracking
         awayInningRuns = []; homeInningRuns = [];
         awayHits = 0; homeHits = 0;
         awayErrors = 0; homeErrors = 0;
         lastInning = 1; lastHalf = 'top'; currentInningRuns = 0;
+        prevAwayRuns = 0; prevHomeRuns = 0;
 
         baseRunners = [null, null, null];
         baseSlots = [null, null, null];
@@ -1260,7 +1583,8 @@
         playLog.innerHTML = '<div class="play-entry" style="color:var(--text-muted); font-style:italic;">Game started. Press Next PA.</div>';
         buildProbBars();
         initBoxScore(awayTeam, homeTeam);
-        matchupText.textContent = 'Press Next PA to begin';
+        matchupText.textContent = '';
+        atBatDisplay.innerHTML = '<span style="color: var(--text-muted); font-style: italic; font-weight: 400;">Press Next PA to begin</span>';
 
         btnNext.disabled = false;
         btnAuto.disabled = false;
@@ -1275,6 +1599,9 @@
         const ev = game.nextPA();
         if (!ev) { stopAuto(); return; }
 
+        // Pulse the mound
+        pulseMound();
+
         // Track inning changes
         checkInningChange(ev);
 
@@ -1282,9 +1609,8 @@
         if (ev.outcome && HIT_SET.has(ev.outcome)) {
             if (ev.halfInning === 'top') awayHits++; else homeHits++;
         }
-        // Detect error: OUT outcome but no out was added
         if (ev.outcome === 'OUT' && ev.postPlay.outs === ev.prePlay.outs) {
-            if (ev.halfInning === 'top') homeErrors++; else awayErrors++; // fielding team gets error
+            if (ev.halfInning === 'top') homeErrors++; else awayErrors++;
         }
 
         // Update box score
@@ -1299,13 +1625,13 @@
         updateStatus();
         if (ev.probs) showProbs(ev.probs, ev.outcome);
         addPlayEntry(ev);
+        updateAtBatDisplay(ev);
 
-        // Update matchup text with rich description
+        // Update matchup text
         matchupText.innerHTML = buildRichDescription(ev);
 
         // Game over?
         if (ev.gameOver || game.isGameOver) {
-            // Flush current inning runs
             if (game._halfInning === 'top' || lastHalf === 'top') {
                 awayInningRuns.push(currentInningRuns);
             } else {
@@ -1317,6 +1643,7 @@
             btnAuto.disabled = true;
             btnSimEnd.disabled = true;
             matchupText.innerHTML = '<strong>Game Over</strong>';
+            atBatDisplay.innerHTML = `<span class="batter-name" style="font-size: 1.1rem;">\u26BE Final: ${awayAbbr} ${game._score[0]} - ${homeAbbr} ${game._score[1]}</span>`;
             updateStatus();
         }
     }

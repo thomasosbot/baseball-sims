@@ -85,6 +85,9 @@ def generate_site():
     # --- Render pages ---
     # Index (today's picks)
     template = env.get_template("index.html")
+    picks_date = latest.get("date", "") if latest else ""
+    is_past = picks_date < today_str if picks_date else False
+
     html = template.render(
         today=latest,
         display_date=display_date,
@@ -92,6 +95,7 @@ def generate_site():
         is_opening_day=is_opening_day,
         opening_day_schedule=opening_day_schedule,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M ET"),
+        is_past=is_past,
     )
     (OUTPUT_DIR / "index.html").write_text(html)
 
@@ -133,11 +137,16 @@ def generate_site():
     )
     (OUTPUT_DIR / "changelog.html").write_text(html)
 
-    # Simulate
+    # Simulate — pass today's matchups so selector defaults to active games
     sim_data = _build_sim_data()
+    today_matchups = []
+    if latest and latest.get("games"):
+        for g in latest["games"]:
+            today_matchups.append({"away": g.get("away", ""), "home": g.get("home", "")})
     template = env.get_template("simulate.html")
     html = template.render(
         sim_data_json=json.dumps(sim_data, separators=(',', ':')) if sim_data else "null",
+        today_matchups_json=json.dumps(today_matchups, separators=(',', ':')),
     )
     (OUTPUT_DIR / "simulate.html").write_text(html)
     if sim_data:
