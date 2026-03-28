@@ -299,7 +299,7 @@ def build_season_stats(results: list) -> dict:
     )
     total_profit = sum(r.get("day_profit", 0) for r in results)
     roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
-    bankroll = results[-1].get("bankroll", 10000) if results else 10000
+    bankroll = round(10000.0 + total_profit, 2)
 
     return {
         "wins": total_wins,

@@ -561,8 +561,8 @@ def _compute_season_stats(results):
         for d in results
     )
 
-    current_bankroll = results[-1]["bankroll"] if results else 10000
-    starting_bankroll = results[0]["bankroll"] - results[0]["day_profit"] if results else 10000
+    current_bankroll = round(10000.0 + total_profit, 2)
+    starting_bankroll = 10000
 
     daily_pnl = []
     cumulative = 0
@@ -572,7 +572,7 @@ def _compute_season_stats(results):
             "date": d["date"],
             "day_profit": d["day_profit"],
             "cumulative": round(cumulative, 2),
-            "bankroll": d["bankroll"],
+            "bankroll": round(10000.0 + cumulative, 2),
         })
 
     # Streak

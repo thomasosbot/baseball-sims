@@ -119,6 +119,14 @@ def update_results(date: str = None, include_spring: bool = False):
         with open(RESULTS_PATH) as f:
             season_results = json.load(f)
 
+    day_profit = round(sum(r["profit"] for r in daily_results), 2)
+
+    # Compute bankroll from results history (10000 + cumulative profits)
+    # so it reflects regular season only, not spring training state
+    cumulative_profit = sum(r.get("day_profit", 0) for r in season_results
+                           if r["date"] != date) + day_profit
+    display_bankroll = round(10000.0 + cumulative_profit, 2)
+
     day_entry = {
         "date": date,
         "games_played": len(final_games),
@@ -126,8 +134,8 @@ def update_results(date: str = None, include_spring: bool = False):
         "wins": sum(1 for r in daily_results if r["won"]),
         "losses": sum(1 for r in daily_results if not r["won"] and r["profit"] != 0),
         "pushes": sum(1 for r in daily_results if r["profit"] == 0 and not r["won"]),
-        "day_profit": round(sum(r["profit"] for r in daily_results), 2),
-        "bankroll": round(bankroll, 2),
+        "day_profit": day_profit,
+        "bankroll": display_bankroll,
         "picks": daily_results,
     }
     # Replace existing entry for this date (avoid duplicates on re-runs)

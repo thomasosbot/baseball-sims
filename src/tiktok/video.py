@@ -132,7 +132,7 @@ def _load_results() -> tuple[dict | None, dict | None]:
     )
     total_profit = sum(r.get("day_profit", 0) for r in results)
     roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
-    bankroll = results[-1].get("bankroll", 10000)
+    bankroll = round(10000.0 + total_profit, 2)
 
     season = {
         "wins": total_wins,
@@ -358,15 +358,15 @@ def _render_pick_card(
     ease = _ease_out_cubic(reveal_progress)
 
     # Card counter at top
-    font_counter = _get_font(34)
+    font_counter = _get_font(40, bold=True)
     counter_text = f"PICK {card_index + 1} OF {total_cards}"
-    _centered_text(draw, 100, counter_text, font_counter, TEXT_MUTED)
+    _centered_text(draw, 90, counter_text, font_counter, TEXT_MUTED)
 
     # Main card - slides up and fades in
     card_x1 = CARD_MARGIN_X
     card_x2 = WIDTH - CARD_MARGIN_X
-    card_y1 = 200 + int((1 - ease) * 80)
-    card_h = 1050
+    card_y1 = 180 + int((1 - ease) * 80)
+    card_h = 1150
     card_y2 = card_y1 + card_h
 
     _draw_rounded_rect(
@@ -385,24 +385,24 @@ def _render_pick_card(
     pick_type = pick.get("type", "moneyline")
     badge_text = "MONEYLINE" if pick_type == "moneyline" else "RUN LINE"
     badge_color = ACCENT if pick_type == "moneyline" else GREEN
-    font_badge = _get_font(26, bold=True)
+    font_badge = _get_font(32, bold=True)
     bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
     bw = bbox[2] - bbox[0]
     badge_fill = (20, 45, 85) if pick_type == "moneyline" else (20, 60, 35)
     _draw_rounded_rect(
-        draw, (cx, cy, cx + bw + 32, cy + 42),
-        radius=20, fill=badge_fill, outline=badge_color,
+        draw, (cx, cy, cx + bw + 36, cy + 48),
+        radius=22, fill=badge_fill, outline=badge_color,
     )
-    draw.text((cx + 16, cy + 7), badge_text, font=font_badge, fill=TEXT_PRIMARY)
+    draw.text((cx + 18, cy + 8), badge_text, font=font_badge, fill=TEXT_PRIMARY)
 
     # Team pick name (big)
-    font_pick = _get_font(80, bold=True)
+    font_pick = _get_font(96, bold=True)
     pick_name = pick.get("pick", "???")
     color = _fade_color(TEXT_PRIMARY, content_alpha)
-    draw.text((cx, cy + 65), pick_name, font=font_pick, fill=color)
+    draw.text((cx, cy + 72), pick_name, font=font_pick, fill=color)
 
     # Matchup line
-    font_matchup = _get_font(38)
+    font_matchup = _get_font(44, bold=True)
     team = pick.get("team", "")
     opponent = pick.get("opponent", "")
     side = pick.get("side", "")
@@ -411,13 +411,13 @@ def _render_pick_card(
     else:
         matchup = f"{opponent} @ {team}"
     color = _fade_color(TEXT_SECONDARY, content_alpha)
-    draw.text((cx, cy + 170), matchup, font=font_matchup, fill=color)
+    draw.text((cx, cy + 190), matchup, font=font_matchup, fill=color)
 
     # Divider line
-    div_y = cy + 240
+    div_y = cy + 265
     draw.line([(cx, div_y), (card_x2 - CARD_PADDING, div_y)], fill=CARD_BORDER, width=2)
 
-    # Stats grid — bigger text
+    # Stats grid
     stats_y = div_y + 30
     stats = [
         ("ODDS", pick.get("odds", "—")),
@@ -426,8 +426,8 @@ def _render_pick_card(
     ]
 
     col_width = (card_x2 - card_x1 - 2 * CARD_PADDING) // len(stats)
-    font_stat_label = _get_font(26)
-    font_stat_value = _get_font(58, bold=True)
+    font_stat_label = _get_font(30)
+    font_stat_value = _get_font(68, bold=True)
 
     for i, (label, value) in enumerate(stats):
         sx = cx + i * col_width
@@ -441,16 +441,16 @@ def _render_pick_card(
             value_color = _fade_color(GREEN, stat_alpha)
 
         draw.text((sx, stats_y), label, font=font_stat_label, fill=label_color)
-        draw.text((sx, stats_y + 38), str(value), font=font_stat_value, fill=value_color)
+        draw.text((sx, stats_y + 42), str(value), font=font_stat_value, fill=value_color)
 
-    # Sportsbook odds breakdown — bigger text
+    # Sportsbook odds breakdown
     books = pick.get("sportsbook_odds", {})
     if books:
-        book_y = stats_y + 160
-        font_book_label = _get_font(26)
-        font_book_val = _get_font(26, bold=True)
+        book_y = stats_y + 185
+        font_book_label = _get_font(30)
+        font_book_val = _get_font(30, bold=True)
         draw.text((cx, book_y), "BEST AVAILABLE ODDS", font=font_book_label, fill=TEXT_MUTED)
-        book_y += 42
+        book_y += 48
         book_names = {
             "fanduel": "FanDuel",
             "bovada": "Bovada",
@@ -465,18 +465,17 @@ def _render_pick_card(
             val_str = f"+{val}" if val > 0 else str(val)
             draw.text((cx, book_y), name, font=font_book_label, fill=TEXT_SECONDARY)
             v_color = GREEN if is_best else TEXT_SECONDARY
-            draw.text((cx + 240, book_y), val_str, font=font_book_val, fill=v_color)
+            draw.text((cx + 280, book_y), val_str, font=font_book_val, fill=v_color)
             if is_best:
-                font_best = _get_font(20, bold=True)
-                draw.text((cx + 340, book_y + 2), "BEST", font=font_best, fill=GREEN)
-            book_y += 38
+                font_best = _get_font(24, bold=True)
+                draw.text((cx + 390, book_y + 2), "BEST", font=font_best, fill=GREEN)
+            book_y += 44
 
     # Explanation text at bottom of card
     explanation = pick.get("explanation", "")
     if explanation:
-        font_explain = _get_font(24)
+        font_explain = _get_font(28)
         max_w = card_x2 - card_x1 - 2 * CARD_PADDING
-        # Word-wrap the explanation
         words = explanation.split()
         lines = []
         current_line = ""
@@ -491,12 +490,10 @@ def _render_pick_card(
                 current_line = test
         if current_line:
             lines.append(current_line)
-        # Draw from bottom of card upward, max 3 lines
         lines = lines[:3]
-        line_h = 32
+        line_h = 38
         sy = card_y2 - CARD_PADDING - len(lines) * line_h
-        # Subtle divider above explanation
-        draw.line([(cx, sy - 12), (card_x2 - CARD_PADDING, sy - 12)],
+        draw.line([(cx, sy - 14), (card_x2 - CARD_PADDING, sy - 14)],
                   fill=CARD_BORDER, width=1)
         for line in lines:
             draw.text((cx, sy), line, font=font_explain, fill=TEXT_SECONDARY)
