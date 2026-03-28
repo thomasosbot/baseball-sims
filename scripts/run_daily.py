@@ -265,6 +265,16 @@ def run_daily(
             print(f"  Error fetching lineups: {e}")
             return
 
+        # If late mode got no confirmed lineups, fall back to projected
+        confirmed_count = sum(1 for g in (games or [])
+                              if len(g.get("home_lineup", [])) >= 9 and len(g.get("away_lineup", [])) >= 9)
+        if games and confirmed_count == 0:
+            print(f"\n  No confirmed lineups available — falling back to projected lineups...")
+            games = _fetch_preview_lineups(today, cumulative, include_spring)
+            if not games:
+                # Last resort: fetch with use_projected=True
+                games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=True, cumulative=cumulative)
+
     if not games:
         print("  No games today.")
         return
