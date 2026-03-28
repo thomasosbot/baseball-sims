@@ -308,6 +308,17 @@ Used in the daily pipeline for game-day weather forecasts. Free, no API key requ
 | Base advancement (1B, runner on 1B) | 72% 2B / 28% 3B | Statcast/FanGraphs BsR, 2022-2024 avg |
 | Base advancement (2B, runner on 1B) | 44% 3B / 56% score | Statcast/FanGraphs BsR, 2022-2024 avg |
 
+## Output Channels
+
+| Channel | Module | Status | Notes |
+|---------|--------|--------|-------|
+| **Website** | `site/generate.py` | Live | `ozzyanalytics.com` via Netlify. Homepage card grid (ML + RL odds), individual game preview pages (`/games/YYYY-MM-DD/`), results, backtest, simulator. |
+| **Newsletter** | `src/newsletter/sender.py` | Live | Daily email via Resend API from `picks@ozzyanalytics.com`. Game narratives from MLB play-by-play. |
+| **Twitter/X** | `src/twitter/poster.py` | Live | @Ozzy_Analytics. Daily tweet with recap + picks + season stats. Auto-trims to 280 chars. tweepy (X API v2). |
+| **Discord** | `src/discord/poster.py` | Built, awaiting config | Rich embed via webhook. Needs `DISCORD_WEBHOOK_URL` secret. |
+| **Reddit** | `src/reddit/poster.py` | Built, awaiting config | Comments on r/sportsbook daily threads + own subreddit via PRAW. Needs `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USERNAME`, `REDDIT_PASSWORD`. |
+| **TikTok** | `src/tiktok/video.py` | Paused | Video generator works (Pillow + MoviePy, 1080x1920) but TikTok community guidelines flag betting content. TikTok-safe version stripped too much context. Code retained. |
+
 ## Data Not Yet Integrated (planned)
 
 | Source | What | Why |

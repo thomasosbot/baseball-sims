@@ -894,4 +894,21 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 
 ---
 
+## 2026 Live Season Results
+
+Tracking live performance from Opening Day (March 26, 2026). Bankroll computed as $10,000 + cumulative regular season profit (spring training excluded).
+
+### Opening Day — March 26, 2026
+
+| Pick | Type | Result | Odds | Profit |
+|------|------|--------|------|--------|
+| WSN ML | Moneyline | W | +193 | +$407 |
+| STL ML | Moneyline | W | +110 | +$417 |
+| TEX ML | Moneyline | L | +136 | -$294 |
+| ARI ML | Moneyline | L | +214 | -$385 |
+
+**Day: 2W-2L, +$145.30, Bankroll: $10,145.30**
+
+---
+
 *Future iterations will be appended below with date, config changes, and metric deltas.*
