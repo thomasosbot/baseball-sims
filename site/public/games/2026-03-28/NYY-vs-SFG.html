@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../static/style.css">
     
-<meta name="description" content="MLB prediction: NYY at SFG on March 28, 2026. Our Monte Carlo model gives SFG a 50% win probability. Tyler Mahle vs Will Warren.">
+<meta name="description" content="MLB prediction: NYY at SFG on March 28, 2026. Our Monte Carlo model gives SFG a 42% win probability. Tyler Mahle vs Will Warren.">
 <meta property="og:title" content="NYY vs SFG Prediction — March 28, 2026">
-<meta property="og:description" content="Monte Carlo simulation predicts SFG to win (50%). Will Warren vs Tyler Mahle.">
+<meta property="og:description" content="Monte Carlo simulation predicts NYY to win (58%). Will Warren vs Tyler Mahle.">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://ozzyanalytics.com/games/2026-03-28/NYY-vs-SFG.html">
 
@@ -48,7 +48,7 @@
         <div class="game-teams">
             <div class="game-team game-team-away">
                 <span class="game-team-abbr">NYY</span>
-                <span class="game-team-prob ">50%</span>
+                <span class="game-team-prob game-team-fav">58%</span>
             </div>
             <div class="game-vs">
                 <span class="game-at">@</span>
@@ -56,7 +56,7 @@
             </div>
             <div class="game-team game-team-home">
                 <span class="game-team-abbr">SFG</span>
-                <span class="game-team-prob ">50%</span>
+                <span class="game-team-prob ">42%</span>
             </div>
         </div>
 
@@ -83,11 +83,11 @@
     <div class="game-section glass fade-in">
         <h2>Win Probability</h2>
         <div class="game-wp-bar">
-            <div class="wp-fill wp-away" style="width: 50%">
-                NYY 50%
+            <div class="wp-fill wp-away" style="width: 58%">
+                NYY 58%
             </div>
-            <div class="wp-fill wp-home" style="width: 50%">
-                SFG 50%
+            <div class="wp-fill wp-home" style="width: 42%">
+                SFG 42%
             </div>
         </div>
 
@@ -98,15 +98,27 @@
             <tbody>
                 <tr>
                     <td>Model (blended)</td>
-                    <td>50.0%</td>
-                    <td>50.0%</td>
+                    <td>58.3%</td>
+                    <td>41.7%</td>
                 </tr>
                 <tr>
                     <td>Simulation only</td>
-                    <td>50.0%</td>
-                    <td>50.0%</td>
+                    <td>48.8%</td>
+                    <td>51.2%</td>
                 </tr>
                 
+                <tr>
+                    <td>Elo ratings</td>
+                    <td>67.8%</td>
+                    <td>32.2%</td>
+                </tr>
+                
+                
+                <tr>
+                    <td>Market (implied)</td>
+                    <td>53.9%</td>
+                    <td>46.1%</td>
+                </tr>
                 
             </tbody>
         </table>
@@ -114,20 +126,426 @@
 
     <!-- Simulation Results -->
     
+    <div class="game-section glass fade-in">
+        <h2>Simulation Results</h2>
+        <p class="game-sim-subtitle">Based on 10,000 Monte Carlo simulations</p>
+
+        <div class="game-run-stats">
+            <div class="run-stat">
+                <span class="run-stat-label">NYY avg runs</span>
+                <span class="run-stat-value">5.0</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">SFG avg runs</span>
+                <span class="run-stat-value">4.6</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">Avg total</span>
+                <span class="run-stat-value">9.6</span>
+            </div>
+        </div>
+
+        <!-- Margin Distribution Chart -->
+        
+        <h3>Win Margin Distribution</h3>
+        <p class="chart-subtitle">Negative = NYY wins, Positive = SFG wins</p>
+        <div class="margin-chart">
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 3px"
+                     title="-10: 0.8%">
+                </div>
+                <span class="margin-label">-10</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 6px"
+                     title="-9: 1.4%">
+                </div>
+                <span class="margin-label">-9</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 7px"
+                     title="-8: 1.8%">
+                </div>
+                <span class="margin-label">-8</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 12px"
+                     title="-7: 2.9%">
+                </div>
+                <span class="margin-label">-7</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 15px"
+                     title="-6: 3.7%">
+                </div>
+                <span class="margin-label">-6</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 18px"
+                     title="-5: 4.6%">
+                </div>
+                <span class="margin-label">-5</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 24px"
+                     title="-4: 6.0%">
+                </div>
+                <span class="margin-label">-4</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 31px"
+                     title="-3: 7.8%">
+                </div>
+                <span class="margin-label">-3</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 36px"
+                     title="-2: 9.1%">
+                </div>
+                <span class="margin-label">-2</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 47px"
+                     title="-1: 11.7%">
+                </div>
+                <span class="margin-label">-1</span>
+            </div>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 55px"
+                     title="1: 13.8%">
+                </div>
+                <span class="margin-label">1</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 44px"
+                     title="2: 11.0%">
+                </div>
+                <span class="margin-label">2</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 30px"
+                     title="3: 7.4%">
+                </div>
+                <span class="margin-label">3</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 20px"
+                     title="4: 5.1%">
+                </div>
+                <span class="margin-label">4</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 15px"
+                     title="5: 3.8%">
+                </div>
+                <span class="margin-label">5</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 10px"
+                     title="6: 2.5%">
+                </div>
+                <span class="margin-label">6</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 7px"
+                     title="7: 1.7%">
+                </div>
+                <span class="margin-label">7</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 5px"
+                     title="8: 1.3%">
+                </div>
+                <span class="margin-label">8</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 3px"
+                     title="9: 0.7%">
+                </div>
+                <span class="margin-label">9</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 3px"
+                     title="10: 0.7%">
+                </div>
+                <span class="margin-label">10</span>
+            </div>
+            
+            
+        </div>
+        
+
+        <!-- Run Distribution -->
+        
+        <h3>Run Scoring Distribution</h3>
+        <div class="run-dist-table-wrap">
+            <table class="run-dist-table">
+                <thead>
+                    <tr>
+                        <th>Runs</th>
+                        
+                        <th>0</th>
+                        
+                        <th>1</th>
+                        
+                        <th>2</th>
+                        
+                        <th>3</th>
+                        
+                        <th>4</th>
+                        
+                        <th>5</th>
+                        
+                        <th>6</th>
+                        
+                        <th>7</th>
+                        
+                        <th>8</th>
+                        
+                        <th>9</th>
+                        
+                        <th>10</th>
+                        
+                        <th>11</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>NYY</td>
+                        
+                        <td>4.5%</td>
+                        
+                        <td>8.7%</td>
+                        
+                        <td>10.6%</td>
+                        
+                        <td>12.8%</td>
+                        
+                        <td>12.2%</td>
+                        
+                        <td>12.1%</td>
+                        
+                        <td>10.3%</td>
+                        
+                        <td>8.0%</td>
+                        
+                        <td>6.1%</td>
+                        
+                        <td>5.2%</td>
+                        
+                        <td>3.5%</td>
+                        
+                        <td>2.3%</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>SFG</td>
+                        
+                        <td>5.6%</td>
+                        
+                        <td>9.2%</td>
+                        
+                        <td>12.3%</td>
+                        
+                        <td>13.4%</td>
+                        
+                        <td>13.1%</td>
+                        
+                        <td>12.3%</td>
+                        
+                        <td>9.8%</td>
+                        
+                        <td>7.8%</td>
+                        
+                        <td>5.6%</td>
+                        
+                        <td>3.5%</td>
+                        
+                        <td>3.0%</td>
+                        
+                        <td>1.8%</td>
+                        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
 
     <!-- Lineups -->
     <div class="game-section glass fade-in">
-        <h2>Lineups <span class="lineup-status lineup-pending">PENDING</span></h2>
+        <h2>Lineups <span class="lineup-status lineup-projected">PROJECTED</span></h2>
         <div class="game-lineups">
             <div class="lineup-col">
                 <h3>NYY</h3>
                 <ol class="lineup-list">
+                    
+                    <li>Trent Grisham</li>
+                    
+                    <li>Aaron Judge</li>
+                    
+                    <li>Cody Bellinger</li>
+                    
+                    <li>Ben Rice</li>
+                    
+                    <li>Giancarlo Stanton</li>
+                    
+                    <li>Jazz Chisholm Jr.</li>
+                    
+                    <li>José Caballero</li>
+                    
+                    <li>Ryan McMahon</li>
+                    
+                    <li>Austin Wells</li>
                     
                 </ol>
             </div>
             <div class="lineup-col">
                 <h3>SFG</h3>
                 <ol class="lineup-list">
+                    
+                    <li>Luis Arraez</li>
+                    
+                    <li>Matt Chapman</li>
+                    
+                    <li>Rafael Devers</li>
+                    
+                    <li>Willy Adames</li>
+                    
+                    <li>Jung Hoo Lee</li>
+                    
+                    <li>Heliot Ramos</li>
+                    
+                    <li>Casey Schmitt</li>
+                    
+                    <li>Patrick Bailey</li>
+                    
+                    <li>Harrison Bader</li>
                     
                 </ol>
             </div>
@@ -139,12 +557,85 @@
         <h2>Park Factors & Conditions</h2>
         <div class="game-context-grid">
             
+            <div class="context-card">
+                <h4>Park Factors</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">Runs: <strong>0.91</strong></span>
+                    <span class="pf-item">HR: <strong>0.82</strong></span>
+                    <span class="pf-item">BB: <strong>0.86</strong></span>
+                    <span class="pf-item">K: <strong>0.9</strong></span>
+                </div>
+            </div>
             
+            
+            
+            <div class="context-card">
+                <h4>Elo Ratings</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">NYY: <strong>1618</strong></span>
+                    <span class="pf-item">SFG: <strong>1464</strong></span>
+                </div>
+            </div>
             
         </div>
     </div>
 
     <!-- Sportsbook Odds -->
+    
+    <div class="game-section glass fade-in">
+        <h2>Sportsbook Odds</h2>
+        <div class="run-dist-table-wrap">
+            <table class="game-odds-table">
+                <thead>
+                    <tr><th>Book</th><th>NYY</th><th>SFG</th></tr>
+                </thead>
+                <tbody>
+                    
+                    
+                    
+                    <tr>
+                        <td>FanDuel</td>
+                        <td>-126</td>
+                        <td>+108</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>Bovada</td>
+                        <td>-131</td>
+                        <td>+109</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>BetMGM</td>
+                        <td>-130</td>
+                        <td>+110</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>DraftKings</td>
+                        <td>-131</td>
+                        <td>+109</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>Caesars</td>
+                        <td>-130</td>
+                        <td>+110</td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
     
 
     <!-- Model Explanation -->
@@ -176,7 +667,7 @@
     <footer class="footer">
         <div class="container">
             <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
-            <p>2026-03-28 14:01 ET</p>
+            <p>2026-03-28 14:31 ET</p>
         </div>
     </footer>
 
