@@ -25,13 +25,13 @@ def format_caption(picks_data: dict) -> str:
     num = len(picks)
 
     lines = [
-        f"Today's MLB Picks - {date}",
-        f"{num} edge{'s' if num != 1 else ''} found by 10,000 simulations",
+        f"Today's MLB Predictions - {date}",
+        f"{num} game{'s' if num != 1 else ''} simulated 10,000 times each",
         "",
         "Full analysis at ozzyanalytics.com",
         "",
-        "#MLB #BaseballPicks #SportsBetting #MLBPicks #BaseballBetting "
-        "#SportsAnalytics #BettingPicks #MLBBetting",
+        "#MLB #Baseball #MLBPredictions #BaseballAnalytics "
+        "#SportsAnalytics #DataScience #Statcast",
     ]
     return "\n".join(lines)
 

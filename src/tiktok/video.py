@@ -176,18 +176,18 @@ def _render_intro_frame(date: str, num_picks: int, progress: float) -> Image.Ima
         color = _fade_color(TEXT_SECONDARY, alpha)
         _centered_text(draw, y + 120 - offset_y, tag, font_tag, color)
 
-    # Date + pick count
+    # Date + prediction count
     font_date = _get_font(52, bold=True)
-    date_text = f"Picks for {date}"
+    date_text = f"Predictions for {date}"
     alpha2 = min(progress * 2 - 0.6, 1.0)
     if alpha2 > 0:
         color = _fade_color(TEXT_PRIMARY, alpha2)
         _centered_text(draw, y + 220 - offset_y, date_text, font_date, color)
 
-    # Pick count badge
+    # Prediction count badge
     if alpha2 > 0:
         font_count = _get_font(36)
-        count_text = f"{num_picks} pick{'s' if num_picks != 1 else ''} today"
+        count_text = f"{num_picks} prediction{'s' if num_picks != 1 else ''} today"
         bbox = draw.textbbox((0, 0), count_text, font=font_count)
         tw = bbox[2] - bbox[0]
         cx = (WIDTH - tw) // 2
@@ -211,34 +211,33 @@ def _render_recap_frame(yesterday: dict, progress: float) -> Image.Image:
 
     # Title
     font_title = _get_font(48, bold=True)
-    _centered_text(draw, 160, "YESTERDAY'S RESULTS", font_title, TEXT_PRIMARY)
+    _centered_text(draw, 160, "YESTERDAY'S PREDICTIONS", font_title, TEXT_PRIMARY)
 
     # Date
     font_date = _get_font(32)
     recap_date = yesterday.get("date", "")
     _centered_text(draw, 225, recap_date, font_date, TEXT_MUTED)
 
-    # Record + P&L summary
+    # Record summary
     wins = yesterday.get("wins", 0)
     losses = yesterday.get("losses", 0)
-    profit = yesterday.get("day_profit", 0)
-    profit_sign = "+" if profit >= 0 else "-"
-    profit_color = GREEN if profit >= 0 else RED
+    total = wins + losses
+    pct = round(wins / total * 100) if total > 0 else 0
 
     font_record = _get_font(72, bold=True)
-    _centered_text(draw, 300, f"{wins}W - {losses}L", font_record, TEXT_PRIMARY)
+    _centered_text(draw, 310, f"{wins}W - {losses}L", font_record, TEXT_PRIMARY)
 
-    font_profit = _get_font(56, bold=True)
-    _centered_text(draw, 395, f"{profit_sign}${abs(profit):.0f}", font_profit, profit_color)
+    font_pct = _get_font(48, bold=True)
+    pct_color = GREEN if wins >= losses else RED
+    _centered_text(draw, 405, f"{pct}% correct", font_pct, pct_color)
 
-    # Individual picks
+    # Individual predictions
     picks = yesterday.get("picks", [])
     card_x1 = CARD_MARGIN_X
     card_x2 = WIDTH - CARD_MARGIN_X
-    card_y = 500
+    card_y = 510
 
     for i, p in enumerate(picks):
-        # Stagger reveal
         pick_alpha = min((progress - 0.15 - i * 0.1) / 0.3, 1.0)
         if pick_alpha <= 0:
             continue
@@ -246,27 +245,25 @@ def _render_recap_frame(yesterday: dict, progress: float) -> Image.Image:
         row_h = 90
         ry = card_y + i * (row_h + 12)
 
-        # Row background
         won = p.get("won", False)
         row_bg = (30, 55, 35) if won else (55, 30, 30)
         _draw_rounded_rect(draw, (card_x1, ry, card_x2, ry + row_h), radius=16, fill=row_bg)
 
-        # W/L badge
-        badge_text = "W" if won else "L"
+        # Correct/Wrong badge
+        badge_text = "\u2713" if won else "\u2717"
         badge_color = GREEN if won else RED
-        font_badge = _get_font(32, bold=True)
+        font_badge = _get_font(36, bold=True)
         bx = card_x1 + 24
         by = ry + 12
         _draw_rounded_rect(draw, (bx, by, bx + 50, by + 50), radius=12,
                            fill=(20, 22, 28), outline=badge_color)
-        # Center the letter in badge
         bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
         btw = bbox[2] - bbox[0]
-        draw.text((bx + (50 - btw) // 2, by + 6), badge_text, font=font_badge, fill=badge_color)
+        draw.text((bx + (50 - btw) // 2, by + 4), badge_text, font=font_badge, fill=badge_color)
 
-        # Pick name
+        # Team name (strip "ML" / "+1.5" etc)
         font_pick = _get_font(36, bold=True)
-        pick_name = p.get("pick", "")
+        pick_name = p.get("pick", "").replace(" ML", "").replace(" +1.5", "")
         color = _fade_color(TEXT_PRIMARY, pick_alpha)
         draw.text((bx + 70, ry + 10), pick_name, font=font_pick, fill=color)
 
@@ -276,15 +273,13 @@ def _render_recap_frame(yesterday: dict, progress: float) -> Image.Image:
         color = _fade_color(TEXT_SECONDARY, pick_alpha)
         draw.text((bx + 70, ry + 52), score, font=font_score, fill=color)
 
-        # P&L on right
-        pnl = p.get("profit", 0)
-        pnl_sign = "+" if pnl >= 0 else ""
-        pnl_color = _fade_color(GREEN if pnl >= 0 else RED, pick_alpha)
-        font_pnl = _get_font(34, bold=True)
-        pnl_text = f"{pnl_sign}${pnl:.0f}"
-        bbox = draw.textbbox((0, 0), pnl_text, font=font_pnl)
-        ptw = bbox[2] - bbox[0]
-        draw.text((card_x2 - 24 - ptw, ry + 26), pnl_text, font=font_pnl, fill=pnl_color)
+        # Result text on right
+        result_text = "CORRECT" if won else "WRONG"
+        result_color = _fade_color(GREEN if won else RED, pick_alpha)
+        font_result = _get_font(30, bold=True)
+        bbox = draw.textbbox((0, 0), result_text, font=font_result)
+        rtw = bbox[2] - bbox[0]
+        draw.text((card_x2 - 24 - rtw, ry + 28), result_text, font=font_result, fill=result_color)
 
     return img
 
@@ -299,22 +294,23 @@ def _render_season_frame(season: dict, progress: float) -> Image.Image:
 
     # Title
     font_title = _get_font(48, bold=True)
-    _centered_text(draw, 300, "SEASON STATS", font_title, TEXT_PRIMARY)
+    _centered_text(draw, 300, "MODEL PERFORMANCE", font_title, TEXT_PRIMARY)
 
     # Accent underline
-    bbox = draw.textbbox((0, 0), "SEASON STATS", font=font_title)
+    bbox = draw.textbbox((0, 0), "MODEL PERFORMANCE", font=font_title)
     tw = bbox[2] - bbox[0]
     ux = (WIDTH - tw) // 2
     draw.rounded_rectangle([ux - 10, 365, ux + tw + 10, 371], radius=3, fill=ACCENT)
 
-    # Stats in a 2x2 grid
+    # Stats — prediction-focused, no gambling language
+    total = season["wins"] + season["losses"]
+    accuracy = round(season["wins"] / total * 100, 1) if total > 0 else 0
     stats = [
         ("RECORD", f"{season['wins']}W - {season['losses']}L", TEXT_PRIMARY),
-        ("PROFIT", f"{'+'if season['total_profit']>=0 else '-'}${abs(season['total_profit']):.0f}",
-         GREEN if season['total_profit'] >= 0 else RED),
-        ("ROI", f"{season['roi']}%",
-         GREEN if season['roi'] >= 0 else RED),
-        ("BANKROLL", f"${season['bankroll']:,.0f}", TEXT_PRIMARY),
+        ("ACCURACY", f"{accuracy}%",
+         GREEN if accuracy >= 50 else RED),
+        ("GAMES ANALYZED", f"{season.get('days', 0)} day{'s' if season.get('days', 0) != 1 else ''}", TEXT_PRIMARY),
+        ("SIMULATIONS", "10,000/game", ACCENT),
     ]
 
     font_label = _get_font(28)
@@ -381,25 +377,27 @@ def _render_pick_card(
     cx = card_x1 + CARD_PADDING
     cy = card_y1 + CARD_PADDING
 
-    # Pick type badge (ML or RL)
-    pick_type = pick.get("type", "moneyline")
-    badge_text = "MONEYLINE" if pick_type == "moneyline" else "RUN LINE"
-    badge_color = ACCENT if pick_type == "moneyline" else GREEN
+    # Prediction badge
     font_badge = _get_font(32, bold=True)
+    badge_text = "PREDICTION"
     bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
     bw = bbox[2] - bbox[0]
-    badge_fill = (20, 45, 85) if pick_type == "moneyline" else (20, 60, 35)
     _draw_rounded_rect(
         draw, (cx, cy, cx + bw + 36, cy + 48),
-        radius=22, fill=badge_fill, outline=badge_color,
+        radius=22, fill=(20, 45, 85), outline=ACCENT,
     )
     draw.text((cx + 18, cy + 8), badge_text, font=font_badge, fill=TEXT_PRIMARY)
 
-    # Team pick name (big)
+    # Team pick name (big) — strip betting terms
     font_pick = _get_font(96, bold=True)
-    pick_name = pick.get("pick", "???")
+    pick_name = pick.get("team", pick.get("pick", "???"))
     color = _fade_color(TEXT_PRIMARY, content_alpha)
     draw.text((cx, cy + 72), pick_name, font=font_pick, fill=color)
+
+    # "predicted to win" label
+    font_wins = _get_font(40)
+    color = _fade_color(GREEN, content_alpha)
+    draw.text((cx, cy + 185), "predicted to win", font=font_wins, fill=color)
 
     # Matchup line
     font_matchup = _get_font(44, bold=True)
@@ -411,92 +409,92 @@ def _render_pick_card(
     else:
         matchup = f"{opponent} @ {team}"
     color = _fade_color(TEXT_SECONDARY, content_alpha)
-    draw.text((cx, cy + 190), matchup, font=font_matchup, fill=color)
+    draw.text((cx, cy + 245), matchup, font=font_matchup, fill=color)
 
     # Divider line
-    div_y = cy + 265
+    div_y = cy + 320
     draw.line([(cx, div_y), (card_x2 - CARD_PADDING, div_y)], fill=CARD_BORDER, width=2)
 
-    # Stats grid
-    stats_y = div_y + 30
-    stats = [
-        ("ODDS", pick.get("odds", "—")),
-        ("MODEL WIN %", f"{pick.get('model_prob', 0):.0%}"),
-        ("EDGE", f"+{pick.get('edge_pct', 0):.1f}%"),
-    ]
+    # Model win probability — big and centered
+    stats_y = div_y + 40
+    font_prob_label = _get_font(32)
+    font_prob_value = _get_font(100, bold=True)
 
-    col_width = (card_x2 - card_x1 - 2 * CARD_PADDING) // len(stats)
-    font_stat_label = _get_font(30)
-    font_stat_value = _get_font(68, bold=True)
+    prob = pick.get("model_prob", 0)
+    prob_text = f"{prob:.0%}"
+    prob_color = GREEN if prob >= 0.55 else TEXT_PRIMARY
 
-    for i, (label, value) in enumerate(stats):
-        sx = cx + i * col_width
-        stat_alpha = min((reveal_progress - 0.2 - i * 0.06) / 0.3, 1.0)
-        if stat_alpha <= 0:
-            continue
+    _centered_text(draw, stats_y, "MODEL WIN PROBABILITY", font_prob_label, TEXT_MUTED)
 
-        label_color = _fade_color(TEXT_MUTED, stat_alpha)
-        value_color = _fade_color(TEXT_PRIMARY, stat_alpha)
-        if label == "EDGE":
-            value_color = _fade_color(GREEN, stat_alpha)
+    bbox = draw.textbbox((0, 0), prob_text, font=font_prob_value)
+    ptw = bbox[2] - bbox[0]
+    prob_x = (WIDTH - ptw) // 2
+    stat_alpha = min((reveal_progress - 0.25) / 0.3, 1.0)
+    if stat_alpha > 0:
+        draw.text((prob_x, stats_y + 45), prob_text, font=font_prob_value,
+                  fill=_fade_color(prob_color, stat_alpha))
 
-        draw.text((sx, stats_y), label, font=font_stat_label, fill=label_color)
-        draw.text((sx, stats_y + 42), str(value), font=font_stat_value, fill=value_color)
+    # Confidence bar
+    bar_y = stats_y + 175
+    bar_x1 = cx
+    bar_x2 = card_x2 - CARD_PADDING
+    bar_h = 24
+    # Background
+    _draw_rounded_rect(draw, (bar_x1, bar_y, bar_x2, bar_y + bar_h),
+                       radius=12, fill=(28, 30, 38))
+    # Fill
+    fill_w = int((bar_x2 - bar_x1) * prob)
+    if fill_w > 0:
+        _draw_rounded_rect(draw, (bar_x1, bar_y, bar_x1 + fill_w, bar_y + bar_h),
+                           radius=12, fill=prob_color)
 
-    # Sportsbook odds breakdown
-    books = pick.get("sportsbook_odds", {})
-    if books:
-        book_y = stats_y + 185
-        font_book_label = _get_font(30)
-        font_book_val = _get_font(30, bold=True)
-        draw.text((cx, book_y), "BEST AVAILABLE ODDS", font=font_book_label, fill=TEXT_MUTED)
-        book_y += 48
-        book_names = {
-            "fanduel": "FanDuel",
-            "bovada": "Bovada",
-            "betmgm": "BetMGM",
-            "draftkings": "DraftKings",
-            "williamhill_us": "Caesars",
-        }
-        best_val = max(books.values()) if books else None
-        for bk, val in books.items():
-            name = book_names.get(bk, bk)
-            is_best = val == best_val
-            val_str = f"+{val}" if val > 0 else str(val)
-            draw.text((cx, book_y), name, font=font_book_label, fill=TEXT_SECONDARY)
-            v_color = GREEN if is_best else TEXT_SECONDARY
-            draw.text((cx + 280, book_y), val_str, font=font_book_val, fill=v_color)
-            if is_best:
-                font_best = _get_font(24, bold=True)
-                draw.text((cx + 390, book_y + 2), "BEST", font=font_best, fill=GREEN)
-            book_y += 44
-
-    # Explanation text at bottom of card
+    # Explanation text at bottom — reframed without betting language
     explanation = pick.get("explanation", "")
     if explanation:
-        font_explain = _get_font(28)
-        max_w = card_x2 - card_x1 - 2 * CARD_PADDING
-        words = explanation.split()
-        lines = []
-        current_line = ""
-        for word in words:
-            test = f"{current_line} {word}".strip()
-            bbox = draw.textbbox((0, 0), test, font=font_explain)
-            if bbox[2] - bbox[0] > max_w:
-                if current_line:
-                    lines.append(current_line)
-                current_line = word
-            else:
-                current_line = test
-        if current_line:
-            lines.append(current_line)
-        lines = lines[:3]
-        line_h = 38
-        sy = card_y2 - CARD_PADDING - len(lines) * line_h
-        draw.line([(cx, sy - 14), (card_x2 - CARD_PADDING, sy - 14)],
-                  fill=CARD_BORDER, width=1)
-        for line in lines:
-            draw.text((cx, sy), line, font=font_explain, fill=TEXT_SECONDARY)
+        import re
+        clean = explanation
+        # Remove full betting-specific sentences
+        # Remove betting-specific content, keep pitcher/matchup context
+        clean = re.sub(r'Run line bets[^.]*\.?', '', clean)
+        clean = re.sub(r'The sim gives them[^.]*\.?', '', clean)
+        clean = re.sub(r'The market has \S+ as a [+-]\d+ underdog, but our simulation disagrees\.',
+                       'Our simulation sees this differently than the market.', clean)
+        clean = re.sub(r'\S+ is getting \+1\.5 at [+-]\d+\.', '', clean)
+        clean = re.sub(r'[—\-]\s*\d+\.?\d*%\s*edge\.?', '', clean)
+        clean = re.sub(r'\d+% chance of covering', '', clean)
+        clean = re.sub(r' [+-]\d+ ', ' ', clean)
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        # Fallback if everything got stripped
+        if not clean or len(clean) < 10:
+            team = pick.get("team", "")
+            clean = f"Our model likes {team} in this matchup."
+        elif not clean.endswith('.'):
+            clean += '.'
+
+        if clean:
+            font_explain = _get_font(28)
+            max_w = card_x2 - card_x1 - 2 * CARD_PADDING
+            words = clean.split()
+            lines = []
+            current_line = ""
+            for word in words:
+                test = f"{current_line} {word}".strip()
+                bbox = draw.textbbox((0, 0), test, font=font_explain)
+                if bbox[2] - bbox[0] > max_w:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = word
+                else:
+                    current_line = test
+            if current_line:
+                lines.append(current_line)
+            lines = lines[:3]
+            line_h = 38
+            sy = card_y2 - CARD_PADDING - len(lines) * line_h
+            draw.line([(cx, sy - 14), (card_x2 - CARD_PADDING, sy - 14)],
+                      fill=CARD_BORDER, width=1)
+            for line in lines:
+                draw.text((cx, sy), line, font=font_explain, fill=TEXT_SECONDARY)
             sy += line_h
 
     return img
