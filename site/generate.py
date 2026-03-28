@@ -59,6 +59,10 @@ def generate_site():
         if "picks" in day:
             day["picks"] = [p for p in day["picks"] if p.get("type", "moneyline") != "totals"]
 
+    # Enrich games with run line odds from spread cache
+    for day in all_days:
+        _enrich_with_spread_odds(day)
+
     # Show the most relevant day: prefer today's non-preview over tomorrow's preview
     latest = all_days[-1] if all_days else None
     today_str = datetime.now().strftime("%Y-%m-%d")
@@ -173,6 +177,41 @@ def generate_site():
     print(f"Site generated: {OUTPUT_DIR}")
     print(f"  index.html, results.html, about.html")
     print(f"  {len(all_days)} daily pick files processed")
+
+
+# ---------------------------------------------------------------------------
+# Run line odds enrichment
+# ---------------------------------------------------------------------------
+
+def _enrich_with_spread_odds(day):
+    """Add run line odds from spread cache to each game object."""
+    date = day.get("date", "")
+    spread_path = DAILY_DIR / f"spread_cache_{date}.json"
+    if not spread_path.exists():
+        return
+
+    try:
+        with open(spread_path) as f:
+            spread_data = json.load(f)
+        df_spread = pd.DataFrame(spread_data)
+    except Exception:
+        return
+
+    from src.data.fetch import TEAM_NAME_TO_ABBREV
+
+    for game in day.get("games", []):
+        away = game.get("away", "")
+        home = game.get("home", "")
+
+        for _, row in df_spread.iterrows():
+            row_home = TEAM_NAME_TO_ABBREV.get(row.get("home_team", ""), "")
+            row_away = TEAM_NAME_TO_ABBREV.get(row.get("away_team", ""), "")
+            if row_home == home and row_away == away:
+                game["rl_home_odds"] = row.get("best_home_odds")
+                game["rl_away_odds"] = row.get("best_away_odds")
+                game["rl_home_spread"] = row.get("home_spread")
+                game["rl_away_spread"] = row.get("away_spread")
+                break
 
 
 # ---------------------------------------------------------------------------

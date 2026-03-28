@@ -1631,6 +1631,79 @@ body {
 
 /* ── Game Preview Pages ── */
 
+/* ── Slate Grid (homepage games) ── */
+
+.slate-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+
+.slate-card {
+    display: block;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 2px solid transparent;
+}
+.slate-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+.slate-card-pick { border-color: var(--accent); }
+
+.slate-pitchers {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.slate-matchup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+.slate-side { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.slate-team-name { font-size: 1.5rem; font-weight: 700; }
+.slate-wp { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); }
+.slate-fav .slate-wp { color: var(--green); }
+.slate-at { color: var(--text-muted); font-size: 0.9rem; margin: 0 0.5rem; }
+
+.slate-odds {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+}
+.slate-odds-col { flex: 1; }
+.slate-odds-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+.slate-odds-pair { display: flex; flex-direction: column; gap: 0.15rem; }
+.slate-odd { font-size: 0.85rem; color: var(--text-secondary); }
+.slate-odd-pick {
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.slate-pick-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+.slate-pick-edge { margin-left: auto; font-size: 0.85rem; color: var(--green); font-weight: 600; }
+
 .game-link { color: var(--text); text-decoration: none; }
 .game-link:hover { color: var(--accent); }
 
