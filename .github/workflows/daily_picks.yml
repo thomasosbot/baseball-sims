@@ -197,29 +197,6 @@ jobs:
           "
         continue-on-error: true
 
-      - name: Generate TikTok video
-        run: |
-          python3 -c "
-          import json, sys
-          sys.path.insert(0, '.')
-          from pathlib import Path
-          from src.tiktok.video import generate_picks_video
-          from src.tiktok.poster import deploy_video
-
-          daily_dir = Path('data/daily')
-          files = sorted(f for f in daily_dir.glob('2026-*.json')
-                         if not f.name.startswith(('odds_cache', 'spread_cache')))
-          if files:
-              with open(files[-1]) as f:
-                  picks = json.load(f)
-              video = generate_picks_video(files[-1])
-              if video:
-                  deploy_video(video, picks)
-          else:
-              print('No daily data found, skipping TikTok video')
-          "
-        continue-on-error: true
-
       - name: Commit and push updates
         run: |
           git add data/state/ data/daily/ site/public/
