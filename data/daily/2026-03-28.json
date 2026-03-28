@@ -1,0 +1,132 @@
+{
+  "date": "2026-03-28",
+  "generated_at": "2026-03-28T14:01:35.594145",
+  "run_mode": "late",
+  "games": [
+    {
+      "away": "TBR",
+      "home": "STL",
+      "away_pitcher": "Joe Boyle",
+      "home_pitcher": "Michael McGreevy",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "WSN",
+      "home": "CHC",
+      "away_pitcher": "Miles Mikolas",
+      "home_pitcher": "Cade Horton",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "Athletics",
+      "home": "TOR",
+      "away_pitcher": "Jeffrey Springs",
+      "home_pitcher": "Dylan Cease",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "MIN",
+      "home": "BAL",
+      "away_pitcher": "Taj Bradley",
+      "home_pitcher": "Kyle Bradish",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "TEX",
+      "home": "PHI",
+      "away_pitcher": "Jacob deGrom",
+      "home_pitcher": "Aaron Nola",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "BOS",
+      "home": "CIN",
+      "away_pitcher": "Sonny Gray",
+      "home_pitcher": "Brady Singer",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "PIT",
+      "home": "NYM",
+      "away_pitcher": "Mitch Keller",
+      "home_pitcher": "David Peterson",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "COL",
+      "home": "MIA",
+      "away_pitcher": "Michael Lorenzen",
+      "home_pitcher": "Eury P\u00e9rez",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "LAA",
+      "home": "HOU",
+      "away_pitcher": "Reid Detmers",
+      "home_pitcher": "Cristian Javier",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "CWS",
+      "home": "MIL",
+      "away_pitcher": "Sean Burke",
+      "home_pitcher": "Chad Patrick",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "KCR",
+      "home": "ATL",
+      "away_pitcher": "Michael Wacha",
+      "home_pitcher": "Reynaldo L\u00f3pez",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "NYY",
+      "home": "SFG",
+      "away_pitcher": "Will Warren",
+      "home_pitcher": "Tyler Mahle",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "DET",
+      "home": "SDP",
+      "away_pitcher": "Jack Flaherty",
+      "home_pitcher": "Randy V\u00e1squez",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "ARI",
+      "home": "LAD",
+      "away_pitcher": "Eduardo Rodriguez",
+      "home_pitcher": "Tyler Glasnow",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    },
+    {
+      "away": "CLE",
+      "home": "SEA",
+      "away_pitcher": "Joey Cantillo",
+      "home_pitcher": "Bryan Woo",
+      "status": "lineups_pending",
+      "lineup_status": "pending"
+    }
+  ],
+  "picks": [],
+  "bankroll": {
+    "current": 11450.56,
+    "today_wagered": 0.0
+  }
+}

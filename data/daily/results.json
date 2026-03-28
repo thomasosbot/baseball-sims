@@ -46,5 +46,53 @@
         "actual_score": "ARI 2 - LAD 8"
       }
     ]
+  },
+  {
+    "date": "2026-03-27",
+    "games_played": 8,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 692.17,
+    "bankroll": 10837.47,
+    "picks": [
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 413.74,
+        "profit": 306.47,
+        "odds": "-135",
+        "actual_score": "Athletics 2 - TOR 3"
+      },
+      {
+        "pick": "COL +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 347.11,
+        "profit": 267.01,
+        "odds": "-130",
+        "actual_score": "COL 1 - MIA 2"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 317.89,
+        "profit": 445.05,
+        "odds": "+140",
+        "actual_score": "LAA 6 - HOU 2"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 326.36,
+        "profit": -326.36,
+        "odds": "+152",
+        "actual_score": "CLE 1 - SEA 5"
+      }
+    ]
   }
 ]
