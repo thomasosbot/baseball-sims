@@ -462,6 +462,7 @@ def send_daily_picks(picks_data: dict, season_stats: dict = None):
 
     from_email = os.getenv("RESEND_FROM_EMAIL", "picks@ozzyanalytics.com")
 
+    import time
     print(f"  Sending to {len(subscribers)} subscribers...")
     for email in subscribers:
         try:
@@ -472,6 +473,7 @@ def send_daily_picks(picks_data: dict, season_stats: dict = None):
                 "html": html,
             })
             print(f"    Sent to {email}")
+            time.sleep(0.3)  # Stay under Resend's 5 req/sec rate limit
         except Exception as e:
             print(f"    Failed to send to {email}: {e}")
 
