@@ -12,3 +12,4 @@ data/raw/
 !data/state/*.pkl
 data/tiktok/
 .DS_Store
+data/twitter/
