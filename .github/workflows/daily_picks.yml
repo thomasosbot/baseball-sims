@@ -2,8 +2,7 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    - cron: '0 3 * * *'     # 11 PM ET — preview run for tomorrow
-    - cron: '0 11 * * *'    # 7 AM ET — grade results + send newsletter
+    - cron: '0 11 * * *'    # 7 AM ET — grade results, generate picks, send newsletter
   workflow_dispatch:
     inputs:
       date:
@@ -15,7 +14,6 @@ on:
         required: false
         type: choice
         options:
-          - preview
           - early
           - late
         default: late
@@ -64,31 +62,20 @@ jobs:
             exit 1
           fi
 
-      - name: Determine run mode and date
+      - name: Determine run mode
         id: mode
         run: |
-          SCHEDULE="${{ github.event.schedule }}"
           INPUT_MODE="${{ inputs.mode }}"
 
           if [ -n "$INPUT_MODE" ]; then
             MODE="$INPUT_MODE"
-          elif [ "$SCHEDULE" = "0 3 * * *" ]; then
-            MODE="preview"
-          elif [ "$SCHEDULE" = "0 11 * * *" ]; then
-            MODE="newsletter"
           else
             MODE="late"
           fi
 
           echo "mode=$MODE" >> $GITHUB_OUTPUT
-          echo "Run mode: $MODE (schedule=$SCHEDULE, input=$INPUT_MODE)"
-
-          # Preview mode runs at 11 PM ET for *tomorrow's* games
-          if [ "$MODE" = "preview" ] && [ -z "$INPUT_MODE" ]; then
-            TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d 2>/dev/null || date -u -v+1d +%Y-%m-%d)
-            echo "date=$TOMORROW" >> $GITHUB_OUTPUT
-            echo "Preview date: $TOMORROW"
-          fi
+          echo "send_newsletter=true" >> $GITHUB_OUTPUT
+          echo "Run mode: $MODE (input=$INPUT_MODE)"
 
       - name: Grade yesterday's results (always, before any pipeline run)
         run: python3 scripts/update_results.py
@@ -103,21 +90,18 @@ jobs:
           git stash pop || true
 
       - name: Run daily pipeline
-        if: steps.mode.outputs.mode != 'newsletter'
         run: |
           DATE_FLAG=""
           if [ -n "${{ inputs.date }}" ]; then
             DATE_FLAG="--date ${{ inputs.date }}"
-          elif [ -n "${{ steps.mode.outputs.date }}" ]; then
-            DATE_FLAG="--date ${{ steps.mode.outputs.date }}"
           fi
           python3 scripts/run_daily.py $DATE_FLAG --mode ${{ steps.mode.outputs.mode }}
 
       - name: Generate website
         run: python3 site/generate.py
 
-      - name: Send newsletter (7 AM ET — recap + today's picks)
-        if: steps.mode.outputs.mode == 'newsletter'
+      - name: Send newsletter
+        if: steps.mode.outputs.send_newsletter == 'true'
         run: |
           python3 -c "
           import json, sys
