@@ -471,16 +471,36 @@ def _render_pick_card(
                 draw.text((cx + 340, book_y + 2), "BEST", font=font_best, fill=GREEN)
             book_y += 38
 
-    # Lineup status pill at bottom of card
-    status = pick.get("lineup_status", "projected")
-    status_color = GREEN if status == "confirmed" else (200, 160, 50)
-    font_status = _get_font(26)
-    status_text = f"Lineups {status.upper()}"
-    bbox = draw.textbbox((0, 0), status_text, font=font_status)
-    sw = bbox[2] - bbox[0]
-    sx = (WIDTH - sw) // 2
-    sy = card_y2 - 60
-    draw.text((sx, sy), status_text, font=font_status, fill=status_color)
+    # Explanation text at bottom of card
+    explanation = pick.get("explanation", "")
+    if explanation:
+        font_explain = _get_font(24)
+        max_w = card_x2 - card_x1 - 2 * CARD_PADDING
+        # Word-wrap the explanation
+        words = explanation.split()
+        lines = []
+        current_line = ""
+        for word in words:
+            test = f"{current_line} {word}".strip()
+            bbox = draw.textbbox((0, 0), test, font=font_explain)
+            if bbox[2] - bbox[0] > max_w:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+            else:
+                current_line = test
+        if current_line:
+            lines.append(current_line)
+        # Draw from bottom of card upward, max 3 lines
+        lines = lines[:3]
+        line_h = 32
+        sy = card_y2 - CARD_PADDING - len(lines) * line_h
+        # Subtle divider above explanation
+        draw.line([(cx, sy - 12), (card_x2 - CARD_PADDING, sy - 12)],
+                  fill=CARD_BORDER, width=1)
+        for line in lines:
+            draw.text((cx, sy), line, font=font_explain, fill=TEXT_SECONDARY)
+            sy += line_h
 
     return img
 
