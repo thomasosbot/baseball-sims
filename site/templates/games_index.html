@@ -32,12 +32,12 @@
                 {{ game.away_pitcher }} vs {{ game.home_pitcher }}
             </div>
             <div class="games-card-probs">
-                <span class="games-card-prob {% if game.model_away_wp > game.model_home_wp %}game-team-fav{% endif %}">
-                    {{ (game.model_away_wp * 100)|round|int }}%
+                <span class="games-card-prob {% if game.model_away_wp|default(0.5) > game.model_home_wp|default(0.5) %}game-team-fav{% endif %}">
+                    {{ (game.model_away_wp|default(0.5) * 100)|round|int }}%
                 </span>
                 <span class="games-card-dash">—</span>
-                <span class="games-card-prob {% if game.model_home_wp > game.model_away_wp %}game-team-fav{% endif %}">
-                    {{ (game.model_home_wp * 100)|round|int }}%
+                <span class="games-card-prob {% if game.model_home_wp|default(0.5) > game.model_away_wp|default(0.5) %}game-team-fav{% endif %}">
+                    {{ (game.model_home_wp|default(0.5) * 100)|round|int }}%
                 </span>
             </div>
             {% if game.pick %}

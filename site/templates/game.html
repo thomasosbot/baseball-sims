@@ -3,7 +3,7 @@
 {% block title %}{{ away }} vs {{ home }} Prediction — {{ date }} | Ozzy Analytics{% endblock %}
 
 {% block head %}
-<meta name="description" content="MLB prediction: {{ away }} at {{ home }} on {{ display_date }}. Our Monte Carlo model gives {{ home }} a {{ (game.model_home_wp * 100)|round|int }}% win probability. {{ game.home_pitcher }} vs {{ game.away_pitcher }}.">
+<meta name="description" content="MLB prediction: {{ away }} at {{ home }} on {{ display_date }}. Our Monte Carlo model gives {{ home }} a {{ (game.model_home_wp|default(0.5) * 100)|round|int }}% win probability. {{ game.home_pitcher }} vs {{ game.away_pitcher }}.">
 <meta property="og:title" content="{{ away }} vs {{ home }} Prediction — {{ display_date }}">
 <meta property="og:description" content="Monte Carlo simulation predicts {{ favorite }} to win ({{ (fav_prob * 100)|round|int }}%). {{ game.away_pitcher }} vs {{ game.home_pitcher }}.">
 <meta property="og:type" content="article">
@@ -24,7 +24,7 @@
         <div class="game-teams">
             <div class="game-team game-team-away">
                 <span class="game-team-abbr">{{ away }}</span>
-                <span class="game-team-prob {% if game.model_away_wp > game.model_home_wp %}game-team-fav{% endif %}">{{ (game.model_away_wp * 100)|round|int }}%</span>
+                <span class="game-team-prob {% if game.model_away_wp|default(0.5) > game.model_home_wp|default(0.5) %}game-team-fav{% endif %}">{{ (game.model_away_wp|default(0.5) * 100)|round|int }}%</span>
             </div>
             <div class="game-vs">
                 <span class="game-at">@</span>
@@ -32,7 +32,7 @@
             </div>
             <div class="game-team game-team-home">
                 <span class="game-team-abbr">{{ home }}</span>
-                <span class="game-team-prob {% if game.model_home_wp > game.model_away_wp %}game-team-fav{% endif %}">{{ (game.model_home_wp * 100)|round|int }}%</span>
+                <span class="game-team-prob {% if game.model_home_wp|default(0.5) > game.model_away_wp|default(0.5) %}game-team-fav{% endif %}">{{ (game.model_home_wp|default(0.5) * 100)|round|int }}%</span>
             </div>
         </div>
 
@@ -66,11 +66,11 @@
     <div class="game-section glass fade-in">
         <h2>Win Probability</h2>
         <div class="game-wp-bar">
-            <div class="wp-fill wp-away" style="width: {{ (game.model_away_wp * 100)|round|int }}%">
-                {{ away }} {{ (game.model_away_wp * 100)|round|int }}%
+            <div class="wp-fill wp-away" style="width: {{ (game.model_away_wp|default(0.5) * 100)|round|int }}%">
+                {{ away }} {{ (game.model_away_wp|default(0.5) * 100)|round|int }}%
             </div>
-            <div class="wp-fill wp-home" style="width: {{ (game.model_home_wp * 100)|round|int }}%">
-                {{ home }} {{ (game.model_home_wp * 100)|round|int }}%
+            <div class="wp-fill wp-home" style="width: {{ (game.model_home_wp|default(0.5) * 100)|round|int }}%">
+                {{ home }} {{ (game.model_home_wp|default(0.5) * 100)|round|int }}%
             </div>
         </div>
 
@@ -81,13 +81,13 @@
             <tbody>
                 <tr>
                     <td>Model (blended)</td>
-                    <td>{{ (game.model_away_wp * 100)|round(1) }}%</td>
-                    <td>{{ (game.model_home_wp * 100)|round(1) }}%</td>
+                    <td>{{ (game.model_away_wp|default(0.5) * 100)|round(1) }}%</td>
+                    <td>{{ (game.model_home_wp|default(0.5) * 100)|round(1) }}%</td>
                 </tr>
                 <tr>
                     <td>Simulation only</td>
-                    <td>{{ ((1 - game.sim_home_wp) * 100)|round(1) }}%</td>
-                    <td>{{ (game.sim_home_wp * 100)|round(1) }}%</td>
+                    <td>{{ ((1 - game.sim_home_wp|default(0.5)) * 100)|round(1) }}%</td>
+                    <td>{{ (game.sim_home_wp|default(0.5) * 100)|round(1) }}%</td>
                 </tr>
                 {% if game.elo_home_wp %}
                 <tr>
