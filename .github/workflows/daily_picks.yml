@@ -2,7 +2,7 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    - cron: '0 12 * * *'    # 8 AM ET — grade results, generate picks, send newsletter + tweet
+    - cron: '15 13 * * *'   # 9:15 AM ET — grade results, generate picks, send newsletter + tweet
   workflow_dispatch:
     inputs:
       date:
