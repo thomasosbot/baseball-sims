@@ -33,22 +33,25 @@ TEXT_MUTED = (120, 125, 135)
 ACCENT = (24, 119, 242)  # --accent #1877F2
 GREEN = (49, 162, 76)  # --green
 RED = (250, 56, 62)  # --red
-ACCENT_GLOW = (24, 119, 242, 40)
 
 # ── Timing (seconds) ──
-INTRO_DURATION = 2.0
-CARD_REVEAL_DURATION = 0.4
-CARD_HOLD_DURATION = 2.0
+INTRO_DURATION = 2.5
+RECAP_DURATION = 3.5
+SEASON_DURATION = 3.0
+CARD_REVEAL_DURATION = 0.8
+CARD_HOLD_DURATION = 3.0
 CARD_TOTAL = CARD_REVEAL_DURATION + CARD_HOLD_DURATION
-OUTRO_DURATION = 2.5
+OUTRO_DURATION = 3.0
 
 # ── Layout ──
-CARD_MARGIN_X = 60
+CARD_MARGIN_X = 50
 CARD_RADIUS = 24
-CARD_PADDING = 36
+CARD_PADDING = 40
+
+# ── Results data path ──
+RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
 
 # ── Fonts ──
-# Try system fonts, fall back gracefully
 _FONT_CACHE: dict[tuple[str, int], ImageFont.FreeTypeFont] = {}
 
 
@@ -89,12 +92,10 @@ def _draw_rounded_rect(
     fill: tuple,
     outline: tuple | None = None,
 ):
-    """Draw a rounded rectangle with optional outline."""
     draw.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline, width=2)
 
 
 def _draw_gradient_bg(img: Image.Image):
-    """Draw a subtle vertical gradient background."""
     draw = ImageDraw.Draw(img)
     for y in range(HEIGHT):
         t = y / HEIGHT
@@ -104,65 +105,245 @@ def _draw_gradient_bg(img: Image.Image):
         draw.line([(0, y), (WIDTH, y)], fill=(r, g, b))
 
 
+def _centered_text(draw, y, text, font, fill):
+    """Draw text centered horizontally."""
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    draw.text(((WIDTH - tw) // 2, y), text, font=font, fill=fill)
+    return tw
+
+
+def _load_results() -> tuple[dict | None, dict | None]:
+    """Load yesterday's results and season stats. Returns (yesterday, season_stats)."""
+    if not RESULTS_PATH.exists():
+        return None, None
+    with open(RESULTS_PATH) as f:
+        results = json.load(f)
+    if not results:
+        return None, None
+
+    yesterday = results[-1]
+
+    total_wins = sum(r.get("wins", 0) for r in results)
+    total_losses = sum(r.get("losses", 0) for r in results)
+    total_wagered = sum(
+        sum(abs(p.get("wager", 0)) for p in r.get("picks", []))
+        for r in results
+    )
+    total_profit = sum(r.get("day_profit", 0) for r in results)
+    roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
+    bankroll = results[-1].get("bankroll", 10000)
+
+    season = {
+        "wins": total_wins,
+        "losses": total_losses,
+        "total_profit": total_profit,
+        "roi": roi,
+        "bankroll": bankroll,
+        "days": len(results),
+    }
+
+    return yesterday, season
+
+
+# ── Frame renderers ──
+
 def _render_intro_frame(date: str, num_picks: int, progress: float) -> Image.Image:
-    """Render the intro/title frame. progress: 0.0 to 1.0 over INTRO_DURATION."""
     img = Image.new("RGB", (WIDTH, HEIGHT))
     _draw_gradient_bg(img)
     draw = ImageDraw.Draw(img)
 
-    # Fade in via alpha simulation (just use progress for position)
     ease = _ease_out_cubic(min(progress * 1.5, 1.0))
     offset_y = int((1 - ease) * 60)
 
     # Brand name
-    font_brand = _get_font(52, bold=True)
+    font_brand = _get_font(64, bold=True)
     text = "OZZY ANALYTICS"
     bbox = draw.textbbox((0, 0), text, font=font_brand)
     tw = bbox[2] - bbox[0]
     x = (WIDTH - tw) // 2
-    y = 680 - offset_y
-    # Accent underline
+    y = 640 - offset_y
     draw.rounded_rectangle(
-        [x - 20, y + 70, x + tw + 20, y + 76], radius=3, fill=ACCENT
+        [x - 20, y + 82, x + tw + 20, y + 88], radius=3, fill=ACCENT
     )
     draw.text((x, y), text, font=font_brand, fill=TEXT_PRIMARY)
 
     # Tagline
-    font_tag = _get_font(36)
+    font_tag = _get_font(40)
     tag = "10,000 Simulations. Zero Gut Feelings."
-    bbox = draw.textbbox((0, 0), tag, font=font_tag)
-    tw = bbox[2] - bbox[0]
     alpha = min(progress * 2 - 0.3, 1.0)
     if alpha > 0:
         color = _fade_color(TEXT_SECONDARY, alpha)
-        draw.text(((WIDTH - tw) // 2, y + 100 - offset_y), tag, font=font_tag, fill=color)
+        _centered_text(draw, y + 120 - offset_y, tag, font_tag, color)
 
     # Date + pick count
-    font_date = _get_font(44, bold=True)
+    font_date = _get_font(52, bold=True)
     date_text = f"Picks for {date}"
-    bbox = draw.textbbox((0, 0), date_text, font=font_date)
-    tw = bbox[2] - bbox[0]
     alpha2 = min(progress * 2 - 0.6, 1.0)
     if alpha2 > 0:
         color = _fade_color(TEXT_PRIMARY, alpha2)
-        draw.text(((WIDTH - tw) // 2, y + 200 - offset_y), date_text, font=font_date, fill=color)
+        _centered_text(draw, y + 220 - offset_y, date_text, font_date, color)
 
     # Pick count badge
     if alpha2 > 0:
-        font_count = _get_font(30)
+        font_count = _get_font(36)
         count_text = f"{num_picks} pick{'s' if num_picks != 1 else ''} today"
         bbox = draw.textbbox((0, 0), count_text, font=font_count)
         tw = bbox[2] - bbox[0]
         cx = (WIDTH - tw) // 2
-        cy = y + 270 - offset_y
+        cy = y + 300 - offset_y
         _draw_rounded_rect(
-            draw,
-            (cx - 24, cy - 8, cx + tw + 24, cy + 40),
-            radius=20,
-            fill=(30, 55, 100),
-            outline=ACCENT,
+            draw, (cx - 24, cy - 10, cx + tw + 24, cy + 46),
+            radius=20, fill=(30, 55, 100), outline=ACCENT,
         )
         draw.text((cx, cy), count_text, font=font_count, fill=TEXT_PRIMARY)
+
+    return img
+
+
+def _render_recap_frame(yesterday: dict, progress: float) -> Image.Image:
+    """Render yesterday's results recap."""
+    img = Image.new("RGB", (WIDTH, HEIGHT))
+    _draw_gradient_bg(img)
+    draw = ImageDraw.Draw(img)
+
+    ease = _ease_out_cubic(min(progress * 1.5, 1.0))
+
+    # Title
+    font_title = _get_font(48, bold=True)
+    _centered_text(draw, 160, "YESTERDAY'S RESULTS", font_title, TEXT_PRIMARY)
+
+    # Date
+    font_date = _get_font(32)
+    recap_date = yesterday.get("date", "")
+    _centered_text(draw, 225, recap_date, font_date, TEXT_MUTED)
+
+    # Record + P&L summary
+    wins = yesterday.get("wins", 0)
+    losses = yesterday.get("losses", 0)
+    profit = yesterday.get("day_profit", 0)
+    profit_sign = "+" if profit >= 0 else "-"
+    profit_color = GREEN if profit >= 0 else RED
+
+    font_record = _get_font(72, bold=True)
+    _centered_text(draw, 300, f"{wins}W - {losses}L", font_record, TEXT_PRIMARY)
+
+    font_profit = _get_font(56, bold=True)
+    _centered_text(draw, 395, f"{profit_sign}${abs(profit):.0f}", font_profit, profit_color)
+
+    # Individual picks
+    picks = yesterday.get("picks", [])
+    card_x1 = CARD_MARGIN_X
+    card_x2 = WIDTH - CARD_MARGIN_X
+    card_y = 500
+
+    for i, p in enumerate(picks):
+        # Stagger reveal
+        pick_alpha = min((progress - 0.15 - i * 0.1) / 0.3, 1.0)
+        if pick_alpha <= 0:
+            continue
+
+        row_h = 90
+        ry = card_y + i * (row_h + 12)
+
+        # Row background
+        won = p.get("won", False)
+        row_bg = (30, 55, 35) if won else (55, 30, 30)
+        _draw_rounded_rect(draw, (card_x1, ry, card_x2, ry + row_h), radius=16, fill=row_bg)
+
+        # W/L badge
+        badge_text = "W" if won else "L"
+        badge_color = GREEN if won else RED
+        font_badge = _get_font(32, bold=True)
+        bx = card_x1 + 24
+        by = ry + 12
+        _draw_rounded_rect(draw, (bx, by, bx + 50, by + 50), radius=12,
+                           fill=(20, 22, 28), outline=badge_color)
+        # Center the letter in badge
+        bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
+        btw = bbox[2] - bbox[0]
+        draw.text((bx + (50 - btw) // 2, by + 6), badge_text, font=font_badge, fill=badge_color)
+
+        # Pick name
+        font_pick = _get_font(36, bold=True)
+        pick_name = p.get("pick", "")
+        color = _fade_color(TEXT_PRIMARY, pick_alpha)
+        draw.text((bx + 70, ry + 10), pick_name, font=font_pick, fill=color)
+
+        # Score
+        font_score = _get_font(28)
+        score = p.get("actual_score", "")
+        color = _fade_color(TEXT_SECONDARY, pick_alpha)
+        draw.text((bx + 70, ry + 52), score, font=font_score, fill=color)
+
+        # P&L on right
+        pnl = p.get("profit", 0)
+        pnl_sign = "+" if pnl >= 0 else ""
+        pnl_color = _fade_color(GREEN if pnl >= 0 else RED, pick_alpha)
+        font_pnl = _get_font(34, bold=True)
+        pnl_text = f"{pnl_sign}${pnl:.0f}"
+        bbox = draw.textbbox((0, 0), pnl_text, font=font_pnl)
+        ptw = bbox[2] - bbox[0]
+        draw.text((card_x2 - 24 - ptw, ry + 26), pnl_text, font=font_pnl, fill=pnl_color)
+
+    return img
+
+
+def _render_season_frame(season: dict, progress: float) -> Image.Image:
+    """Render season stats overview."""
+    img = Image.new("RGB", (WIDTH, HEIGHT))
+    _draw_gradient_bg(img)
+    draw = ImageDraw.Draw(img)
+
+    ease = _ease_out_cubic(min(progress * 1.5, 1.0))
+
+    # Title
+    font_title = _get_font(48, bold=True)
+    _centered_text(draw, 300, "SEASON STATS", font_title, TEXT_PRIMARY)
+
+    # Accent underline
+    bbox = draw.textbbox((0, 0), "SEASON STATS", font=font_title)
+    tw = bbox[2] - bbox[0]
+    ux = (WIDTH - tw) // 2
+    draw.rounded_rectangle([ux - 10, 365, ux + tw + 10, 371], radius=3, fill=ACCENT)
+
+    # Stats in a 2x2 grid
+    stats = [
+        ("RECORD", f"{season['wins']}W - {season['losses']}L", TEXT_PRIMARY),
+        ("PROFIT", f"{'+'if season['total_profit']>=0 else '-'}${abs(season['total_profit']):.0f}",
+         GREEN if season['total_profit'] >= 0 else RED),
+        ("ROI", f"{season['roi']}%",
+         GREEN if season['roi'] >= 0 else RED),
+        ("BANKROLL", f"${season['bankroll']:,.0f}", TEXT_PRIMARY),
+    ]
+
+    font_label = _get_font(28)
+    font_value = _get_font(64, bold=True)
+    grid_y = 440
+    col_w = WIDTH // 2
+    row_h = 220
+
+    for i, (label, value, color) in enumerate(stats):
+        stat_alpha = min((progress - 0.2 - i * 0.1) / 0.3, 1.0)
+        if stat_alpha <= 0:
+            continue
+
+        col = i % 2
+        row = i // 2
+        cx = col * col_w + col_w // 2
+        cy = grid_y + row * row_h
+
+        # Label
+        label_color = _fade_color(TEXT_MUTED, stat_alpha)
+        bbox = draw.textbbox((0, 0), label, font=font_label)
+        ltw = bbox[2] - bbox[0]
+        draw.text((cx - ltw // 2, cy), label, font=font_label, fill=label_color)
+
+        # Value
+        val_color = _fade_color(color, stat_alpha)
+        bbox = draw.textbbox((0, 0), value, font=font_value)
+        vtw = bbox[2] - bbox[0]
+        draw.text((cx - vtw // 2, cy + 40), value, font=font_value, fill=val_color)
 
     return img
 
@@ -170,7 +351,6 @@ def _render_intro_frame(date: str, num_picks: int, progress: float) -> Image.Ima
 def _render_pick_card(
     pick: dict, card_index: int, total_cards: int, reveal_progress: float
 ) -> Image.Image:
-    """Render a single pick card frame. reveal_progress: 0.0 (hidden) to 1.0 (full)."""
     img = Image.new("RGB", (WIDTH, HEIGHT))
     _draw_gradient_bg(img)
     draw = ImageDraw.Draw(img)
@@ -178,17 +358,15 @@ def _render_pick_card(
     ease = _ease_out_cubic(reveal_progress)
 
     # Card counter at top
-    font_counter = _get_font(28)
+    font_counter = _get_font(34)
     counter_text = f"PICK {card_index + 1} OF {total_cards}"
-    bbox = draw.textbbox((0, 0), counter_text, font=font_counter)
-    tw = bbox[2] - bbox[0]
-    draw.text(((WIDTH - tw) // 2, 120), counter_text, font=font_counter, fill=TEXT_MUTED)
+    _centered_text(draw, 100, counter_text, font_counter, TEXT_MUTED)
 
     # Main card - slides up and fades in
     card_x1 = CARD_MARGIN_X
     card_x2 = WIDTH - CARD_MARGIN_X
-    card_y1 = 240 + int((1 - ease) * 80)
-    card_h = 900
+    card_y1 = 200 + int((1 - ease) * 80)
+    card_h = 1050
     card_y2 = card_y1 + card_h
 
     _draw_rounded_rect(
@@ -196,10 +374,10 @@ def _render_pick_card(
         radius=CARD_RADIUS, fill=CARD_BG, outline=CARD_BORDER,
     )
 
-    if reveal_progress < 0.15:
+    if reveal_progress < 0.1:
         return img
 
-    content_alpha = min((reveal_progress - 0.15) / 0.3, 1.0)
+    content_alpha = min((reveal_progress - 0.1) / 0.3, 1.0)
     cx = card_x1 + CARD_PADDING
     cy = card_y1 + CARD_PADDING
 
@@ -207,25 +385,24 @@ def _render_pick_card(
     pick_type = pick.get("type", "moneyline")
     badge_text = "MONEYLINE" if pick_type == "moneyline" else "RUN LINE"
     badge_color = ACCENT if pick_type == "moneyline" else GREEN
-    font_badge = _get_font(22, bold=True)
+    font_badge = _get_font(26, bold=True)
     bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
     bw = bbox[2] - bbox[0]
-    # Darker fill so text pops
     badge_fill = (20, 45, 85) if pick_type == "moneyline" else (20, 60, 35)
     _draw_rounded_rect(
-        draw, (cx, cy, cx + bw + 28, cy + 36),
-        radius=18, fill=badge_fill, outline=badge_color,
+        draw, (cx, cy, cx + bw + 32, cy + 42),
+        radius=20, fill=badge_fill, outline=badge_color,
     )
-    draw.text((cx + 14, cy + 6), badge_text, font=font_badge, fill=TEXT_PRIMARY)
+    draw.text((cx + 16, cy + 7), badge_text, font=font_badge, fill=TEXT_PRIMARY)
 
     # Team pick name (big)
-    font_pick = _get_font(64, bold=True)
+    font_pick = _get_font(80, bold=True)
     pick_name = pick.get("pick", "???")
     color = _fade_color(TEXT_PRIMARY, content_alpha)
-    draw.text((cx, cy + 70), pick_name, font=font_pick, fill=color)
+    draw.text((cx, cy + 65), pick_name, font=font_pick, fill=color)
 
     # Matchup line
-    font_matchup = _get_font(32)
+    font_matchup = _get_font(38)
     team = pick.get("team", "")
     opponent = pick.get("opponent", "")
     side = pick.get("side", "")
@@ -234,13 +411,13 @@ def _render_pick_card(
     else:
         matchup = f"{opponent} @ {team}"
     color = _fade_color(TEXT_SECONDARY, content_alpha)
-    draw.text((cx, cy + 155), matchup, font=font_matchup, fill=color)
+    draw.text((cx, cy + 170), matchup, font=font_matchup, fill=color)
 
     # Divider line
-    div_y = cy + 220
+    div_y = cy + 240
     draw.line([(cx, div_y), (card_x2 - CARD_PADDING, div_y)], fill=CARD_BORDER, width=2)
 
-    # Stats grid
+    # Stats grid — bigger text
     stats_y = div_y + 30
     stats = [
         ("ODDS", pick.get("odds", "—")),
@@ -249,13 +426,12 @@ def _render_pick_card(
     ]
 
     col_width = (card_x2 - card_x1 - 2 * CARD_PADDING) // len(stats)
-    font_stat_label = _get_font(22)
-    font_stat_value = _get_font(48, bold=True)
+    font_stat_label = _get_font(26)
+    font_stat_value = _get_font(58, bold=True)
 
     for i, (label, value) in enumerate(stats):
         sx = cx + i * col_width
-        # Stagger reveal
-        stat_alpha = min((reveal_progress - 0.3 - i * 0.08) / 0.3, 1.0)
+        stat_alpha = min((reveal_progress - 0.2 - i * 0.06) / 0.3, 1.0)
         if stat_alpha <= 0:
             continue
 
@@ -265,16 +441,16 @@ def _render_pick_card(
             value_color = _fade_color(GREEN, stat_alpha)
 
         draw.text((sx, stats_y), label, font=font_stat_label, fill=label_color)
-        draw.text((sx, stats_y + 35), str(value), font=font_stat_value, fill=value_color)
+        draw.text((sx, stats_y + 38), str(value), font=font_stat_value, fill=value_color)
 
-    # Sportsbook odds breakdown
+    # Sportsbook odds breakdown — bigger text
     books = pick.get("sportsbook_odds", {})
     if books:
-        book_y = stats_y + 140
-        font_book_label = _get_font(20)
-        font_book_val = _get_font(20, bold=True)
+        book_y = stats_y + 160
+        font_book_label = _get_font(26)
+        font_book_val = _get_font(26, bold=True)
         draw.text((cx, book_y), "BEST AVAILABLE ODDS", font=font_book_label, fill=TEXT_MUTED)
-        book_y += 35
+        book_y += 42
         book_names = {
             "fanduel": "FanDuel",
             "bovada": "Bovada",
@@ -282,7 +458,6 @@ def _render_pick_card(
             "draftkings": "DraftKings",
             "williamhill_us": "Caesars",
         }
-        # Find best odds
         best_val = max(books.values()) if books else None
         for bk, val in books.items():
             name = book_names.get(bk, bk)
@@ -290,28 +465,27 @@ def _render_pick_card(
             val_str = f"+{val}" if val > 0 else str(val)
             draw.text((cx, book_y), name, font=font_book_label, fill=TEXT_SECONDARY)
             v_color = GREEN if is_best else TEXT_SECONDARY
-            draw.text((cx + 200, book_y), val_str, font=font_book_val, fill=v_color)
+            draw.text((cx + 240, book_y), val_str, font=font_book_val, fill=v_color)
             if is_best:
-                # Best tag
-                draw.text((cx + 280, book_y), "BEST", font=_get_font(16, bold=True), fill=GREEN)
-            book_y += 32
+                font_best = _get_font(20, bold=True)
+                draw.text((cx + 340, book_y + 2), "BEST", font=font_best, fill=GREEN)
+            book_y += 38
 
     # Lineup status pill at bottom of card
     status = pick.get("lineup_status", "projected")
     status_color = GREEN if status == "confirmed" else (200, 160, 50)
-    font_status = _get_font(20)
+    font_status = _get_font(26)
     status_text = f"Lineups {status.upper()}"
     bbox = draw.textbbox((0, 0), status_text, font=font_status)
     sw = bbox[2] - bbox[0]
     sx = (WIDTH - sw) // 2
-    sy = card_y2 - 55
+    sy = card_y2 - 60
     draw.text((sx, sy), status_text, font=font_status, fill=status_color)
 
     return img
 
 
 def _render_outro_frame(date: str, num_picks: int, progress: float) -> Image.Image:
-    """Render the outro/CTA frame."""
     img = Image.new("RGB", (WIDTH, HEIGHT))
     _draw_gradient_bg(img)
     draw = ImageDraw.Draw(img)
@@ -319,69 +493,60 @@ def _render_outro_frame(date: str, num_picks: int, progress: float) -> Image.Ima
     ease = _ease_out_cubic(min(progress * 1.5, 1.0))
 
     # Brand
-    font_brand = _get_font(48, bold=True)
+    font_brand = _get_font(60, bold=True)
     text = "OZZY ANALYTICS"
     bbox = draw.textbbox((0, 0), text, font=font_brand)
     tw = bbox[2] - bbox[0]
     x = (WIDTH - tw) // 2
-    y = 700
+    y = 680
     draw.text((x, y), text, font=font_brand, fill=TEXT_PRIMARY)
     draw.rounded_rectangle(
-        [x - 20, y + 65, x + tw + 20, y + 71], radius=3, fill=ACCENT
+        [x - 20, y + 78, x + tw + 20, y + 84], radius=3, fill=ACCENT
     )
 
     # CTA
-    font_cta = _get_font(36)
+    font_cta = _get_font(40)
     cta = "Full analysis + all picks at"
-    bbox = draw.textbbox((0, 0), cta, font=font_cta)
-    tw = bbox[2] - bbox[0]
     if ease > 0.3:
-        draw.text(((WIDTH - tw) // 2, y + 110), cta, font=font_cta, fill=TEXT_SECONDARY)
+        _centered_text(draw, y + 130, cta, font_cta, TEXT_SECONDARY)
 
     # URL
-    font_url = _get_font(44, bold=True)
+    font_url = _get_font(52, bold=True)
     url = "ozzyanalytics.com"
     bbox = draw.textbbox((0, 0), url, font=font_url)
     tw = bbox[2] - bbox[0]
     ux = (WIDTH - tw) // 2
-    uy = y + 170
+    uy = y + 200
     if ease > 0.5:
-        # Accent box around URL — solid dark fill so text is readable
         _draw_rounded_rect(
-            draw, (ux - 30, uy - 12, ux + tw + 30, uy + 52),
+            draw, (ux - 30, uy - 14, ux + tw + 30, uy + 60),
             radius=16, fill=(20, 45, 85), outline=ACCENT,
         )
         draw.text((ux, uy), url, font=font_url, fill=TEXT_PRIMARY)
 
     # Follow CTA
     if ease > 0.7:
-        font_follow = _get_font(28)
+        font_follow = _get_font(34)
         follow = "Follow for daily MLB picks"
-        bbox = draw.textbbox((0, 0), follow, font=font_follow)
-        tw = bbox[2] - bbox[0]
-        draw.text(((WIDTH - tw) // 2, uy + 90), follow, font=font_follow, fill=TEXT_MUTED)
+        _centered_text(draw, uy + 110, follow, font_follow, TEXT_MUTED)
 
     return img
 
 
 def _ease_out_cubic(t: float) -> float:
-    """Ease-out cubic for smooth animations."""
     return 1 - (1 - t) ** 3
 
 
 def _fade_color(color: tuple, alpha: float) -> tuple:
-    """Simulate fade by interpolating color toward background."""
     alpha = max(0.0, min(1.0, alpha))
     return tuple(int(c * alpha + BG_COLOR[i] * (1 - alpha)) for i, c in enumerate(color[:3]))
 
 
 def _load_picks(json_path: str | Path) -> tuple[str, list[dict]]:
-    """Load picks from a daily JSON file. Returns (date, picks)."""
     with open(json_path) as f:
         data = json.load(f)
     date = data.get("date", "Unknown")
     picks = data.get("picks", [])
-    # Deduplicate picks (JSON sometimes has dupes from early+late)
     seen = set()
     unique = []
     for p in picks:
@@ -393,7 +558,6 @@ def _load_picks(json_path: str | Path) -> tuple[str, list[dict]]:
 
 
 def _pil_to_array(img: Image.Image):
-    """Convert PIL Image to numpy array for MoviePy."""
     import numpy as np
     return np.array(img)
 
@@ -401,10 +565,6 @@ def _pil_to_array(img: Image.Image):
 def generate_picks_video(json_path: str | Path, output_path: str | Path = None) -> Path:
     """
     Generate a TikTok vertical video from a daily picks JSON.
-
-    Args:
-        json_path: Path to daily picks JSON (e.g., data/daily/2026-03-27.json)
-        output_path: Output MP4 path. Defaults to data/tiktok/<date>.mp4
 
     Returns:
         Path to the generated video file.
@@ -420,39 +580,65 @@ def generate_picks_video(json_path: str | Path, output_path: str | Path = None) 
     output_path = Path(output_path) if output_path else Path(f"data/tiktok/{date}.mp4")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    yesterday, season = _load_results()
+
     print(f"  Generating TikTok video for {date} ({len(picks)} picks)...")
 
     clips = []
 
-    # Intro: render animated frames, then hold final frame
+    # Intro: animate then hold
     intro_anim_frames = int(INTRO_DURATION * FPS)
     for i in range(intro_anim_frames):
         progress = i / intro_anim_frames
         frame = _pil_to_array(_render_intro_frame(date, len(picks), progress))
         clips.append(ImageClip(frame, duration=1 / FPS))
-    # Hold final intro frame
-    final_intro = _pil_to_array(_render_intro_frame(date, len(picks), 1.0))
-    clips.append(ImageClip(final_intro, duration=0.5))
+    clips.append(ImageClip(
+        _pil_to_array(_render_intro_frame(date, len(picks), 1.0)), duration=0.5
+    ))
 
-    # Pick cards: animate reveal, then hold
+    # Yesterday's recap (if results exist)
+    if yesterday and yesterday.get("picks"):
+        recap_anim_frames = int(RECAP_DURATION * FPS)
+        for i in range(recap_anim_frames):
+            progress = i / recap_anim_frames
+            frame = _pil_to_array(_render_recap_frame(yesterday, progress))
+            clips.append(ImageClip(frame, duration=1 / FPS))
+        clips.append(ImageClip(
+            _pil_to_array(_render_recap_frame(yesterday, 1.0)), duration=1.0
+        ))
+
+    # Season stats (if available)
+    if season:
+        season_anim_frames = int(SEASON_DURATION * FPS)
+        for i in range(season_anim_frames):
+            progress = i / season_anim_frames
+            frame = _pil_to_array(_render_season_frame(season, progress))
+            clips.append(ImageClip(frame, duration=1 / FPS))
+        clips.append(ImageClip(
+            _pil_to_array(_render_season_frame(season, 1.0)), duration=1.0
+        ))
+
+    # Pick cards: slower reveal + longer hold
     for idx, pick in enumerate(picks):
         reveal_frames = int(CARD_REVEAL_DURATION * FPS)
         for i in range(reveal_frames):
             progress = i / reveal_frames
             frame = _pil_to_array(_render_pick_card(pick, idx, len(picks), progress))
             clips.append(ImageClip(frame, duration=1 / FPS))
-        # Hold fully revealed card
-        final_card = _pil_to_array(_render_pick_card(pick, idx, len(picks), 1.0))
-        clips.append(ImageClip(final_card, duration=CARD_HOLD_DURATION))
+        clips.append(ImageClip(
+            _pil_to_array(_render_pick_card(pick, idx, len(picks), 1.0)),
+            duration=CARD_HOLD_DURATION,
+        ))
 
-    # Outro: animate in, then hold
+    # Outro: animate then hold
     outro_anim_frames = int(OUTRO_DURATION * FPS)
     for i in range(outro_anim_frames):
         progress = i / outro_anim_frames
         frame = _pil_to_array(_render_outro_frame(date, len(picks), progress))
         clips.append(ImageClip(frame, duration=1 / FPS))
-    final_outro = _pil_to_array(_render_outro_frame(date, len(picks), 1.0))
-    clips.append(ImageClip(final_outro, duration=1.0))
+    clips.append(ImageClip(
+        _pil_to_array(_render_outro_frame(date, len(picks), 1.0)), duration=1.5
+    ))
 
     # Assemble
     final = concatenate_videoclips(clips, method="chain")
@@ -465,13 +651,12 @@ def generate_picks_video(json_path: str | Path, output_path: str | Path = None) 
         logger=None,
     )
 
-    duration = INTRO_DURATION + len(picks) * CARD_TOTAL + OUTRO_DURATION
-    print(f"  Video saved: {output_path} ({duration:.1f}s, {len(picks)} picks)")
+    total_dur = final.duration
+    print(f"  Video saved: {output_path} ({total_dur:.1f}s, {len(picks)} picks)")
     return output_path
 
 
 def generate_from_latest() -> Path | None:
-    """Generate video from the most recent daily picks JSON."""
     daily_dir = Path("data/daily")
     jsons = sorted(daily_dir.glob("2*.json"), reverse=True)
     if not jsons:
