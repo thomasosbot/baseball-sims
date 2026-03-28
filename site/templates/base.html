@@ -7,22 +7,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="{{ base_url|default('') }}static/style.css">
     {% block head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">Ozzy Analytics</a>
+            <a href="{{ base_url|default('') }}index.html" class="logo">Ozzy Analytics</a>
             <button class="nav-toggle" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-links">
-                <a href="index.html" class="{% if active == 'picks' %}active{% endif %}">Today's Picks</a>
-                <a href="results.html" class="{% if active == 'results' %}active{% endif %}">Results</a>
-                <a href="backtest.html" class="{% if active == 'backtest' %}active{% endif %}">2025 Backtest</a>
-                <a href="simulate.html" class="{% if active == 'simulate' %}active{% endif %}">Simulate</a>
-                <a href="about.html" class="{% if active == 'about' %}active{% endif %}">About</a>
+                <a href="{{ base_url|default('') }}index.html" class="{% if active == 'picks' %}active{% endif %}">Today's Picks</a>
+                <a href="{{ base_url|default('') }}results.html" class="{% if active == 'results' %}active{% endif %}">Results</a>
+                <a href="{{ base_url|default('') }}backtest.html" class="{% if active == 'backtest' %}active{% endif %}">2025 Backtest</a>
+                <a href="{{ base_url|default('') }}simulate.html" class="{% if active == 'simulate' %}active{% endif %}">Simulate</a>
+                <a href="{{ base_url|default('') }}about.html" class="{% if active == 'about' %}active{% endif %}">About</a>
             </div>
         </div>
     </nav>

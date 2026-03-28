@@ -195,9 +195,11 @@
                 {% for game in today.games %}
                 <tr class="game-row {% if game.status == 'lineups_pending' %}pending-row{% elif game.lineup_status == 'projected' and not is_past %}projected-row{% endif %}" data-game-idx="{{ loop.index0 }}">
                     <td>
-                        <span class="team">{{ game.away }}</span>
-                        <span class="at">@</span>
-                        <span class="team">{{ game.home }}</span>
+                        <a href="games/{{ today.date }}/{{ game.away }}-vs-{{ game.home }}.html" class="game-link">
+                            <span class="team">{{ game.away }}</span>
+                            <span class="at">@</span>
+                            <span class="team">{{ game.home }}</span>
+                        </a>
                         {% if game.lineup_status == 'projected' and not is_past %}
                         <span class="lineup-badge projected">projected</span>
                         {% endif %}

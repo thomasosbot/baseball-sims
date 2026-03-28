@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}MLB Predictions for {{ display_date }} | Ozzy Analytics{% endblock %}
+
+{% block head %}
+<meta name="description" content="MLB game predictions for {{ display_date }}. {{ games|length }} games simulated 10,000 times each. Win probabilities, pitching matchups, and simulation analysis.">
+<meta property="og:title" content="MLB Predictions — {{ display_date }}">
+<meta property="og:description" content="{{ games|length }} games analyzed with Monte Carlo simulation.">
+<link rel="canonical" href="https://ozzyanalytics.com/games/{{ date }}/index.html">
+{% endblock %}
+
+{% block content %}
+<div class="games-index">
+
+    <div class="game-breadcrumb">
+        <a href="{{ base_url|default('') }}index.html">Today's Picks</a> &rsaquo;
+        {{ display_date }}
+    </div>
+
+    <h1 class="fade-in">{{ display_date }} — {{ games|length }} Games</h1>
+    <p class="games-subtitle fade-in">Every game simulated 10,000 times. Click a matchup for the full breakdown.</p>
+
+    <div class="games-grid fade-in">
+        {% for game in games %}
+        <a href="{{ game.away }}-vs-{{ game.home }}.html" class="games-card glass">
+            <div class="games-card-matchup">
+                <span class="games-card-team">{{ game.away }}</span>
+                <span class="games-card-at">@</span>
+                <span class="games-card-team">{{ game.home }}</span>
+            </div>
+            <div class="games-card-pitchers">
+                {{ game.away_pitcher }} vs {{ game.home_pitcher }}
+            </div>
+            <div class="games-card-probs">
+                <span class="games-card-prob {% if game.model_away_wp > game.model_home_wp %}game-team-fav{% endif %}">
+                    {{ (game.model_away_wp * 100)|round|int }}%
+                </span>
+                <span class="games-card-dash">—</span>
+                <span class="games-card-prob {% if game.model_home_wp > game.model_away_wp %}game-team-fav{% endif %}">
+                    {{ (game.model_home_wp * 100)|round|int }}%
+                </span>
+            </div>
+            {% if game.pick %}
+            <div class="games-card-pick">
+                <span class="pick-type-badge {% if game.pick_type == 'moneyline' %}badge-ml{% else %}badge-rl{% endif %}">
+                    {{ "ML" if game.pick_type == "moneyline" else "RL" }}
+                </span>
+                {{ game.pick }}
+            </div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

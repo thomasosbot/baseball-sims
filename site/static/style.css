@@ -1628,3 +1628,167 @@ body {
     .stat-card { min-width: auto; }
     .pick-details { flex-direction: column; gap: 0.5rem; }
 }
+
+/* ── Game Preview Pages ── */
+
+.game-link { color: var(--text); text-decoration: none; }
+.game-link:hover { color: var(--accent); }
+
+.game-preview { padding: 1.5rem 0 3rem; }
+.game-breadcrumb { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+.game-breadcrumb a { color: var(--accent); text-decoration: none; }
+
+.game-header { text-align: center; padding: 2rem; margin-bottom: 1.5rem; }
+.game-teams { display: flex; align-items: center; justify-content: center; gap: 2rem; }
+.game-team { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+.game-team-abbr { font-size: 2.5rem; font-weight: 700; }
+.game-team-prob { font-size: 1.5rem; font-weight: 600; color: var(--text-secondary); }
+.game-team-fav { color: var(--green); }
+.game-vs { display: flex; flex-direction: column; align-items: center; }
+.game-at { font-size: 1.2rem; color: var(--text-muted); font-weight: 600; }
+.game-date-small { font-size: 0.8rem; color: var(--text-muted); }
+
+.game-pick-badge {
+    margin-top: 1.25rem;
+    padding: 0.6rem 1.2rem;
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    display: inline-block;
+    font-size: 0.95rem;
+}
+
+.game-section { padding: 1.5rem; margin-bottom: 1.25rem; }
+.game-section h2 { font-size: 1.15rem; margin-bottom: 0.75rem; }
+.game-section h3 { font-size: 0.95rem; margin: 1.25rem 0 0.5rem; color: var(--text-secondary); }
+
+.game-pitchers { display: flex; align-items: center; justify-content: center; gap: 1.5rem; }
+.game-pitcher { text-align: center; }
+.pitcher-team { font-size: 0.8rem; color: var(--text-muted); display: block; }
+.pitcher-name { font-size: 1.3rem; font-weight: 600; }
+.pitcher-vs { color: var(--text-muted); font-size: 0.9rem; }
+
+.game-wp-bar {
+    display: flex;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 40px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.wp-fill { display: flex; align-items: center; justify-content: center; color: white; }
+.wp-away { background: var(--accent); }
+.wp-home { background: var(--green); }
+
+.game-wp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.game-wp-table th, .game-wp-table td { padding: 0.5rem 0.75rem; text-align: center; border-bottom: 1px solid var(--border); }
+.game-wp-table th { color: var(--text-muted); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
+.game-wp-table td:first-child { text-align: left; font-weight: 500; }
+
+.game-sim-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+.game-run-stats { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.run-stat {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+}
+.run-stat-label { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem; }
+.run-stat-value { font-size: 1.5rem; font-weight: 700; }
+
+.chart-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+.margin-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 80px;
+    padding-bottom: 20px;
+    position: relative;
+}
+.margin-bar-wrap { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.margin-bar { min-height: 2px; width: 100%; border-radius: 2px 2px 0 0; }
+.bar-away { background: var(--accent); }
+.bar-home { background: var(--green); }
+.bar-push { background: var(--text-muted); }
+.margin-label { font-size: 0.6rem; color: var(--text-muted); margin-top: 2px; }
+
+.run-dist-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.run-dist-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 500px; }
+.run-dist-table th, .run-dist-table td { padding: 0.4rem 0.5rem; text-align: center; border-bottom: 1px solid var(--border); }
+.run-dist-table th { color: var(--text-muted); font-weight: 500; }
+
+.game-lineups { display: flex; gap: 2rem; }
+.lineup-col { flex: 1; }
+.lineup-col h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text); }
+.lineup-list { padding-left: 1.5rem; font-size: 0.9rem; line-height: 1.8; }
+.lineup-status { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 600; margin-left: 0.5rem; }
+.lineup-confirmed { background: var(--green-light); color: var(--green); }
+.lineup-projected { background: rgba(200, 160, 50, 0.1); color: #c8a032; }
+
+.game-context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.context-card { padding: 1rem; background: rgba(0,0,0,0.02); border-radius: var(--radius-sm); }
+.context-card h4 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+.pf-grid { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.9rem; }
+.pf-item strong { color: var(--text); }
+
+.game-odds-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.game-odds-table th, .game-odds-table td { padding: 0.5rem 0.75rem; text-align: center; border-bottom: 1px solid var(--border); }
+.game-odds-table th { color: var(--text-muted); font-weight: 500; font-size: 0.8rem; }
+.game-odds-table td:first-child { text-align: left; }
+
+.game-explanation { font-size: 1rem; line-height: 1.7; color: var(--text-secondary); }
+
+.game-nav-links { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+.game-nav-links a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+
+/* Games Index */
+.games-index { padding: 1.5rem 0 3rem; }
+.games-index h1 { margin-bottom: 0.25rem; }
+.games-subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
+
+.games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.games-card {
+    display: block;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.games-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-2px); }
+.games-card-matchup { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.25rem; }
+.games-card-at { margin: 0 0.3rem; color: var(--text-muted); font-weight: 400; }
+.games-card-pitchers { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.games-card-probs { font-size: 1.1rem; font-weight: 600; }
+.games-card-dash { margin: 0 0.5rem; color: var(--text-muted); }
+.games-card-pick {
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.pick-type-badge {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 0.3rem;
+}
+.badge-ml { background: var(--accent-light); color: var(--accent); }
+.badge-rl { background: var(--green-light); color: var(--green); }
+
+@media (max-width: 768px) {
+    .game-teams { gap: 1rem; }
+    .game-team-abbr { font-size: 1.8rem; }
+    .game-lineups { flex-direction: column; gap: 1rem; }
+    .game-run-stats { flex-direction: column; }
+}

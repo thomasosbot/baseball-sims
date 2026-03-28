@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}{{ away }} vs {{ home }} Prediction — {{ date }} | Ozzy Analytics{% endblock %}
+
+{% block head %}
+<meta name="description" content="MLB prediction: {{ away }} at {{ home }} on {{ display_date }}. Our Monte Carlo model gives {{ home }} a {{ (game.model_home_wp * 100)|round|int }}% win probability. {{ game.home_pitcher }} vs {{ game.away_pitcher }}.">
+<meta property="og:title" content="{{ away }} vs {{ home }} Prediction — {{ display_date }}">
+<meta property="og:description" content="Monte Carlo simulation predicts {{ favorite }} to win ({{ (fav_prob * 100)|round|int }}%). {{ game.away_pitcher }} vs {{ game.home_pitcher }}.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://ozzyanalytics.com/games/{{ date }}/{{ away }}-vs-{{ home }}.html">
+{% endblock %}
+
+{% block content %}
+<div class="game-preview">
+
+    <div class="game-breadcrumb">
+        <a href="{{ base_url|default('') }}index.html">Today's Picks</a> &rsaquo;
+        <a href="index.html">{{ display_date }}</a> &rsaquo;
+        {{ away }} @ {{ home }}
+    </div>
+
+    <!-- Matchup Header -->
+    <div class="game-header glass fade-in">
+        <div class="game-teams">
+            <div class="game-team game-team-away">
+                <span class="game-team-abbr">{{ away }}</span>
+                <span class="game-team-prob {% if game.model_away_wp > game.model_home_wp %}game-team-fav{% endif %}">{{ (game.model_away_wp * 100)|round|int }}%</span>
+            </div>
+            <div class="game-vs">
+                <span class="game-at">@</span>
+                <span class="game-date-small">{{ display_date }}</span>
+            </div>
+            <div class="game-team game-team-home">
+                <span class="game-team-abbr">{{ home }}</span>
+                <span class="game-team-prob {% if game.model_home_wp > game.model_away_wp %}game-team-fav{% endif %}">{{ (game.model_home_wp * 100)|round|int }}%</span>
+            </div>
+        </div>
+
+        {% if pick %}
+        <div class="game-pick-badge">
+            <span class="pick-type-badge {% if pick.type == 'moneyline' %}badge-ml{% else %}badge-rl{% endif %}">
+                {{ "ML" if pick.type == "moneyline" else "RL" }}
+            </span>
+            <strong>{{ pick.pick }}</strong> ({{ pick.odds }}) &mdash; {{ (pick.model_prob * 100)|round|int }}% win, +{{ pick.edge_pct|round(1) }}% edge
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pitching Matchup -->
+    <div class="game-section glass fade-in">
+        <h2>Pitching Matchup</h2>
+        <div class="game-pitchers">
+            <div class="game-pitcher">
+                <span class="pitcher-team">{{ away }}</span>
+                <span class="pitcher-name">{{ game.away_pitcher }}</span>
+            </div>
+            <div class="pitcher-vs">vs</div>
+            <div class="game-pitcher">
+                <span class="pitcher-team">{{ home }}</span>
+                <span class="pitcher-name">{{ game.home_pitcher }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Probability Breakdown -->
+    <div class="game-section glass fade-in">
+        <h2>Win Probability</h2>
+        <div class="game-wp-bar">
+            <div class="wp-fill wp-away" style="width: {{ (game.model_away_wp * 100)|round|int }}%">
+                {{ away }} {{ (game.model_away_wp * 100)|round|int }}%
+            </div>
+            <div class="wp-fill wp-home" style="width: {{ (game.model_home_wp * 100)|round|int }}%">
+                {{ home }} {{ (game.model_home_wp * 100)|round|int }}%
+            </div>
+        </div>
+
+        <table class="game-wp-table">
+            <thead>
+                <tr><th>Source</th><th>{{ away }}</th><th>{{ home }}</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Model (blended)</td>
+                    <td>{{ (game.model_away_wp * 100)|round(1) }}%</td>
+                    <td>{{ (game.model_home_wp * 100)|round(1) }}%</td>
+                </tr>
+                <tr>
+                    <td>Simulation only</td>
+                    <td>{{ ((1 - game.sim_home_wp) * 100)|round(1) }}%</td>
+                    <td>{{ (game.sim_home_wp * 100)|round(1) }}%</td>
+                </tr>
+                {% if game.elo_home_wp %}
+                <tr>
+                    <td>Elo ratings</td>
+                    <td>{{ ((1 - game.elo_home_wp) * 100)|round(1) }}%</td>
+                    <td>{{ (game.elo_home_wp * 100)|round(1) }}%</td>
+                </tr>
+                {% endif %}
+                {% if game.market_home_wp %}
+                <tr>
+                    <td>Market (implied)</td>
+                    <td>{{ ((1 - game.market_home_wp) * 100)|round(1) }}%</td>
+                    <td>{{ (game.market_home_wp * 100)|round(1) }}%</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Simulation Results -->
+    {% if game.sim_detail %}
+    <div class="game-section glass fade-in">
+        <h2>Simulation Results</h2>
+        <p class="game-sim-subtitle">Based on 10,000 Monte Carlo simulations</p>
+
+        <div class="game-run-stats">
+            <div class="run-stat">
+                <span class="run-stat-label">{{ away }} avg runs</span>
+                <span class="run-stat-value">{{ game.sim_detail.avg_away_runs|round(1) }}</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">{{ home }} avg runs</span>
+                <span class="run-stat-value">{{ game.sim_detail.avg_home_runs|round(1) }}</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">Avg total</span>
+                <span class="run-stat-value">{{ game.avg_total_runs|round(1) }}</span>
+            </div>
+        </div>
+
+        <!-- Margin Distribution Chart -->
+        {% if game.sim_detail.margin_distribution %}
+        <h3>Win Margin Distribution</h3>
+        <p class="chart-subtitle">Negative = {{ away }} wins, Positive = {{ home }} wins</p>
+        <div class="margin-chart">
+            {% for i in range(game.sim_detail.margin_distribution.labels|length) %}
+            {% set label = game.sim_detail.margin_distribution.labels[i] %}
+            {% set freq = game.sim_detail.margin_distribution.freq[i] %}
+            {% if freq > 0 %}
+            <div class="margin-bar-wrap">
+                <div class="margin-bar {% if label < 0 %}bar-away{% elif label > 0 %}bar-home{% else %}bar-push{% endif %}"
+                     style="height: {{ (freq * 4)|round|int }}px"
+                     title="{{ label }}: {{ freq }}%">
+                </div>
+                <span class="margin-label">{{ label }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Run Distribution -->
+        {% if game.sim_detail.run_distribution %}
+        <h3>Run Scoring Distribution</h3>
+        <div class="run-dist-table-wrap">
+            <table class="run-dist-table">
+                <thead>
+                    <tr>
+                        <th>Runs</th>
+                        {% for r in game.sim_detail.run_distribution.labels[:12] %}
+                        <th>{{ r }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ away }}</td>
+                        {% for pct in game.sim_detail.run_distribution.away_freq[:12] %}
+                        <td>{{ pct|round(1) }}%</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>{{ home }}</td>
+                        {% for pct in game.sim_detail.run_distribution.home_freq[:12] %}
+                        <td>{{ pct|round(1) }}%</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Lineups -->
+    <div class="game-section glass fade-in">
+        <h2>Lineups <span class="lineup-status lineup-{{ game.lineup_status|default('projected') }}">{{ game.lineup_status|default('projected')|upper }}</span></h2>
+        <div class="game-lineups">
+            <div class="lineup-col">
+                <h3>{{ away }}</h3>
+                <ol class="lineup-list">
+                    {% for name in game.away_lineup_names %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+            <div class="lineup-col">
+                <h3>{{ home }}</h3>
+                <ol class="lineup-list">
+                    {% for name in game.home_lineup_names %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Park & Weather -->
+    <div class="game-section glass fade-in">
+        <h2>Park Factors & Conditions</h2>
+        <div class="game-context-grid">
+            {% if game.park_factors %}
+            <div class="context-card">
+                <h4>Park Factors</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">Runs: <strong>{{ game.park_factors.runs|round(2) }}</strong></span>
+                    <span class="pf-item">HR: <strong>{{ game.park_factors.HR|round(2) }}</strong></span>
+                    <span class="pf-item">BB: <strong>{{ game.park_factors.bb|round(2) }}</strong></span>
+                    <span class="pf-item">K: <strong>{{ game.park_factors.k|round(2) }}</strong></span>
+                </div>
+            </div>
+            {% endif %}
+            {% if game.weather %}
+            <div class="context-card">
+                <h4>Weather</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">{{ game.weather.condition|default('—') }}</span>
+                    {% if game.weather.temperature %}<span class="pf-item">{{ game.weather.temperature|round|int }}&deg;F</span>{% endif %}
+                    {% if game.weather.wind_speed %}<span class="pf-item">Wind: {{ game.weather.wind_speed|round|int }} mph {{ game.weather.wind_direction|default('') }}</span>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if game.elo_home_rating %}
+            <div class="context-card">
+                <h4>Elo Ratings</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">{{ away }}: <strong>{{ game.elo_away_rating|round|int }}</strong></span>
+                    <span class="pf-item">{{ home }}: <strong>{{ game.elo_home_rating|round|int }}</strong></span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sportsbook Odds -->
+    {% if game.books_home %}
+    <div class="game-section glass fade-in">
+        <h2>Sportsbook Odds</h2>
+        <div class="run-dist-table-wrap">
+            <table class="game-odds-table">
+                <thead>
+                    <tr><th>Book</th><th>{{ away }}</th><th>{{ home }}</th></tr>
+                </thead>
+                <tbody>
+                    {% set book_names = {"fanduel": "FanDuel", "bovada": "Bovada", "betmgm": "BetMGM", "draftkings": "DraftKings", "williamhill_us": "Caesars"} %}
+                    {% for key, name in book_names.items() %}
+                    {% if key in game.books_home %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ "%+d"|format(game.books_away[key]) }}</td>
+                        <td>{{ "%+d"|format(game.books_home[key]) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Model Explanation -->
+    {% if pick and pick.explanation %}
+    <div class="game-section glass fade-in">
+        <h2>Model Analysis</h2>
+        <p class="game-explanation">{{ pick.explanation }}</p>
+    </div>
+    {% endif %}
+
+    <div class="game-nav-links">
+        <a href="{{ base_url|default('') }}index.html">&larr; Today's Picks</a>
+        <a href="index.html">All {{ display_date }} Games &rarr;</a>
+    </div>
+
+</div>
+{% endblock %}

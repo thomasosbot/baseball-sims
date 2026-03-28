@@ -162,12 +162,106 @@ def generate_site():
     html = template.render(stats=stats)
     (OUTPUT_DIR / "about.html").write_text(html)
 
+    # Game preview pages — one per game per day
+    game_count = _generate_game_pages(env, all_days)
+    if game_count:
+        print(f"  {game_count} game preview pages")
+
     # Copy static assets
     _copy_static()
 
     print(f"Site generated: {OUTPUT_DIR}")
     print(f"  index.html, results.html, about.html")
     print(f"  {len(all_days)} daily pick files processed")
+
+
+# ---------------------------------------------------------------------------
+# Game preview page generation
+# ---------------------------------------------------------------------------
+
+def _generate_game_pages(env, all_days):
+    """Generate individual game preview pages for SEO."""
+    game_template = env.get_template("game.html")
+    index_template = env.get_template("games_index.html")
+    total = 0
+
+    for day in all_days:
+        date = day.get("date", "")
+        games = day.get("games", [])
+        picks = day.get("picks", [])
+        if not date or not games:
+            continue
+
+        # Format display date
+        try:
+            display_date = datetime.strptime(date, "%Y-%m-%d").strftime("%B %-d, %Y")
+        except (ValueError, TypeError):
+            display_date = date
+
+        # Build picks lookup by team
+        picks_by_team = {}
+        for p in picks:
+            team = p.get("team", "")
+            if team:
+                picks_by_team[team] = p
+
+        # Create directory for this date
+        day_dir = OUTPUT_DIR / "games" / date
+        day_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate individual game pages
+        for game in games:
+            away = game.get("away", "")
+            home = game.get("home", "")
+            if not away or not home:
+                continue
+
+            # Find the pick for this game (if any)
+            pick = picks_by_team.get(away) or picks_by_team.get(home)
+
+            # Determine favorite
+            fav_prob = max(game.get("model_home_wp", 0.5), game.get("model_away_wp", 0.5))
+            favorite = home if game.get("model_home_wp", 0.5) >= 0.5 else away
+
+            html = game_template.render(
+                game=game,
+                away=away,
+                home=home,
+                date=date,
+                display_date=display_date,
+                pick=pick,
+                favorite=favorite,
+                fav_prob=fav_prob,
+                generated_at=datetime.now().strftime("%Y-%m-%d %H:%M ET"),
+                base_url="../../",
+            )
+            filename = f"{away}-vs-{home}.html"
+            (day_dir / filename).write_text(html)
+            total += 1
+
+        # Generate daily games index page
+        # Enrich games with pick info for the index
+        index_games = []
+        for game in games:
+            away = game.get("away", "")
+            home = game.get("home", "")
+            pick = picks_by_team.get(away) or picks_by_team.get(home)
+            index_games.append({
+                **game,
+                "pick": pick.get("pick", "") if pick else None,
+                "pick_type": pick.get("type", "") if pick else None,
+            })
+
+        html = index_template.render(
+            games=index_games,
+            date=date,
+            display_date=display_date,
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M ET"),
+            base_url="../../",
+        )
+        (day_dir / "index.html").write_text(html)
+
+    return total
 
 
 # ---------------------------------------------------------------------------
