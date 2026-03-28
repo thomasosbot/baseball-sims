@@ -10,4 +10,5 @@ data/raw/
 *.pickle
 # Allow state pickles (needed by CI pipeline)
 !data/state/*.pkl
+data/tiktok/
 .DS_Store
