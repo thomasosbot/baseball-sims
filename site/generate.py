@@ -40,7 +40,7 @@ def generate_site():
     daily_files = sorted(DAILY_DIR.glob("*.json"))
     all_days = []
     for f in daily_files:
-        if f.name in ("results.json", "changelog.json") or f.name.startswith("odds_cache"):
+        if f.name in ("results.json", "changelog.json") or f.name.startswith(("odds_cache", "spread_cache")):
             continue
         with open(f) as fh:
             all_days.append(json.load(fh))
