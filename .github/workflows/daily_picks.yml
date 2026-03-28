@@ -67,24 +67,28 @@ jobs:
       - name: Determine run mode and date
         id: mode
         run: |
-          if [ -n "${{ inputs.mode }}" ]; then
-            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "0 3 * * *" ]; then
-            echo "mode=preview" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "0 11 * * *" ]; then
-            echo "mode=newsletter" >> $GITHUB_OUTPUT
+          SCHEDULE="${{ github.event.schedule }}"
+          INPUT_MODE="${{ inputs.mode }}"
+
+          if [ -n "$INPUT_MODE" ]; then
+            MODE="$INPUT_MODE"
+          elif [ "$SCHEDULE" = "0 3 * * *" ]; then
+            MODE="preview"
+          elif [ "$SCHEDULE" = "0 11 * * *" ]; then
+            MODE="newsletter"
           else
-            echo "mode=late" >> $GITHUB_OUTPUT
+            MODE="late"
           fi
+
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+          echo "Run mode: $MODE (schedule=$SCHEDULE, input=$INPUT_MODE)"
 
           # Preview mode runs at 11 PM ET for *tomorrow's* games
-          MODE=$(grep mode $GITHUB_OUTPUT | tail -1 | cut -d= -f2)
-          if [ "$MODE" = "preview" ] && [ -z "${{ inputs.date }}" ]; then
+          if [ "$MODE" = "preview" ] && [ -z "$INPUT_MODE" ]; then
             TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d 2>/dev/null || date -u -v+1d +%Y-%m-%d)
             echo "date=$TOMORROW" >> $GITHUB_OUTPUT
+            echo "Preview date: $TOMORROW"
           fi
-
-          echo "Run mode: $MODE"
 
       - name: Grade yesterday's results (always, before any pipeline run)
         run: python3 scripts/update_results.py
