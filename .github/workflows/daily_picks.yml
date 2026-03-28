@@ -58,6 +58,12 @@ jobs:
           echo "TWITTER_API_SECRET=${{ secrets.TWITTER_API_SECRET }}" >> .env
           echo "TWITTER_ACCESS_TOKEN=${{ secrets.TWITTER_ACCESS_TOKEN }}" >> .env
           echo "TWITTER_ACCESS_TOKEN_SECRET=${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}" >> .env
+          echo "DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}" >> .env
+          echo "REDDIT_CLIENT_ID=${{ secrets.REDDIT_CLIENT_ID }}" >> .env
+          echo "REDDIT_CLIENT_SECRET=${{ secrets.REDDIT_CLIENT_SECRET }}" >> .env
+          echo "REDDIT_USERNAME=${{ secrets.REDDIT_USERNAME }}" >> .env
+          echo "REDDIT_PASSWORD=${{ secrets.REDDIT_PASSWORD }}" >> .env
+          echo "REDDIT_SUBREDDIT=${{ secrets.REDDIT_SUBREDDIT }}" >> .env
 
       - name: Restore state from repo
         run: |
@@ -146,6 +152,48 @@ jobs:
               post_daily_picks(picks)
           else:
               print('No daily data found, skipping Twitter post')
+          "
+        continue-on-error: true
+
+      - name: Post to Discord
+        if: steps.mode.outputs.send_newsletter == 'true'
+        run: |
+          python3 -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from pathlib import Path
+          from src.discord.poster import post_daily_picks
+
+          daily_dir = Path('data/daily')
+          files = sorted(f for f in daily_dir.glob('2026-*.json')
+                         if not f.name.startswith(('odds_cache', 'spread_cache')))
+          if files:
+              with open(files[-1]) as f:
+                  picks = json.load(f)
+              post_daily_picks(picks)
+          else:
+              print('No daily data found, skipping Discord post')
+          "
+        continue-on-error: true
+
+      - name: Post to Reddit
+        if: steps.mode.outputs.send_newsletter == 'true'
+        run: |
+          python3 -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from pathlib import Path
+          from src.reddit.poster import post_daily_picks
+
+          daily_dir = Path('data/daily')
+          files = sorted(f for f in daily_dir.glob('2026-*.json')
+                         if not f.name.startswith(('odds_cache', 'spread_cache')))
+          if files:
+              with open(files[-1]) as f:
+                  picks = json.load(f)
+              post_daily_picks(picks)
+          else:
+              print('No daily data found, skipping Reddit post')
           "
         continue-on-error: true
 
