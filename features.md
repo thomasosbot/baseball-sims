@@ -471,8 +471,8 @@ The model's predicted win probabilities were historically narrower than the mark
 |---------|-----------|--------|
 | **Platoon-aware projected lineups** | `src/data/fetch.py` | Done — `fetch_team_platoon_lineup()` builds consensus lineup from recent games vs same-handed pitchers. `resolve_pitcher_throws()` resolves handedness via cumulative state or MLB API search. |
 | **RotoGrinders scraper** | `src/data/fetch.py` | Done — `fetch_rotogrinders_lineups()` scrapes projected lineups with confirmed/unconfirmed status. `resolve_rg_player_to_id()` maps names to MLBAM IDs. |
-| **Three-tier pipeline (preview/early/late)** | `scripts/run_daily.py`, `.github/workflows/` | Done — `--mode preview` uses RotoGrinders + platoon fallback. Night-before at 9 PM ET, day-of reactive via lineup watcher, 6 PM guaranteed final. |
-| **Lineup watcher** | `scripts/check_lineups.py`, `.github/workflows/lineup_watcher.yml` | Done — polls every 15 min (10 AM–8 PM ET), triggers pipeline on new confirmations. Smart mode: ≥80% confirmed → late. |
+| **Daily pipeline** | `scripts/run_daily.py`, `.github/workflows/daily_picks.yml` | Done — single 8 AM ET run, picks locked in once per day. Grades results, generates picks, sends newsletter + tweet. |
+| **Twitter posting** | `src/twitter/poster.py` | Done — posts daily picks tweet with recap, picks, season stats, hashtags. Uses tweepy + X API v2. |
 | **Projection changelog** | `scripts/run_daily.py`, `site/templates/changelog.html` | Done — tracks WP shifts and pick adds/drops/shifts between preview and confirmed runs. Summary stats: avg WP shift, picks unchanged %. |
 | **Opening day banner** | `site/templates/index.html`, `site/generate.py` | Done — dark gradient hero with game card grid showing odds, pipeline timeline (9 PM → 1 PM → 6 PM). |
 | **Interactive game simulator** | `site/static/sim.js`, `site/templates/simulate.html` | Done — client-side JS port of full MC engine. SVG diamond with runner names, MLB linescore, probability bars, live box score (AB/R/H/RBI/BB/K/AVG + 2B/3B/HR summary), rich play-by-play narrative. |

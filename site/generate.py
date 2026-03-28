@@ -99,7 +99,7 @@ def generate_site():
     )
     (OUTPUT_DIR / "index.html").write_text(html)
 
-    # History — build pick-by-pick log from results
+    # Results — build pick-by-pick log from results
     all_picks = []
     for day in season_results:
         for pick in day.get("picks", []):
@@ -112,7 +112,7 @@ def generate_site():
         all_days=all_days,
         all_picks=all_picks,
     )
-    (OUTPUT_DIR / "history.html").write_text(html)
+    (OUTPUT_DIR / "results.html").write_text(html)
 
     # Backtest
     backtest_data, chart_data, combined_data, combined_chart = _load_backtest_data()
@@ -128,21 +128,26 @@ def generate_site():
         (OUTPUT_DIR / "backtest.html").write_text(html)
         print(f"  backtest.html ({', '.join(str(y) for y in sorted(backtest_data.keys()))})")
 
-    # Changelog
-    changelog_days, changelog_summary = _load_changelog()
-    template = env.get_template("changelog.html")
-    html = template.render(
-        changelog_days=changelog_days,
-        summary=changelog_summary,
-    )
-    (OUTPUT_DIR / "changelog.html").write_text(html)
-
-    # Simulate — pass today's matchups so selector defaults to active games
+    # Simulate — fetch today's actual schedule from MLB API
     sim_data = _build_sim_data()
     today_matchups = []
-    if latest and latest.get("games"):
-        for g in latest["games"]:
-            today_matchups.append({"away": g.get("away", ""), "home": g.get("home", "")})
+    try:
+        import statsapi
+        today_str_sched = datetime.now().strftime("%Y-%m-%d")
+        sched = statsapi.schedule(date=today_str_sched)
+        from src.data.fetch import TEAM_NAME_TO_ABBREV
+        for g in sched:
+            away_name = g.get("away_name", "")
+            home_name = g.get("home_name", "")
+            away_abbr = TEAM_NAME_TO_ABBREV.get(away_name, away_name)
+            home_abbr = TEAM_NAME_TO_ABBREV.get(home_name, home_name)
+            today_matchups.append({"away": away_abbr, "home": home_abbr})
+    except Exception as e:
+        print(f"  Warning: could not fetch today's schedule for simulator: {e}")
+        # Fallback to latest daily JSON
+        if latest and latest.get("games"):
+            for g in latest["games"]:
+                today_matchups.append({"away": g.get("away", ""), "home": g.get("home", "")})
     template = env.get_template("simulate.html")
     html = template.render(
         sim_data_json=json.dumps(sim_data, separators=(',', ':')) if sim_data else "null",
@@ -161,7 +166,7 @@ def generate_site():
     _copy_static()
 
     print(f"Site generated: {OUTPUT_DIR}")
-    print(f"  index.html, history.html, about.html")
+    print(f"  index.html, results.html, about.html")
     print(f"  {len(all_days)} daily pick files processed")
 
 

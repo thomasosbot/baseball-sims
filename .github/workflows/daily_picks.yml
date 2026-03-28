@@ -2,7 +2,7 @@ name: Daily Picks Pipeline
 
 on:
   schedule:
-    - cron: '0 11 * * *'    # 7 AM ET — grade results, generate picks, send newsletter
+    - cron: '0 12 * * *'    # 8 AM ET — grade results, generate picks, send newsletter + tweet
   workflow_dispatch:
     inputs:
       date:
@@ -51,6 +51,10 @@ jobs:
           echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
           echo "RESEND_FROM_EMAIL=${{ secrets.RESEND_FROM_EMAIL }}" >> .env
           echo "RESEND_AUDIENCE_ID=${{ secrets.RESEND_AUDIENCE_ID }}" >> .env
+          echo "TWITTER_API_KEY=${{ secrets.TWITTER_API_KEY }}" >> .env
+          echo "TWITTER_API_SECRET=${{ secrets.TWITTER_API_SECRET }}" >> .env
+          echo "TWITTER_ACCESS_TOKEN=${{ secrets.TWITTER_ACCESS_TOKEN }}" >> .env
+          echo "TWITTER_ACCESS_TOKEN_SECRET=${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}" >> .env
 
       - name: Restore state from repo
         run: |
@@ -118,6 +122,27 @@ jobs:
               send_daily_picks(picks)
           else:
               print('No daily data found, skipping newsletter')
+          "
+        continue-on-error: true
+
+      - name: Post to Twitter
+        if: steps.mode.outputs.send_newsletter == 'true'
+        run: |
+          python3 -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from pathlib import Path
+          from src.twitter.poster import post_daily_picks
+
+          daily_dir = Path('data/daily')
+          files = sorted(f for f in daily_dir.glob('2026-*.json')
+                         if not f.name.startswith(('odds_cache', 'spread_cache')))
+          if files:
+              with open(files[-1]) as f:
+                  picks = json.load(f)
+              post_daily_picks(picks)
+          else:
+              print('No daily data found, skipping Twitter post')
           "
         continue-on-error: true
 

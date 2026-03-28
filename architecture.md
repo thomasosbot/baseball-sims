@@ -116,36 +116,23 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds (moneyline + spreads; totals fetch disabled for 2026), runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode early` (projected lineups from team's most recent game) and `--mode late` (confirmed lineups). Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, and Elo ratings for the expandable game detail view. |
 | `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L. Deduplicates results.json entries by date on re-runs. |
 | `site/generate.py` | Static site generator | Reads daily JSON files, filters out totals picks (safety net), renders Jinja2 templates to `site/public/` (Netlify). Builds embedded JSON for game simulator (30 teams, player profiles, park factors). |
-| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + expandable game details + opening day banner), `history.html` (chart + results), `simulate.html` (interactive game simulator), `changelog.html` (preview vs confirmed drift tracker), `about.html` (model info) |
+| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer), `index.html` (picks + expandable game details + opening day banner), `history.html` → `results.html` (chart + results), `simulate.html` (interactive game simulator), `changelog.html` (preview vs confirmed drift tracker), `about.html` (model info) |
 | `site/static/sim.js` | JS simulation engine | Faithful port of the Python MC engine to JavaScript — runs entirely client-side. Includes odds-ratio PA model, base advancement, SB/WP/errors, TTO, tiered bullpen, extra innings with ghost runner. |
 | `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges, expandable game detail panels with CSS bar charts, SVG baseball diamond with runner animations |
 | `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
 | `site/netlify.toml` | Netlify config | Build settings, publish dir, functions dir |
 | `src/newsletter/sender.py` | Email newsletter | Fetches subscribers from Resend Contacts API (audience-based), sends daily picks HTML email from `picks@ozzyanalytics.com` |
-| `scripts/check_lineups.py` | Lineup watcher | Lightweight script that checks MLB API for newly confirmed lineups. Compares against existing daily JSON, exits 0 if changes detected. Used by the watcher workflow. |
-| `.github/workflows/daily_picks.yml` | Automation | Three-tier schedule: preview (9 PM ET, RotoGrinders projected lineups for tomorrow) + late (6 PM ET, confirmed lineups + newsletter). Day-of updates triggered reactively by the lineup watcher. |
-| `.github/workflows/lineup_watcher.yml` | Lineup watcher | Runs every 15 min from 10 AM–8 PM ET. Checks for newly confirmed lineups and triggers the daily pipeline when changes are detected. Smart mode selection: ≥80% confirmed → late, otherwise → early. |
+| `src/twitter/poster.py` | Twitter/X posting | Posts daily picks tweet with yesterday's recap, today's picks, season stats, and hashtags |
+| `.github/workflows/daily_picks.yml` | Automation | Single daily run at 8 AM ET — grades results, generates picks, sends newsletter + tweet, commits. Picks are locked in once per day. |
 
-**Daily pipeline flow (three-tier schedule):**
+**Daily pipeline flow:**
 ```
-[9 PM ET] Preview run (--mode preview)
-    → run_daily.py --mode preview (RotoGrinders projected lineups + platoon fallback)
-    → site/generate.py (rebuild website with "PREVIEW" banner)
-    → Changelog snapshot saved (preview state)
-    → git commit + push
-
-[10 AM – 8 PM ET] Lineup watcher (every 15 min)
-    → check_lineups.py (compare confirmed lineups vs last run)
-    → If new confirmations: trigger daily_picks.yml via workflow_dispatch
-    → run_daily.py --mode early/late (based on confirmation %)
-    → Changelog snapshot saved (preview → early/late diff)
+[8 AM ET] Daily run (--mode late)
+    → update_results.py (grade yesterday's picks)
+    → run_daily.py --mode late (confirmed lineups, generate picks)
     → site/generate.py (rebuild website)
-    → git commit + push
-
-[6 PM ET] Late run (--mode late, guaranteed anchor)
-    → run_daily.py --mode late (confirmed lineups, overwrites daily JSON)
-    → site/generate.py (rebuild website, "Final" picks)
     → newsletter/sender.py (email subscribers)
+    → twitter/poster.py (post picks tweet)
     → git commit + push
 ```
 
