@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../static/style.css">
     
-<meta name="description" content="MLB prediction: TBR at STL on March 29, 2026. Our Monte Carlo model gives STL a 50% win probability. Dustin May vs Steven Matz.">
+<meta name="description" content="MLB prediction: TBR at STL on March 29, 2026. Our Monte Carlo model gives STL a 62% win probability. Dustin May vs Steven Matz.">
 <meta property="og:title" content="TBR vs STL Prediction — March 29, 2026">
-<meta property="og:description" content="Monte Carlo simulation predicts STL to win (50%). Steven Matz vs Dustin May.">
+<meta property="og:description" content="Monte Carlo simulation predicts STL to win (62%). Steven Matz vs Dustin May.">
 <meta property="og:type" content="article">
 <link rel="canonical" href="https://ozzyanalytics.com/games/2026-03-29/TBR-vs-STL.html">
 
@@ -48,7 +48,7 @@
         <div class="game-teams">
             <div class="game-team game-team-away">
                 <span class="game-team-abbr">TBR</span>
-                <span class="game-team-prob ">50%</span>
+                <span class="game-team-prob ">38%</span>
             </div>
             <div class="game-vs">
                 <span class="game-at">@</span>
@@ -56,10 +56,17 @@
             </div>
             <div class="game-team game-team-home">
                 <span class="game-team-abbr">STL</span>
-                <span class="game-team-prob ">50%</span>
+                <span class="game-team-prob game-team-fav">62%</span>
             </div>
         </div>
 
+        
+        <div class="game-pick-badge">
+            <span class="pick-type-badge badge-ml">
+                ML
+            </span>
+            <strong>STL ML</strong> (+103) &mdash; 62% win, +9.2% edge
+        </div>
         
     </div>
 
@@ -83,11 +90,11 @@
     <div class="game-section glass fade-in">
         <h2>Win Probability</h2>
         <div class="game-wp-bar">
-            <div class="wp-fill wp-away" style="width: 50%">
-                TBR 50%
+            <div class="wp-fill wp-away" style="width: 38%">
+                TBR 38%
             </div>
-            <div class="wp-fill wp-home" style="width: 50%">
-                STL 50%
+            <div class="wp-fill wp-home" style="width: 62%">
+                STL 62%
             </div>
         </div>
 
@@ -98,15 +105,27 @@
             <tbody>
                 <tr>
                     <td>Model (blended)</td>
-                    <td>50.0%</td>
-                    <td>50.0%</td>
+                    <td>38.1%</td>
+                    <td>61.9%</td>
                 </tr>
                 <tr>
                     <td>Simulation only</td>
-                    <td>50.0%</td>
-                    <td>50.0%</td>
+                    <td>50.2%</td>
+                    <td>49.8%</td>
                 </tr>
                 
+                <tr>
+                    <td>Elo ratings</td>
+                    <td>26.1%</td>
+                    <td>73.9%</td>
+                </tr>
+                
+                
+                <tr>
+                    <td>Market (implied)</td>
+                    <td>52.4%</td>
+                    <td>47.6%</td>
+                </tr>
                 
             </tbody>
         </table>
@@ -114,20 +133,426 @@
 
     <!-- Simulation Results -->
     
+    <div class="game-section glass fade-in">
+        <h2>Simulation Results</h2>
+        <p class="game-sim-subtitle">Based on 10,000 Monte Carlo simulations</p>
+
+        <div class="game-run-stats">
+            <div class="run-stat">
+                <span class="run-stat-label">TBR avg runs</span>
+                <span class="run-stat-value">4.8</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">STL avg runs</span>
+                <span class="run-stat-value">4.4</span>
+            </div>
+            <div class="run-stat">
+                <span class="run-stat-label">Avg total</span>
+                <span class="run-stat-value">9.2</span>
+            </div>
+        </div>
+
+        <!-- Margin Distribution Chart -->
+        
+        <h3>Win Margin Distribution</h3>
+        <p class="chart-subtitle">Negative = TBR wins, Positive = STL wins</p>
+        <div class="margin-chart">
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 3px"
+                     title="-10: 0.7%">
+                </div>
+                <span class="margin-label">-10</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 4px"
+                     title="-9: 1.0%">
+                </div>
+                <span class="margin-label">-9</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 8px"
+                     title="-8: 1.9%">
+                </div>
+                <span class="margin-label">-8</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 9px"
+                     title="-7: 2.3%">
+                </div>
+                <span class="margin-label">-7</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 13px"
+                     title="-6: 3.3%">
+                </div>
+                <span class="margin-label">-6</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 19px"
+                     title="-5: 4.7%">
+                </div>
+                <span class="margin-label">-5</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 25px"
+                     title="-4: 6.2%">
+                </div>
+                <span class="margin-label">-4</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 33px"
+                     title="-3: 8.3%">
+                </div>
+                <span class="margin-label">-3</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 41px"
+                     title="-2: 10.2%">
+                </div>
+                <span class="margin-label">-2</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-away"
+                     style="height: 50px"
+                     title="-1: 12.6%">
+                </div>
+                <span class="margin-label">-1</span>
+            </div>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 57px"
+                     title="1: 14.2%">
+                </div>
+                <span class="margin-label">1</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 40px"
+                     title="2: 10.1%">
+                </div>
+                <span class="margin-label">2</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 29px"
+                     title="3: 7.3%">
+                </div>
+                <span class="margin-label">3</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 20px"
+                     title="4: 5.1%">
+                </div>
+                <span class="margin-label">4</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 14px"
+                     title="5: 3.6%">
+                </div>
+                <span class="margin-label">5</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 10px"
+                     title="6: 2.5%">
+                </div>
+                <span class="margin-label">6</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 7px"
+                     title="7: 1.7%">
+                </div>
+                <span class="margin-label">7</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 4px"
+                     title="8: 1.0%">
+                </div>
+                <span class="margin-label">8</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 3px"
+                     title="9: 0.7%">
+                </div>
+                <span class="margin-label">9</span>
+            </div>
+            
+            
+            
+            
+            
+            <div class="margin-bar-wrap">
+                <div class="margin-bar bar-home"
+                     style="height: 2px"
+                     title="10: 0.5%">
+                </div>
+                <span class="margin-label">10</span>
+            </div>
+            
+            
+        </div>
+        
+
+        <!-- Run Distribution -->
+        
+        <h3>Run Scoring Distribution</h3>
+        <div class="run-dist-table-wrap">
+            <table class="run-dist-table">
+                <thead>
+                    <tr>
+                        <th>Runs</th>
+                        
+                        <th>0</th>
+                        
+                        <th>1</th>
+                        
+                        <th>2</th>
+                        
+                        <th>3</th>
+                        
+                        <th>4</th>
+                        
+                        <th>5</th>
+                        
+                        <th>6</th>
+                        
+                        <th>7</th>
+                        
+                        <th>8</th>
+                        
+                        <th>9</th>
+                        
+                        <th>10</th>
+                        
+                        <th>11</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TBR</td>
+                        
+                        <td>4.9%</td>
+                        
+                        <td>8.7%</td>
+                        
+                        <td>12.2%</td>
+                        
+                        <td>12.8%</td>
+                        
+                        <td>13.2%</td>
+                        
+                        <td>11.7%</td>
+                        
+                        <td>9.7%</td>
+                        
+                        <td>8.0%</td>
+                        
+                        <td>6.0%</td>
+                        
+                        <td>4.5%</td>
+                        
+                        <td>3.0%</td>
+                        
+                        <td>2.1%</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>STL</td>
+                        
+                        <td>5.8%</td>
+                        
+                        <td>10.7%</td>
+                        
+                        <td>13.2%</td>
+                        
+                        <td>13.9%</td>
+                        
+                        <td>13.1%</td>
+                        
+                        <td>11.8%</td>
+                        
+                        <td>9.5%</td>
+                        
+                        <td>7.6%</td>
+                        
+                        <td>5.2%</td>
+                        
+                        <td>3.6%</td>
+                        
+                        <td>2.2%</td>
+                        
+                        <td>1.4%</td>
+                        
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
 
     <!-- Lineups -->
     <div class="game-section glass fade-in">
-        <h2>Lineups <span class="lineup-status lineup-pending">PENDING</span></h2>
+        <h2>Lineups <span class="lineup-status lineup-projected">PROJECTED</span></h2>
         <div class="game-lineups">
             <div class="lineup-col">
                 <h3>TBR</h3>
                 <ol class="lineup-list">
+                    
+                    <li>Yandy Díaz</li>
+                    
+                    <li>Jonathan Aranda</li>
+                    
+                    <li>Jake Fraley</li>
+                    
+                    <li>Junior Caminero</li>
+                    
+                    <li>Cedric Mullins</li>
+                    
+                    <li>Chandler Simpson</li>
+                    
+                    <li>Carson Williams</li>
+                    
+                    <li>Richie Palacios</li>
+                    
+                    <li>Nick Fortes</li>
                     
                 </ol>
             </div>
             <div class="lineup-col">
                 <h3>STL</h3>
                 <ol class="lineup-list">
+                    
+                    <li>JJ Wetherholt</li>
+                    
+                    <li>Iván Herrera</li>
+                    
+                    <li>Alec Burleson</li>
+                    
+                    <li>Masyn Winn</li>
+                    
+                    <li>Thomas Saggese</li>
+                    
+                    <li>Ramón Urías</li>
+                    
+                    <li>Jordan Walker</li>
+                    
+                    <li>Pedro Pagés</li>
+                    
+                    <li>Victor Scott II</li>
                     
                 </ol>
             </div>
@@ -139,15 +564,102 @@
         <h2>Park Factors & Conditions</h2>
         <div class="game-context-grid">
             
+            <div class="context-card">
+                <h4>Park Factors</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">Runs: <strong>1.0</strong></span>
+                    <span class="pf-item">HR: <strong>0.89</strong></span>
+                    <span class="pf-item">BB: <strong>1.0</strong></span>
+                    <span class="pf-item">K: <strong>0.93</strong></span>
+                </div>
+            </div>
             
+            
+            <div class="context-card">
+                <h4>Weather</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">Forecast</span>
+                    <span class="pf-item">72&deg;F</span>
+                    <span class="pf-item">Wind: 12 mph in</span>
+                </div>
+            </div>
+            
+            
+            <div class="context-card">
+                <h4>Elo Ratings</h4>
+                <div class="pf-grid">
+                    <span class="pf-item">TBR: <strong>1399</strong></span>
+                    <span class="pf-item">STL: <strong>1555</strong></span>
+                </div>
+            </div>
             
         </div>
     </div>
 
     <!-- Sportsbook Odds -->
     
+    <div class="game-section glass fade-in">
+        <h2>Sportsbook Odds</h2>
+        <div class="run-dist-table-wrap">
+            <table class="game-odds-table">
+                <thead>
+                    <tr><th>Book</th><th>TBR</th><th>STL</th></tr>
+                </thead>
+                <tbody>
+                    
+                    
+                    
+                    <tr>
+                        <td>FanDuel</td>
+                        <td>-118</td>
+                        <td>+100</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>Bovada</td>
+                        <td>-123</td>
+                        <td>+103</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>BetMGM</td>
+                        <td>-120</td>
+                        <td>+100</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>DraftKings</td>
+                        <td>-120</td>
+                        <td>+100</td>
+                    </tr>
+                    
+                    
+                    
+                    <tr>
+                        <td>Caesars</td>
+                        <td>-120</td>
+                        <td>+100</td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
 
     <!-- Model Explanation -->
+    
+    <div class="game-section glass fade-in">
+        <h2>Model Analysis</h2>
+        <p class="game-explanation">STL is getting plus-money at +103 and the model thinks that's too cheap. Dustin May keeps STL competitive on the mound against Steven Matz. STL holds a commanding 156-point Elo edge.</p>
+    </div>
     
 
     <div class="game-nav-links">
@@ -176,7 +688,7 @@
     <footer class="footer">
         <div class="container">
             <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
-            <p>2026-03-29 14:31 ET</p>
+            <p>2026-03-29 14:42 ET</p>
         </div>
     </footer>
 
