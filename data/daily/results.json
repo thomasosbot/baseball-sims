@@ -94,5 +94,89 @@
         "actual_score": "CLE 1 - SEA 5"
       }
     ]
+  },
+  {
+    "date": "2026-03-28",
+    "games_played": 15,
+    "picks_count": 8,
+    "wins": 4,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": 39.57,
+    "bankroll": 10877.04,
+    "picks": [
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 455.2,
+        "profit": 413.82,
+        "odds": "-110",
+        "actual_score": "TBR 5 - STL 6"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 363.8,
+        "profit": -363.8,
+        "odds": "-105",
+        "actual_score": "TEX 5 - PHI 4"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 337.93,
+        "profit": -337.93,
+        "odds": "+126",
+        "actual_score": "LAA 9 - HOU 11"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 501.59,
+        "profit": 477.7,
+        "odds": "-105",
+        "actual_score": "ARI 2 - LAD 3"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 263.85,
+        "profit": 416.88,
+        "odds": "+158",
+        "actual_score": "CLE 6 - SEA 5"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 537.6,
+        "profit": -537.6,
+        "odds": "+200",
+        "actual_score": "WSN 2 - CHC 10"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 499.22,
+        "profit": -499.22,
+        "odds": "-105",
+        "actual_score": "WSN 2 - CHC 10"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 610.63,
+        "profit": 469.72,
+        "odds": "-130",
+        "actual_score": "Athletics 7 - TOR 8"
+      }
+    ]
   }
 ]
