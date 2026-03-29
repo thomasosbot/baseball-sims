@@ -265,15 +265,32 @@ def run_daily(
             print(f"  Error fetching lineups: {e}")
             return
 
-        # If late mode got no confirmed lineups, fall back to projected
-        confirmed_count = sum(1 for g in (games or [])
-                              if len(g.get("home_lineup", [])) >= 9 and len(g.get("away_lineup", [])) >= 9)
-        if games and confirmed_count == 0:
-            print(f"\n  No confirmed lineups available — falling back to projected lineups...")
-            games = _fetch_preview_lineups(today, cumulative, include_spring)
-            if not games:
-                # Last resort: fetch with use_projected=True
-                games = fetch_daily_lineups(today, include_spring=include_spring, use_projected=True, cumulative=cumulative)
+        # Fill in any games missing lineups with projected lineups
+        pending_count = sum(1 for g in (games or [])
+                            if len(g.get("home_lineup", [])) < 9 or len(g.get("away_lineup", [])) < 9)
+        if games and pending_count > 0:
+            print(f"\n  {pending_count} games missing confirmed lineups — filling with projected...")
+            projected = _fetch_preview_lineups(today, cumulative, include_spring)
+            if projected:
+                # Build lookup of projected games by (home, away) team abbreviations
+                proj_lookup = {}
+                for pg in projected:
+                    ha = team_abbrev(pg.get("home_team", ""))
+                    aa = team_abbrev(pg.get("away_team", ""))
+                    proj_lookup[(ha, aa)] = pg
+
+                # Replace pending games with projected versions
+                filled = 0
+                for i, g in enumerate(games):
+                    if len(g.get("home_lineup", [])) < 9 or len(g.get("away_lineup", [])) < 9:
+                        ha = team_abbrev(g.get("home_team", ""))
+                        aa = team_abbrev(g.get("away_team", ""))
+                        proj = proj_lookup.get((ha, aa))
+                        if proj and len(proj.get("home_lineup", [])) >= 9:
+                            proj["lineup_status"] = "projected"
+                            games[i] = proj
+                            filled += 1
+                print(f"  Filled {filled}/{pending_count} pending games with projected lineups")
 
     if not games:
         print("  No games today.")
