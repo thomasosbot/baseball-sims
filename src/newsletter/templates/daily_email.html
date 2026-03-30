@@ -170,7 +170,9 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if pick.explanation %}
+            {% if pick.rich_context %}
+            <div class="explanation">{{ pick.rich_context }}</div>
+            {% elif pick.explanation %}
             <div class="explanation">{{ pick.explanation }}</div>
             {% endif %}
         </div>
