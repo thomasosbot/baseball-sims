@@ -178,5 +178,62 @@
         "actual_score": "Athletics 7 - TOR 8"
       }
     ]
+  },
+  {
+    "date": "2026-03-29",
+    "games_played": 12,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 974.58,
+    "bankroll": 11851.62,
+    "picks": [
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 320.6,
+        "profit": 448.84,
+        "odds": "+140",
+        "actual_score": "TEX 8 - PHI 3"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 382.77,
+        "profit": -382.77,
+        "odds": "+154",
+        "actual_score": "LAA 7 - HOU 9"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 495.86,
+        "profit": -495.86,
+        "odds": "+103",
+        "actual_score": "TBR 11 - STL 7"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 385.54,
+        "profit": 809.63,
+        "odds": "+210",
+        "actual_score": "WSN 6 - CHC 3"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 571.87,
+        "profit": 594.74,
+        "odds": "+104",
+        "actual_score": "WSN 6 - CHC 3"
+      }
+    ]
   }
 ]

@@ -35,23 +35,23 @@
     <h1>Season Results</h1>
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
-            <span class="stat-value">16</span>
+            <span class="stat-value">21</span>
             <span class="stat-label">Total Picks</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">9-7</span>
+            <span class="stat-value">12-9</span>
             <span class="stat-label">Record</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">56.2%</span>
+            <span class="stat-value">57.1%</span>
             <span class="stat-label">Win Rate</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value profit">$877</span>
+            <span class="stat-value profit">$1852</span>
             <span class="stat-label">Total P&L</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">14.0%</span>
+            <span class="stat-value">22.0%</span>
             <span class="stat-label">ROI</span>
         </div>
     </div>
@@ -83,6 +83,16 @@
                 </tr>
             </thead>
             <tbody>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td>5</td>
+                    <td>3-2</td>
+                    <td class="profit">
+                        $975
+                    </td>
+                    <td>$11852</td>
+                </tr>
                 
                 <tr>
                     <td>2026-03-28</td>
@@ -137,6 +147,86 @@
                 </tr>
             </thead>
             <tbody>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td style="font-weight: 700;">WSN +1.5</td>
+                    <td style="font-family: monospace;">+104</td>
+                    <td>$572</td>
+                    <td>
+                        
+                        <span class="result-badge win">W</span>
+                        
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 6 - CHC 3</td>
+                    <td class="profit" style="font-family: monospace; font-weight: 700;">
+                        +$595
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td style="font-weight: 700;">WSN ML</td>
+                    <td style="font-family: monospace;">+210</td>
+                    <td>$386</td>
+                    <td>
+                        
+                        <span class="result-badge win">W</span>
+                        
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 6 - CHC 3</td>
+                    <td class="profit" style="font-family: monospace; font-weight: 700;">
+                        +$810
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td style="font-weight: 700;">STL ML</td>
+                    <td style="font-family: monospace;">+103</td>
+                    <td>$496</td>
+                    <td>
+                        
+                        <span class="result-badge loss">L</span>
+                        
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 11 - STL 7</td>
+                    <td class="loss" style="font-family: monospace; font-weight: 700;">
+                        $-496
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td style="font-weight: 700;">LAA ML</td>
+                    <td style="font-family: monospace;">+154</td>
+                    <td>$383</td>
+                    <td>
+                        
+                        <span class="result-badge loss">L</span>
+                        
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 7 - HOU 9</td>
+                    <td class="loss" style="font-family: monospace; font-weight: 700;">
+                        $-383
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>2026-03-29</td>
+                    <td style="font-weight: 700;">TEX ML</td>
+                    <td style="font-family: monospace;">+140</td>
+                    <td>$321</td>
+                    <td>
+                        
+                        <span class="result-badge win">W</span>
+                        
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">TEX 8 - PHI 3</td>
+                    <td class="profit" style="font-family: monospace; font-weight: 700;">
+                        +$449
+                    </td>
+                </tr>
                 
                 <tr>
                     <td>2026-03-28</td>
@@ -472,7 +562,7 @@
 
 <script>
 const ctx = document.getElementById('pnlChart').getContext('2d');
-const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}];
+const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}];
 const isPositive = data[data.length-1].cumulative >= 0;
 
 new Chart(ctx, {
