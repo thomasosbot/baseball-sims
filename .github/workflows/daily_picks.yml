@@ -1,8 +1,8 @@
 name: Daily Picks Pipeline
 
 on:
-  schedule:
-    - cron: '15 13 * * *'   # 9:15 AM ET — grade results, generate picks, send newsletter + tweet
+  # schedule disabled — using cron-job.org for reliable timing
+  # - cron: '15 13 * * *'
   workflow_dispatch:
     inputs:
       date:
