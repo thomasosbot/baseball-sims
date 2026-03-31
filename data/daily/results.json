@@ -235,5 +235,53 @@
         "actual_score": "WSN 6 - CHC 3"
       }
     ]
+  },
+  {
+    "date": "2026-03-30",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -850.2,
+    "bankroll": 11001.42,
+    "picks": [
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 320.56,
+        "profit": -320.56,
+        "odds": "+141",
+        "actual_score": "MIN 1 - KCR 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 413.84,
+        "profit": 629.04,
+        "odds": "+152",
+        "actual_score": "WSN 13 - PHI 2"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 696.41,
+        "profit": -696.41,
+        "odds": "-134",
+        "actual_score": "CWS 9 - MIA 4"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 462.27,
+        "profit": -462.27,
+        "odds": "+130",
+        "actual_score": "NYM 4 - STL 2"
+      }
+    ]
   }
 ]
