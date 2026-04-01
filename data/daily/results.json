@@ -283,5 +283,89 @@
         "actual_score": "NYM 4 - STL 2"
       }
     ]
+  },
+  {
+    "date": "2026-03-31",
+    "games_played": 14,
+    "picks_count": 8,
+    "wins": 3,
+    "losses": 5,
+    "pushes": 0,
+    "day_profit": -551.86,
+    "bankroll": 10449.56,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 315.73,
+        "profit": -315.73,
+        "odds": "-105",
+        "actual_score": "PIT 8 - CIN 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 512.15,
+        "profit": -512.15,
+        "odds": "+159",
+        "actual_score": "WSN 2 - PHI 3"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 418.81,
+        "profit": 332.39,
+        "odds": "-126",
+        "actual_score": "WSN 2 - PHI 3"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 464.65,
+        "profit": 311.85,
+        "odds": "-149",
+        "actual_score": "CWS 2 - MIA 9"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 431.45,
+        "profit": 604.03,
+        "odds": "+140",
+        "actual_score": "NYM 0 - STL 3"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 311.39,
+        "profit": -311.39,
+        "odds": "+134",
+        "actual_score": "BOS 2 - HOU 9"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 385.79,
+        "profit": -385.79,
+        "odds": "+122",
+        "actual_score": "SFG 9 - SDP 3"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 275.07,
+        "profit": -275.07,
+        "odds": "+218",
+        "actual_score": "CLE 1 - LAD 4"
+      }
+    ]
   }
 ]
