@@ -367,5 +367,98 @@
         "actual_score": "CLE 1 - LAD 4"
       }
     ]
+  },
+  {
+    "date": "2026-04-01",
+    "games_played": 15,
+    "picks_count": 9,
+    "wins": 6,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 1277.01,
+    "bankroll": 11726.57,
+    "picks": [
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 535.95,
+        "profit": -535.95,
+        "odds": "-118",
+        "actual_score": "Athletics 1 - ATL 5"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 466.08,
+        "profit": -466.08,
+        "odds": "+140",
+        "actual_score": "PIT 8 - CIN 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 579.18,
+        "profit": -579.18,
+        "odds": "+225",
+        "actual_score": "WSN 5 - PHI 6"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 433.33,
+        "profit": 455.0,
+        "odds": "+105",
+        "actual_score": "WSN 5 - PHI 6"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 540.96,
+        "profit": 360.64,
+        "odds": "-150",
+        "actual_score": "CWS 0 - MIA 10"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 437.93,
+        "profit": 617.48,
+        "odds": "+141",
+        "actual_score": "NYM 1 - STL 2"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 300.76,
+        "profit": 390.99,
+        "odds": "+130",
+        "actual_score": "BOS 4 - HOU 6"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 364.21,
+        "profit": 509.89,
+        "odds": "+140",
+        "actual_score": "DET 0 - ARI 1"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 238.28,
+        "profit": 524.22,
+        "odds": "+220",
+        "actual_score": "CLE 4 - LAD 1"
+      }
+    ]
   }
 ]
