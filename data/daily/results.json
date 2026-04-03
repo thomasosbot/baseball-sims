@@ -460,5 +460,16 @@
         "actual_score": "CLE 4 - LAD 1"
       }
     ]
+  },
+  {
+    "date": "2026-04-02",
+    "games_played": 3,
+    "picks_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 0,
+    "bankroll": 11726.57,
+    "picks": []
   }
 ]

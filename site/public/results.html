@@ -85,6 +85,16 @@
             <tbody>
                 
                 <tr>
+                    <td>2026-04-02</td>
+                    <td>0</td>
+                    <td>0-0</td>
+                    <td class="">
+                        $0
+                    </td>
+                    <td>$11727</td>
+                </tr>
+                
+                <tr>
                     <td>2026-04-01</td>
                     <td>9</td>
                     <td>6-3</td>
@@ -928,7 +938,7 @@
 
 <script>
 const ctx = document.getElementById('pnlChart').getContext('2d');
-const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}, {"bankroll": 11001.42, "cumulative": 1001.42, "date": "2026-03-30", "day_profit": -850.2}, {"bankroll": 10449.56, "cumulative": 449.56, "date": "2026-03-31", "day_profit": -551.86}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-01", "day_profit": 1277.01}];
+const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}, {"bankroll": 11001.42, "cumulative": 1001.42, "date": "2026-03-30", "day_profit": -850.2}, {"bankroll": 10449.56, "cumulative": 449.56, "date": "2026-03-31", "day_profit": -551.86}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-01", "day_profit": 1277.01}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-02", "day_profit": 0}];
 const isPositive = data[data.length-1].cumulative >= 0;
 
 new Chart(ctx, {
