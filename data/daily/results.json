@@ -471,5 +471,62 @@
     "day_profit": 0,
     "bankroll": 11726.57,
     "picks": []
+  },
+  {
+    "date": "2026-04-03",
+    "games_played": 14,
+    "picks_count": 5,
+    "wins": 2,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -465.48,
+    "bankroll": 11261.09,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 420.62,
+        "profit": -420.62,
+        "odds": "+220",
+        "actual_score": "LAD 13 - WSN 6"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 470.64,
+        "profit": -470.64,
+        "odds": "+150",
+        "actual_score": "STL 0 - DET 4"
+      },
+      {
+        "pick": "CWS +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 427.25,
+        "profit": 448.61,
+        "odds": "+105",
+        "actual_score": "TOR 4 - CWS 5"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 328.6,
+        "profit": 298.73,
+        "odds": "-110",
+        "actual_score": "TBR 4 - MIN 10"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 321.56,
+        "profit": -321.56,
+        "odds": "+115",
+        "actual_score": "NYM 10 - SFG 3"
+      }
+    ]
   }
 ]
