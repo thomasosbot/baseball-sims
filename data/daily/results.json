@@ -528,5 +528,53 @@
         "actual_score": "NYM 10 - SFG 3"
       }
     ]
+  },
+  {
+    "date": "2026-04-04",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -1010.79,
+    "bankroll": 10250.3,
+    "picks": [
+      {
+        "pick": "CWS +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 423.27,
+        "profit": 384.79,
+        "odds": "-110",
+        "actual_score": "TOR 3 - CWS 6"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 461.77,
+        "profit": -461.77,
+        "odds": "+244",
+        "actual_score": "LAD 10 - WSN 5"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 566.72,
+        "profit": -566.72,
+        "odds": "+146",
+        "actual_score": "LAD 10 - WSN 5"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 367.09,
+        "profit": -367.09,
+        "odds": "-110",
+        "actual_score": "TBR 7 - MIN 1"
+      }
+    ]
   }
 ]
