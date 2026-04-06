@@ -576,5 +576,62 @@
         "actual_score": "TBR 7 - MIN 1"
       }
     ]
+  },
+  {
+    "date": "2026-04-05",
+    "games_played": 16,
+    "picks_count": 5,
+    "wins": 4,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 1253.45,
+    "bankroll": 11503.75,
+    "picks": [
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 400.73,
+        "profit": -400.73,
+        "odds": "+110",
+        "actual_score": "LAD 8 - WSN 6"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 273.8,
+        "profit": 369.63,
+        "odds": "+135",
+        "actual_score": "SDP 8 - BOS 6"
+      },
+      {
+        "pick": "SDP +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 440.71,
+        "profit": 293.81,
+        "odds": "-150",
+        "actual_score": "SDP 8 - BOS 6"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 251.05,
+        "profit": 602.52,
+        "odds": "+240",
+        "actual_score": "MIA 7 - NYY 6"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 267.74,
+        "profit": 388.22,
+        "odds": "+145",
+        "actual_score": "SEA 7 - LAA 8"
+      }
+    ]
   }
 ]
