@@ -644,5 +644,71 @@
     "day_profit": 0,
     "bankroll": 11503.75,
     "picks": []
+  },
+  {
+    "date": "2026-04-07",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 2,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -751.41,
+    "bankroll": 10752.34,
+    "picks": [
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 309.15,
+        "profit": -309.15,
+        "odds": "+136",
+        "actual_score": "ARI 3 - NYM 4"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 324.66,
+        "profit": -324.66,
+        "odds": "+130",
+        "actual_score": "SDP 1 - PIT 7"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 317.1,
+        "profit": 367.84,
+        "odds": "+116",
+        "actual_score": "CHC 9 - TBR 2"
+      },
+      {
+        "pick": "MIL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 410.37,
+        "profit": -410.37,
+        "odds": "+134",
+        "actual_score": "MIL 2 - BOS 3"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 620.27,
+        "profit": -620.27,
+        "odds": "-106",
+        "actual_score": "Athletics 3 - NYY 5"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 378.61,
+        "profit": 545.2,
+        "odds": "+144",
+        "actual_score": "DET 2 - MIN 4"
+      }
+    ]
   }
 ]
