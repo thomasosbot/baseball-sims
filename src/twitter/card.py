@@ -129,11 +129,14 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
     y = 32
 
     # Brand header
-    draw.text((x, y), "OZZY ANALYTICS", font=_font(28, bold=True), fill=TEXT)
-    draw.rounded_rectangle([x, y + 38, x + 220, y + 42], radius=2, fill=ACCENT)
+    brand_font = _font(28, bold=True)
+    draw.text((x, y), "OZZY ANALYTICS", font=brand_font, fill=TEXT)
+    bbox = draw.textbbox((0, 0), "OZZY ANALYTICS", font=brand_font)
+    brand_w = bbox[2] - bbox[0]
+    draw.rounded_rectangle([x, y + 38, x + brand_w, y + 42], radius=2, fill=ACCENT)
 
     # Date
-    draw.text((x + 240, y + 5), f"Picks for {date}", font=_font(22), fill=TEXT_SEC)
+    draw.text((x + brand_w + 20, y + 5), f"Picks for {date}", font=_font(22), fill=TEXT_SEC)
 
     y = 85
 

@@ -56,6 +56,10 @@ jobs:
           git pull --rebase || git reset --hard origin/main
           git stash pop || true
 
+      - name: Regenerate website with fresh results
+        run: python3 site/generate.py
+        continue-on-error: true
+
       - name: Post results to Twitter
         env:
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
@@ -73,7 +77,7 @@ jobs:
 
       - name: Commit and push updated results
         run: |
-          git add data/state/ data/daily/
+          git add data/state/ data/daily/ site/public/
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

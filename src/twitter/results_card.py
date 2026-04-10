@@ -91,10 +91,13 @@ def generate_results_card(
     draw = ImageDraw.Draw(img)
 
     # ── Header: Brand + Date ──
-    draw.text((40, 28), "OZZY ANALYTICS", font=_font(24, bold=True), fill=TEXT)
-    draw.rounded_rectangle([40, 60, 230, 64], radius=2, fill=ACCENT)
+    brand_font = _font(24, bold=True)
+    draw.text((40, 28), "OZZY ANALYTICS", font=brand_font, fill=TEXT)
+    bbox = draw.textbbox((0, 0), "OZZY ANALYTICS", font=brand_font)
+    brand_w = bbox[2] - bbox[0]
+    draw.rounded_rectangle([40, 58, 40 + brand_w, 62], radius=2, fill=ACCENT)
 
-    draw.text((250, 32), f"Results — {date}", font=_font(20), fill=TEXT_SEC)
+    draw.text((40 + brand_w + 20, 32), f"Results — {date}", font=_font(20), fill=TEXT_SEC)
 
     # ── Big W-L + P&L ──
     record_text = f"{wins}W - {losses}L"
