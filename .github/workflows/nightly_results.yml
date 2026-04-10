@@ -1,0 +1,83 @@
+name: Nightly Results Tweet
+
+on:
+  # Triggered by cron-job.org at 12:45 AM ET (4:45 UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-results
+  cancel-in-progress: false
+
+jobs:
+  nightly-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up environment
+        run: |
+          echo "ODDS_API_KEY=${{ secrets.ODDS_API_KEY }}" >> .env
+
+      - name: Restore state from repo
+        run: |
+          if ls data/state/state_*.pkl 1>/dev/null 2>&1; then
+            echo "State files found"
+          else
+            echo "No state files found"
+            exit 1
+          fi
+
+      - name: Grade today's results
+        run: python3 scripts/update_results.py
+        continue-on-error: true
+
+      - name: Pull latest (avoid conflicts)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git stash --include-untracked || true
+          git pull --rebase || git reset --hard origin/main
+          git stash pop || true
+
+      - name: Post results to Twitter
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+        run: |
+          python3 -c "
+          import sys
+          sys.path.insert(0, '.')
+          from src.twitter.results_poster import post_nightly_results
+          post_nightly_results()
+          "
+        continue-on-error: true
+
+      - name: Commit and push updated results
+        run: |
+          git add data/state/ data/daily/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Nightly results: $(date +%Y-%m-%d)"
+            git pull --rebase || (git rebase --abort 2>/dev/null; git stash && git pull --rebase && git stash pop)
+            git push || echo "Push failed"
+          fi
