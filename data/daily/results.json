@@ -758,5 +758,53 @@
         "actual_score": "DET 6 - MIN 8"
       }
     ]
+  },
+  {
+    "date": "2026-04-09",
+    "games_played": 6,
+    "picks_count": 4,
+    "wins": 4,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 1851.23,
+    "bankroll": 14444.43,
+    "picks": [
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 518.03,
+        "profit": 450.46,
+        "odds": "-115",
+        "actual_score": "Athletics 1 - NYY 0"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 357.96,
+        "profit": 415.23,
+        "odds": "+116",
+        "actual_score": "DET 1 - MIN 3"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 445.2,
+        "profit": 623.28,
+        "odds": "+140",
+        "actual_score": "ARI 7 - NYM 1"
+      },
+      {
+        "pick": "CWS +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 470.94,
+        "profit": 362.26,
+        "odds": "-130",
+        "actual_score": "CWS 2 - KCR 0"
+      }
+    ]
   }
 ]
