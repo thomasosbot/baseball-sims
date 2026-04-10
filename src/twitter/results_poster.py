@@ -121,11 +121,12 @@ def format_results_tweet(today: dict, season: dict) -> str:
 
     parts = [random.choice(flavors)]
 
-    # Season line
+    # Season line with starting bankroll context
     sw, sl = season["wins"], season["losses"]
     sp = season["total_profit"]
     sp_sign = "+" if sp >= 0 else ""
-    parts.append(f"Season: {sw}-{sl} | {sp_sign}${sp:,.0f} | {season['roi']}% ROI")
+    bankroll = season.get("bankroll", 10000)
+    parts.append(f"Season: {sw}-{sl} | {sp_sign}${sp:,.0f} | {season['roi']}% ROI\n$10,000 starting bankroll → ${bankroll:,.0f}")
 
     parts.append("Full results: ozzyanalytics.com/results.html\n\n#MLB #SportsBetting #MLBPicks")
 

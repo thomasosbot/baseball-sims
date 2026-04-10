@@ -102,10 +102,11 @@ def format_tweet(picks_data: dict) -> str:
         sign = "+" if profit >= 0 else "-"
         parts.append(f"Season: {w}-{l} | {sign}${abs(profit):.0f} | {stats['roi']}% ROI")
 
-    # Pick summary
+    # Pick summary with total wagered
     if picks:
         num = len(picks)
-        parts.append(f"{num} pick{'s' if num != 1 else ''} for {date}")
+        total_wagered = sum(p.get("wager", 0) for p in picks)
+        parts.append(f"{num} pick{'s' if num != 1 else ''} for {date} — ${total_wagered:,.0f} wagered")
     else:
         parts.append(f"No edges today ({date})")
 
