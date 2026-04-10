@@ -168,9 +168,10 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
             # Pick name
             draw.text((x + 65, row_y + 10), p.get("pick", ""), font=_font(26, bold=True), fill=TEXT)
 
-            # Odds
+            # Odds + Wager
             odds = p.get("odds", "")
-            draw.text((x + 65, row_y + 38), odds, font=_font(16), fill=TEXT_SEC)
+            wager = p.get("wager", 0)
+            draw.text((x + 65, row_y + 38), f"{odds}  •  ${wager:,.0f}", font=_font(16), fill=TEXT_SEC)
 
             # Model Win %
             prob = p.get("model_prob", 0)
