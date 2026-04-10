@@ -56,8 +56,51 @@ jobs:
           git pull --rebase || git reset --hard origin/main
           git stash pop || true
 
-      - name: Regenerate website with fresh results
-        run: python3 site/generate.py
+      - name: Regenerate results page only
+        run: |
+          python3 -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from pathlib import Path
+          from jinja2 import Environment, FileSystemLoader
+
+          SITE_DIR = Path('site')
+          OUTPUT_DIR = SITE_DIR / 'public'
+          DAILY_DIR = Path('data/daily')
+          RESULTS_PATH = DAILY_DIR / 'results.json'
+
+          env = Environment(loader=FileSystemLoader(str(SITE_DIR / 'templates')))
+
+          season_results = []
+          if RESULTS_PATH.exists():
+              with open(RESULTS_PATH) as f:
+                  season_results = json.load(f)
+
+          total_wins = sum(r.get('wins', 0) for r in season_results)
+          total_losses = sum(r.get('losses', 0) for r in season_results)
+          total_profit = sum(r.get('day_profit', 0) for r in season_results)
+          total_wagered = sum(sum(abs(p.get('wager', 0)) for p in r.get('picks', [])) for r in season_results)
+          roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
+          stats = {'wins': total_wins, 'losses': total_losses, 'total_profit': total_profit,
+                   'roi': roi, 'bankroll': round(10000.0 + total_profit, 2)}
+
+          all_picks = []
+          for day in season_results:
+              for pick in day.get('picks', []):
+                  all_picks.append({**pick, 'date': day['date']})
+
+          all_days = []
+          for f in sorted(DAILY_DIR.glob('2026-*.json')):
+              if f.name in ('results.json', 'changelog.json') or f.name.startswith(('odds_cache', 'spread_cache')):
+                  continue
+              with open(f) as fh:
+                  all_days.append(json.load(fh))
+
+          template = env.get_template('history.html')
+          html = template.render(results=season_results, stats=stats, all_days=all_days, all_picks=all_picks)
+          (OUTPUT_DIR / 'results.html').write_text(html)
+          print('  results.html regenerated')
+          "
         continue-on-error: true
 
       - name: Post results to Twitter
