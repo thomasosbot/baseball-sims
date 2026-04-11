@@ -81,8 +81,25 @@ jobs:
           total_profit = sum(r.get('day_profit', 0) for r in season_results)
           total_wagered = sum(sum(abs(p.get('wager', 0)) for p in r.get('picks', [])) for r in season_results)
           roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
+          # Build daily P&L for chart
+          cumulative = 0
+          daily_pnl = []
+          for d in season_results:
+              cumulative += d['day_profit']
+              daily_pnl.append({'date': d['date'], 'day_profit': d['day_profit'],
+                                'cumulative': round(cumulative, 2), 'bankroll': round(10000.0 + cumulative, 2)})
+
+          # Streak
+          streak = 0
+          if season_results:
+              for d in reversed(season_results):
+                  if d['day_profit'] > 0: streak += 1
+                  else: break
+
           stats = {'wins': total_wins, 'losses': total_losses, 'total_profit': total_profit,
-                   'roi': roi, 'bankroll': round(10000.0 + total_profit, 2)}
+                   'roi': roi, 'bankroll': round(10000.0 + total_profit, 2),
+                   'current_bankroll': round(10000.0 + total_profit, 2),
+                   'starting_bankroll': 10000, 'daily_pnl': daily_pnl, 'streak': streak}
 
           all_picks = []
           for day in season_results:
