@@ -136,6 +136,13 @@ def generate_site():
     )
     (OUTPUT_DIR / "results.html").write_text(html)
 
+    # Dashboard
+    dashboard_ctx = _compute_dashboard_context(season_results, stats, all_picks)
+    template = env.get_template("dashboard.html")
+    html = template.render(**dashboard_ctx)
+    (OUTPUT_DIR / "dashboard.html").write_text(html)
+    print("  dashboard.html")
+
     # Backtest
     backtest_data, chart_data, combined_data, combined_chart = _load_backtest_data()
     if backtest_data:
@@ -688,6 +695,112 @@ def _compute_bankroll_series(df, starting_bankroll):
         "values": values,
         "starting": starting_bankroll,
         "ending": values[-1] if values else starting_bankroll,
+    }
+
+
+def _compute_dashboard_context(results, stats, all_picks):
+    """Compute all data needed by the dashboard template."""
+    from datetime import datetime, timedelta
+
+    # Daily P&L with bankroll
+    daily_pnl = stats.get("daily_pnl", [])
+
+    # Avg pick profit
+    total_picks = stats.get("total_picks", 0)
+    avg_pick_profit = round(stats["total_profit"] / max(1, total_picks), 2)
+
+    # Best/worst day dates
+    best_day_date = ""
+    worst_day_date = ""
+    if results:
+        best_val = max(d["day_profit"] for d in results)
+        worst_val = min(d["day_profit"] for d in results)
+        for d in results:
+            if d["day_profit"] == best_val and not best_day_date:
+                best_day_date = d["date"]
+            if d["day_profit"] == worst_val and not worst_day_date:
+                worst_day_date = d["date"]
+
+    # ML vs RL breakdown
+    ml_stats = {"wins": 0, "losses": 0, "profit": 0, "wagered": 0}
+    rl_stats = {"wins": 0, "losses": 0, "profit": 0, "wagered": 0}
+    for pick in all_picks:
+        bucket = ml_stats if pick.get("type", "moneyline") == "moneyline" else rl_stats
+        if pick.get("won"):
+            bucket["wins"] += 1
+        elif pick.get("won") is False:
+            bucket["losses"] += 1
+        bucket["profit"] += pick.get("profit", 0)
+        bucket["wagered"] += pick.get("wager", 0)
+
+    ml_stats["profit"] = round(ml_stats["profit"], 2)
+    ml_stats["roi"] = round(ml_stats["profit"] / max(1, ml_stats["wagered"]) * 100, 1)
+    rl_stats["profit"] = round(rl_stats["profit"], 2)
+    rl_stats["roi"] = round(rl_stats["profit"] / max(1, rl_stats["wagered"]) * 100, 1)
+
+    # Recent results (last 10 days, for streak dots: +1=win day, -1=loss day, 0=push/no picks)
+    recent_results = []
+    for d in results[-10:]:
+        if d["day_profit"] > 0:
+            recent_results.append(1)
+        elif d["day_profit"] < 0:
+            recent_results.append(-1)
+        else:
+            recent_results.append(0)
+
+    # Calendar heat map
+    calendar_days = []
+    if results:
+        first_date = datetime.strptime(results[0]["date"], "%Y-%m-%d")
+        last_date = datetime.strptime(results[-1]["date"], "%Y-%m-%d")
+
+        # Build lookup
+        day_lookup = {d["date"]: d for d in results}
+
+        # Start from Monday of the first week
+        start = first_date - timedelta(days=first_date.weekday())
+        # End on Sunday of the last week
+        end = last_date + timedelta(days=(6 - last_date.weekday()))
+
+        current = start
+        while current <= end:
+            date_str = current.strftime("%Y-%m-%d")
+            if current < first_date or current > last_date:
+                calendar_days.append({"empty": True})
+            elif date_str in day_lookup:
+                d = day_lookup[date_str]
+                if d["picks_count"] == 0:
+                    calendar_days.append({
+                        "day": current.day,
+                        "no_picks": True,
+                        "profit": 0,
+                    })
+                else:
+                    calendar_days.append({
+                        "day": current.day,
+                        "wins": d["wins"],
+                        "losses": d["losses"],
+                        "profit": d["day_profit"],
+                    })
+            else:
+                calendar_days.append({
+                    "day": current.day,
+                    "no_picks": True,
+                    "profit": 0,
+                })
+            current += timedelta(days=1)
+
+    return {
+        "stats": stats,
+        "daily_pnl": daily_pnl,
+        "avg_pick_profit": avg_pick_profit,
+        "best_day_date": best_day_date,
+        "worst_day_date": worst_day_date,
+        "ml_stats": ml_stats,
+        "rl_stats": rl_stats,
+        "recent_results": recent_results,
+        "calendar_days": calendar_days,
+        "all_picks": all_picks,
     }
 
 

@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+{% set active = "dashboard" %}
+
+{% block title %}Dashboard — Ozzy Analytics{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .dash-card {
+        text-align: center;
+        padding: 1.25rem 1rem;
+    }
+    .dash-card .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        display: block;
+    }
+    .dash-card .stat-label {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    .dash-card .stat-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.15rem;
+        display: block;
+    }
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .type-breakdown {
+        padding: 1.5rem;
+    }
+    .type-breakdown h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+    .type-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .type-stats {
+        display: flex;
+        gap: 1.25rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .type-stats span {
+        font-family: monospace;
+        font-weight: 600;
+    }
+    .streak-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .streak-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+    .streak-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+    .streak-dots {
+        display: flex;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+    }
+    .streak-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .streak-dot.win { background: var(--green); }
+    .streak-dot.loss { background: var(--red); }
+    .streak-dot.neutral { background: var(--border); }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+    }
+    .cal-header {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-align: center;
+        text-transform: uppercase;
+    }
+    .cal-cell {
+        aspect-ratio: 1;
+        border-radius: var(--radius-sm);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        position: relative;
+    }
+    .cal-cell.win-day {
+        background: var(--green-light);
+        color: var(--green);
+    }
+    .cal-cell.loss-day {
+        background: var(--red-light);
+        color: var(--red);
+    }
+    .cal-cell.even-day {
+        background: rgba(0,0,0,0.03);
+        color: var(--text-muted);
+    }
+    .cal-cell.empty { background: transparent; }
+    .cal-cell .cal-date {
+        font-size: 0.65rem;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+    .cal-cell .cal-record {
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+    .chart-card {
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .dash-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .two-col {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 480px) {
+        .dash-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .dash-card .stat-value {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Performance Dashboard</h1>
+</section>
+
+<!-- Summary Stats -->
+<section class="section fade-in">
+    <div class="dash-grid">
+        <div class="dash-card glass">
+            <span class="stat-value">{{ stats.wins }}-{{ stats.losses }}</span>
+            <span class="stat-label">Record</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.total_profit) }}</span>
+            <span class="stat-label">Total P&L</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value">{{ stats.roi }}%</span>
+            <span class="stat-label">ROI</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value">${{ "%.0f"|format(stats.current_bankroll) }}</span>
+            <span class="stat-label">Bankroll</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value">{{ stats.win_rate }}%</span>
+            <span class="stat-label">Win Rate</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value {% if avg_pick_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(avg_pick_profit) }}</span>
+            <span class="stat-label">Avg Pick P&L</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value profit">${{ "%.0f"|format(stats.best_day) }}</span>
+            <span class="stat-label">Best Day</span>
+            <span class="stat-sub">{{ best_day_date }}</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value loss">${{ "%.0f"|format(stats.worst_day) }}</span>
+            <span class="stat-label">Worst Day</span>
+            <span class="stat-sub">{{ worst_day_date }}</span>
+        </div>
+    </div>
+</section>
+
+<!-- Bankroll Growth Chart -->
+<section class="section fade-in">
+    <h2 class="section-title">Bankroll Growth</h2>
+    <div class="chart-card glass">
+        <div class="chart-container" style="height: 300px;">
+            <canvas id="bankrollChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Bet Type Breakdown + Streak -->
+<section class="section fade-in">
+    <div class="two-col">
+        <div class="type-breakdown glass">
+            <h3>ROI by Bet Type</h3>
+            <div class="type-row">
+                <span class="type-label">Moneyline</span>
+                <div class="type-stats">
+                    <span>{{ ml_stats.wins }}-{{ ml_stats.losses }}</span>
+                    <span class="{% if ml_stats.profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(ml_stats.profit) }}</span>
+                    <span>{{ ml_stats.roi }}%</span>
+                </div>
+            </div>
+            <div class="type-row">
+                <span class="type-label">Run Line</span>
+                <div class="type-stats">
+                    <span>{{ rl_stats.wins }}-{{ rl_stats.losses }}</span>
+                    <span class="{% if rl_stats.profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(rl_stats.profit) }}</span>
+                    <span>{{ rl_stats.roi }}%</span>
+                </div>
+            </div>
+        </div>
+        <div class="streak-card glass">
+            {% if stats.current_streak > 0 %}
+            <span class="streak-value profit">{{ stats.current_streak }}W</span>
+            {% elif stats.current_streak < 0 %}
+            <span class="streak-value loss">{{ (stats.current_streak * -1) }}L</span>
+            {% else %}
+            <span class="streak-value">--</span>
+            {% endif %}
+            <span class="streak-label">Current Streak (days)</span>
+            <div class="streak-dots">
+                {% for r in recent_results %}
+                <div class="streak-dot {% if r > 0 %}win{% elif r < 0 %}loss{% else %}neutral{% endif %}"></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Daily P&L Bar Chart -->
+<section class="section fade-in">
+    <h2 class="section-title">Daily P&L</h2>
+    <div class="chart-card glass">
+        <div class="chart-container" style="height: 250px;">
+            <canvas id="dailyPnlChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Calendar Heat Map -->
+{% if calendar_days %}
+<section class="section fade-in">
+    <h2 class="section-title">Results Calendar</h2>
+    <div class="glass" style="padding: 1.5rem;">
+        <div class="calendar-grid">
+            <div class="cal-header">Mon</div>
+            <div class="cal-header">Tue</div>
+            <div class="cal-header">Wed</div>
+            <div class="cal-header">Thu</div>
+            <div class="cal-header">Fri</div>
+            <div class="cal-header">Sat</div>
+            <div class="cal-header">Sun</div>
+            {% for cell in calendar_days %}
+            {% if cell.empty %}
+            <div class="cal-cell empty"></div>
+            {% elif cell.no_picks %}
+            <div class="cal-cell even-day">
+                <span class="cal-date">{{ cell.day }}</span>
+                <span class="cal-record">--</span>
+            </div>
+            {% elif cell.profit > 0 %}
+            <div class="cal-cell win-day">
+                <span class="cal-date">{{ cell.day }}</span>
+                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+            </div>
+            {% elif cell.profit < 0 %}
+            <div class="cal-cell loss-day">
+                <span class="cal-date">{{ cell.day }}</span>
+                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+            </div>
+            {% else %}
+            <div class="cal-cell even-day">
+                <span class="cal-date">{{ cell.day }}</span>
+                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Pick-by-Pick Log -->
+{% if all_picks %}
+<section class="section fade-in">
+    <h2 class="section-title">Pick-by-Pick Log</h2>
+    <div class="table-card glass">
+        <table class="games-table" id="picksTable">
+            <thead>
+                <tr>
+                    <th style="cursor:pointer;" onclick="sortTable(0)">Date</th>
+                    <th>Pick</th>
+                    <th>Type</th>
+                    <th style="cursor:pointer;" onclick="sortTable(3)">Odds</th>
+                    <th>Result</th>
+                    <th style="cursor:pointer;" onclick="sortTable(5)">P&L</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pick in all_picks|reverse %}
+                <tr>
+                    <td>{{ pick.date }}</td>
+                    <td style="font-weight: 700;">{{ pick.pick }}</td>
+                    <td>
+                        {% if pick.type == "moneyline" %}
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        {% else %}
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family: monospace;">{{ pick.odds }}</td>
+                    <td>
+                        {% if pick.won %}
+                        <span class="result-badge win">W</span>
+                        {% elif pick.won == false %}
+                        <span class="result-badge loss">L</span>
+                        {% else %}
+                        <span class="result-badge push">P</span>
+                        {% endif %}
+                    </td>
+                    <td class="{% if pick.profit > 0 %}profit{% elif pick.profit < 0 %}loss{% endif %}" style="font-family: monospace; font-weight: 700;">
+                        {% if pick.profit > 0 %}+{% endif %}${{ "%.0f"|format(pick.profit) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Bankroll growth chart
+const bankrollCtx = document.getElementById('bankrollChart').getContext('2d');
+const dailyData = {{ daily_pnl | tojson }};
+const finalBankroll = dailyData[dailyData.length - 1].bankroll;
+const isPositive = finalBankroll >= 10000;
+
+new Chart(bankrollCtx, {
+    type: 'line',
+    data: {
+        labels: dailyData.map(d => d.date),
+        datasets: [{
+            label: 'Bankroll ($)',
+            data: dailyData.map(d => d.bankroll),
+            borderColor: isPositive ? '#31A24C' : '#FA383E',
+            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.08)' : 'rgba(250, 56, 62, 0.08)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: isPositive ? '#31A24C' : '#FA383E',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 2.5,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(28, 30, 33, 0.9)',
+                titleFont: { family: 'Inter' },
+                bodyFont: { family: 'Inter' },
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: ctx => '$' + ctx.parsed.y.toLocaleString(),
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: {
+                    color: '#8A8D91',
+                    font: { family: 'Inter', size: 11 },
+                    callback: v => '$' + v.toLocaleString(),
+                },
+                suggestedMin: 9000,
+            },
+        },
+    },
+});
+
+// Daily P&L bar chart
+const pnlCtx = document.getElementById('dailyPnlChart').getContext('2d');
+new Chart(pnlCtx, {
+    type: 'bar',
+    data: {
+        labels: dailyData.map(d => d.date),
+        datasets: [{
+            label: 'Daily P&L ($)',
+            data: dailyData.map(d => d.day_profit),
+            backgroundColor: dailyData.map(d => d.day_profit >= 0 ? 'rgba(49, 162, 76, 0.7)' : 'rgba(250, 56, 62, 0.7)'),
+            borderColor: dailyData.map(d => d.day_profit >= 0 ? '#31A24C' : '#FA383E'),
+            borderWidth: 1,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(28, 30, 33, 0.9)',
+                titleFont: { family: 'Inter' },
+                bodyFont: { family: 'Inter' },
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: ctx => {
+                        const v = ctx.parsed.y;
+                        return (v >= 0 ? '+$' : '-$') + Math.abs(v).toLocaleString();
+                    },
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: {
+                    color: '#8A8D91',
+                    font: { family: 'Inter', size: 11 },
+                    callback: v => '$' + v.toLocaleString(),
+                },
+            },
+        },
+    },
+});
+
+// Simple table sort
+function sortTable(colIndex) {
+    const table = document.getElementById('picksTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const currentDir = table.dataset.sortDir === 'asc' ? 'desc' : 'asc';
+    table.dataset.sortDir = currentDir;
+
+    rows.sort((a, b) => {
+        let aVal = a.cells[colIndex].textContent.trim();
+        let bVal = b.cells[colIndex].textContent.trim();
+        // Try numeric (strip $ and +)
+        const aNum = parseFloat(aVal.replace(/[$+,]/g, ''));
+        const bNum = parseFloat(bVal.replace(/[$+,]/g, ''));
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return currentDir === 'asc' ? aNum - bNum : bNum - aNum;
+        }
+        return currentDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+{% endblock %}

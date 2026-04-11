@@ -3,13 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Season Results — Ozzy Analytics</title>
+    <title>Dashboard — Ozzy Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/style.css">
     
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .dash-card {
+        text-align: center;
+        padding: 1.25rem 1rem;
+    }
+    .dash-card .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        display: block;
+    }
+    .dash-card .stat-label {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    .dash-card .stat-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.15rem;
+        display: block;
+    }
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .type-breakdown {
+        padding: 1.5rem;
+    }
+    .type-breakdown h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+    .type-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .type-stats {
+        display: flex;
+        gap: 1.25rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .type-stats span {
+        font-family: monospace;
+        font-weight: 600;
+    }
+    .streak-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .streak-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+    .streak-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+    .streak-dots {
+        display: flex;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+    }
+    .streak-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .streak-dot.win { background: var(--green); }
+    .streak-dot.loss { background: var(--red); }
+    .streak-dot.neutral { background: var(--border); }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+    }
+    .cal-header {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-align: center;
+        text-transform: uppercase;
+    }
+    .cal-cell {
+        aspect-ratio: 1;
+        border-radius: var(--radius-sm);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        position: relative;
+    }
+    .cal-cell.win-day {
+        background: var(--green-light);
+        color: var(--green);
+    }
+    .cal-cell.loss-day {
+        background: var(--red-light);
+        color: var(--red);
+    }
+    .cal-cell.even-day {
+        background: rgba(0,0,0,0.03);
+        color: var(--text-muted);
+    }
+    .cal-cell.empty { background: transparent; }
+    .cal-cell .cal-date {
+        font-size: 0.65rem;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+    .cal-cell .cal-record {
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+    .chart-card {
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .dash-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .two-col {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 480px) {
+        .dash-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .dash-card .stat-value {
+            font-size: 1.3rem;
+        }
+    }
+</style>
 
 </head>
 <body>
@@ -36,8 +204,8 @@
             </button>
             <div class="nav-links">
                 <a href="index.html" class="">Today's Picks</a>
-                <a href="results.html" class="active">Results</a>
-                <a href="dashboard.html" class="">Dashboard</a>
+                <a href="results.html" class="">Results</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
                 <a href="backtest.html" class="">2025 Backtest</a>
                 <a href="simulate.html" class="">Simulate</a>
                 <a href="about.html" class="">About</a>
@@ -48,238 +216,288 @@
     <main class="container">
         
 <section class="hero">
-    <h1>Season Results</h1>
-    <div class="stats-bar fade-in">
-        <div class="stat-card glass">
-            <span class="stat-value">78</span>
-            <span class="stat-label">Total Picks</span>
-        </div>
-        <div class="stat-card glass">
+    <h1>Performance Dashboard</h1>
+</section>
+
+<!-- Summary Stats -->
+<section class="section fade-in">
+    <div class="dash-grid">
+        <div class="dash-card glass">
             <span class="stat-value">46-32</span>
             <span class="stat-label">Record</span>
         </div>
-        <div class="stat-card glass">
-            <span class="stat-value">59.0%</span>
-            <span class="stat-label">Win Rate</span>
-        </div>
-        <div class="stat-card glass">
+        <div class="dash-card glass">
             <span class="stat-value profit">$8651</span>
             <span class="stat-label">Total P&L</span>
         </div>
-        <div class="stat-card glass">
+        <div class="dash-card glass">
             <span class="stat-value">26.0%</span>
             <span class="stat-label">ROI</span>
         </div>
+        <div class="dash-card glass">
+            <span class="stat-value">$18651</span>
+            <span class="stat-label">Bankroll</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value">59.0%</span>
+            <span class="stat-label">Win Rate</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value profit">$111</span>
+            <span class="stat-label">Avg Pick P&L</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value profit">$4207</span>
+            <span class="stat-label">Best Day</span>
+            <span class="stat-sub">2026-04-10</span>
+        </div>
+        <div class="dash-card glass">
+            <span class="stat-value loss">$-1011</span>
+            <span class="stat-label">Worst Day</span>
+            <span class="stat-sub">2026-04-04</span>
+        </div>
     </div>
 </section>
 
+<!-- Bankroll Growth Chart -->
+<section class="section fade-in">
+    <h2 class="section-title">Bankroll Growth</h2>
+    <div class="chart-card glass">
+        <div class="chart-container" style="height: 300px;">
+            <canvas id="bankrollChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Bet Type Breakdown + Streak -->
+<section class="section fade-in">
+    <div class="two-col">
+        <div class="type-breakdown glass">
+            <h3>ROI by Bet Type</h3>
+            <div class="type-row">
+                <span class="type-label">Moneyline</span>
+                <div class="type-stats">
+                    <span>30-27</span>
+                    <span class="profit">$4207</span>
+                    <span>18.7%</span>
+                </div>
+            </div>
+            <div class="type-row">
+                <span class="type-label">Run Line</span>
+                <div class="type-stats">
+                    <span>16-5</span>
+                    <span class="profit">$4444</span>
+                    <span>41.2%</span>
+                </div>
+            </div>
+        </div>
+        <div class="streak-card glass">
+            
+            <span class="streak-value profit">2W</span>
+            
+            <span class="streak-label">Current Streak (days)</span>
+            <div class="streak-dots">
+                
+                <div class="streak-dot win"></div>
+                
+                <div class="streak-dot neutral"></div>
+                
+                <div class="streak-dot loss"></div>
+                
+                <div class="streak-dot loss"></div>
+                
+                <div class="streak-dot win"></div>
+                
+                <div class="streak-dot neutral"></div>
+                
+                <div class="streak-dot loss"></div>
+                
+                <div class="streak-dot win"></div>
+                
+                <div class="streak-dot win"></div>
+                
+                <div class="streak-dot win"></div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Daily P&L Bar Chart -->
+<section class="section fade-in">
+    <h2 class="section-title">Daily P&L</h2>
+    <div class="chart-card glass">
+        <div class="chart-container" style="height: 250px;">
+            <canvas id="dailyPnlChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Calendar Heat Map -->
 
 <section class="section fade-in">
-    <h2 class="section-title">Cumulative P&L</h2>
-    <div class="chart-card glass">
-        <div class="chart-container">
-            <canvas id="pnlChart"></canvas>
+    <h2 class="section-title">Results Calendar</h2>
+    <div class="glass" style="padding: 1.5rem;">
+        <div class="calendar-grid">
+            <div class="cal-header">Mon</div>
+            <div class="cal-header">Tue</div>
+            <div class="cal-header">Wed</div>
+            <div class="cal-header">Thu</div>
+            <div class="cal-header">Fri</div>
+            <div class="cal-header">Sat</div>
+            <div class="cal-header">Sun</div>
+            
+            
+            <div class="cal-cell empty"></div>
+            
+            
+            
+            <div class="cal-cell empty"></div>
+            
+            
+            
+            <div class="cal-cell empty"></div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">26</span>
+                <span class="cal-record">2-2</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">27</span>
+                <span class="cal-record">3-1</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">28</span>
+                <span class="cal-record">4-4</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">29</span>
+                <span class="cal-record">3-2</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell loss-day">
+                <span class="cal-date">30</span>
+                <span class="cal-record">1-3</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell loss-day">
+                <span class="cal-date">31</span>
+                <span class="cal-record">3-5</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">1</span>
+                <span class="cal-record">6-3</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell even-day">
+                <span class="cal-date">2</span>
+                <span class="cal-record">--</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell loss-day">
+                <span class="cal-date">3</span>
+                <span class="cal-record">2-3</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell loss-day">
+                <span class="cal-date">4</span>
+                <span class="cal-record">1-3</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">5</span>
+                <span class="cal-record">4-1</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell even-day">
+                <span class="cal-date">6</span>
+                <span class="cal-record">--</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell loss-day">
+                <span class="cal-date">7</span>
+                <span class="cal-record">2-4</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">8</span>
+                <span class="cal-record">4-0</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">9</span>
+                <span class="cal-record">4-0</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell win-day">
+                <span class="cal-date">10</span>
+                <span class="cal-record">7-1</span>
+            </div>
+            
+            
+            
+            <div class="cal-cell empty"></div>
+            
+            
+            
+            <div class="cal-cell empty"></div>
+            
+            
         </div>
     </div>
 </section>
 
 
-
-<section class="section fade-in">
-    <h2 class="section-title">Daily Results</h2>
-    <div class="table-card glass">
-        <table class="games-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Picks</th>
-                    <th>W-L</th>
-                    <th>Day P&L</th>
-                    <th>Bankroll</th>
-                </tr>
-            </thead>
-            <tbody>
-                
-                <tr>
-                    <td>2026-04-10</td>
-                    <td>8</td>
-                    <td>7-1</td>
-                    <td class="profit">
-                        $4207
-                    </td>
-                    <td>$18651</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-09</td>
-                    <td>4</td>
-                    <td>4-0</td>
-                    <td class="profit">
-                        $1851
-                    </td>
-                    <td>$14444</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-08</td>
-                    <td>4</td>
-                    <td>4-0</td>
-                    <td class="profit">
-                        $1841
-                    </td>
-                    <td>$12593</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-07</td>
-                    <td>6</td>
-                    <td>2-4</td>
-                    <td class="loss">
-                        $-751
-                    </td>
-                    <td>$10752</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-06</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$11504</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-05</td>
-                    <td>5</td>
-                    <td>4-1</td>
-                    <td class="profit">
-                        $1253
-                    </td>
-                    <td>$11504</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-04</td>
-                    <td>4</td>
-                    <td>1-3</td>
-                    <td class="loss">
-                        $-1011
-                    </td>
-                    <td>$10250</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-03</td>
-                    <td>5</td>
-                    <td>2-3</td>
-                    <td class="loss">
-                        $-465
-                    </td>
-                    <td>$11261</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-02</td>
-                    <td>0</td>
-                    <td>0-0</td>
-                    <td class="">
-                        $0
-                    </td>
-                    <td>$11727</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-04-01</td>
-                    <td>9</td>
-                    <td>6-3</td>
-                    <td class="profit">
-                        $1277
-                    </td>
-                    <td>$11727</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-31</td>
-                    <td>8</td>
-                    <td>3-5</td>
-                    <td class="loss">
-                        $-552
-                    </td>
-                    <td>$10450</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-30</td>
-                    <td>4</td>
-                    <td>1-3</td>
-                    <td class="loss">
-                        $-850
-                    </td>
-                    <td>$11001</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-29</td>
-                    <td>5</td>
-                    <td>3-2</td>
-                    <td class="profit">
-                        $975
-                    </td>
-                    <td>$11852</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-28</td>
-                    <td>8</td>
-                    <td>4-4</td>
-                    <td class="profit">
-                        $40
-                    </td>
-                    <td>$10877</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-27</td>
-                    <td>4</td>
-                    <td>3-1</td>
-                    <td class="profit">
-                        $692
-                    </td>
-                    <td>$10837</td>
-                </tr>
-                
-                <tr>
-                    <td>2026-03-26</td>
-                    <td>4</td>
-                    <td>2-2</td>
-                    <td class="profit">
-                        $145
-                    </td>
-                    <td>$10145</td>
-                </tr>
-                
-            </tbody>
-        </table>
-    </div>
-</section>
-
-
+<!-- Pick-by-Pick Log -->
 
 <section class="section fade-in">
     <h2 class="section-title">Pick-by-Pick Log</h2>
     <div class="table-card glass">
-        <table class="games-table">
+        <table class="games-table" id="picksTable">
             <thead>
                 <tr>
-                    <th>Date</th>
+                    <th style="cursor:pointer;" onclick="sortTable(0)">Date</th>
                     <th>Pick</th>
-                    <th>Odds</th>
-                    <th>Wager</th>
+                    <th>Type</th>
+                    <th style="cursor:pointer;" onclick="sortTable(3)">Odds</th>
                     <th>Result</th>
-                    <th>Score</th>
-                    <th>P&L</th>
+                    <th style="cursor:pointer;" onclick="sortTable(5)">P&L</th>
                 </tr>
             </thead>
             <tbody>
@@ -287,14 +505,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">TEX +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-105</td>
-                    <td>$512</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TEX 7 - LAD 8</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$488
                     </td>
@@ -303,14 +524,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+124</td>
-                    <td>$572</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">BOS 2 - STL 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$709
                     </td>
@@ -319,14 +543,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-120</td>
-                    <td>$919</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 7 - MIL 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$766
                     </td>
@@ -335,14 +562,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">Athletics ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+132</td>
-                    <td>$493</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 4 - NYM 0</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$650
                     </td>
@@ -351,14 +581,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">LAA +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-128</td>
-                    <td>$647</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 10 - CIN 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$506
                     </td>
@@ -367,14 +600,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">LAA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+160</td>
-                    <td>$428</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 10 - CIN 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$684
                     </td>
@@ -383,14 +619,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">MIA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+130</td>
-                    <td>$556</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">MIA 0 - DET 2</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-556
                     </td>
@@ -399,14 +638,17 @@
                 <tr>
                     <td>2026-04-10</td>
                     <td style="font-weight: 700;">ARI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+158</td>
-                    <td>$608</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">ARI 5 - PHI 4</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$961
                     </td>
@@ -415,14 +657,17 @@
                 <tr>
                     <td>2026-04-09</td>
                     <td style="font-weight: 700;">CWS +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-130</td>
-                    <td>$471</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CWS 2 - KCR 0</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$362
                     </td>
@@ -431,14 +676,17 @@
                 <tr>
                     <td>2026-04-09</td>
                     <td style="font-weight: 700;">ARI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$445</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">ARI 7 - NYM 1</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$623
                     </td>
@@ -447,14 +695,17 @@
                 <tr>
                     <td>2026-04-09</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+116</td>
-                    <td>$358</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">DET 1 - MIN 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$415
                     </td>
@@ -463,14 +714,17 @@
                 <tr>
                     <td>2026-04-09</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-115</td>
-                    <td>$518</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 1 - NYY 0</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$450
                     </td>
@@ -479,14 +733,17 @@
                 <tr>
                     <td>2026-04-08</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+135</td>
-                    <td>$397</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">DET 6 - MIN 8</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$536
                     </td>
@@ -495,14 +752,17 @@
                 <tr>
                     <td>2026-04-08</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-110</td>
-                    <td>$512</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 3 - NYY 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$465
                     </td>
@@ -511,14 +771,17 @@
                 <tr>
                     <td>2026-04-08</td>
                     <td style="font-weight: 700;">TEX ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+114</td>
-                    <td>$347</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SEA 0 - TEX 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$396
                     </td>
@@ -527,14 +790,17 @@
                 <tr>
                     <td>2026-04-08</td>
                     <td style="font-weight: 700;">CLE ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+110</td>
-                    <td>$404</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">KCR 2 - CLE 10</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$444
                     </td>
@@ -543,14 +809,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+144</td>
-                    <td>$379</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">DET 2 - MIN 4</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$545
                     </td>
@@ -559,14 +828,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-106</td>
-                    <td>$620</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 3 - NYY 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-620
                     </td>
@@ -575,14 +847,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">MIL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+134</td>
-                    <td>$410</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">MIL 2 - BOS 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-410
                     </td>
@@ -591,14 +866,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">CHC ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+116</td>
-                    <td>$317</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CHC 9 - TBR 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$368
                     </td>
@@ -607,14 +885,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">SDP ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+130</td>
-                    <td>$325</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SDP 1 - PIT 7</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-325
                     </td>
@@ -623,14 +904,17 @@
                 <tr>
                     <td>2026-04-07</td>
                     <td style="font-weight: 700;">ARI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+136</td>
-                    <td>$309</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">ARI 3 - NYM 4</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-309
                     </td>
@@ -639,14 +923,17 @@
                 <tr>
                     <td>2026-04-05</td>
                     <td style="font-weight: 700;">LAA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+145</td>
-                    <td>$268</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SEA 7 - LAA 8</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$388
                     </td>
@@ -655,14 +942,17 @@
                 <tr>
                     <td>2026-04-05</td>
                     <td style="font-weight: 700;">MIA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+240</td>
-                    <td>$251</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">MIA 7 - NYY 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$603
                     </td>
@@ -671,14 +961,17 @@
                 <tr>
                     <td>2026-04-05</td>
                     <td style="font-weight: 700;">SDP +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-150</td>
-                    <td>$441</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SDP 8 - BOS 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$294
                     </td>
@@ -687,14 +980,17 @@
                 <tr>
                     <td>2026-04-05</td>
                     <td style="font-weight: 700;">SDP ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+135</td>
-                    <td>$274</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SDP 8 - BOS 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$370
                     </td>
@@ -703,14 +999,17 @@
                 <tr>
                     <td>2026-04-05</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+110</td>
-                    <td>$401</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAD 8 - WSN 6</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-401
                     </td>
@@ -719,14 +1018,17 @@
                 <tr>
                     <td>2026-04-04</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-110</td>
-                    <td>$367</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 7 - MIN 1</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-367
                     </td>
@@ -735,14 +1037,17 @@
                 <tr>
                     <td>2026-04-04</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+146</td>
-                    <td>$567</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAD 10 - WSN 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-567
                     </td>
@@ -751,14 +1056,17 @@
                 <tr>
                     <td>2026-04-04</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+244</td>
-                    <td>$462</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAD 10 - WSN 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-462
                     </td>
@@ -767,14 +1075,17 @@
                 <tr>
                     <td>2026-04-04</td>
                     <td style="font-weight: 700;">CWS +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-110</td>
-                    <td>$423</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TOR 3 - CWS 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$385
                     </td>
@@ -783,14 +1094,17 @@
                 <tr>
                     <td>2026-04-03</td>
                     <td style="font-weight: 700;">SFG ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+115</td>
-                    <td>$322</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">NYM 10 - SFG 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-322
                     </td>
@@ -799,14 +1113,17 @@
                 <tr>
                     <td>2026-04-03</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-110</td>
-                    <td>$329</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 4 - MIN 10</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$299
                     </td>
@@ -815,14 +1132,17 @@
                 <tr>
                     <td>2026-04-03</td>
                     <td style="font-weight: 700;">CWS +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+105</td>
-                    <td>$427</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TOR 4 - CWS 5</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$449
                     </td>
@@ -831,14 +1151,17 @@
                 <tr>
                     <td>2026-04-03</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+150</td>
-                    <td>$471</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">STL 0 - DET 4</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-471
                     </td>
@@ -847,14 +1170,17 @@
                 <tr>
                     <td>2026-04-03</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+220</td>
-                    <td>$421</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAD 13 - WSN 6</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-421
                     </td>
@@ -863,14 +1189,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">CLE ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+220</td>
-                    <td>$238</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CLE 4 - LAD 1</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$524
                     </td>
@@ -879,14 +1208,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">ARI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$364</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">DET 0 - ARI 1</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$510
                     </td>
@@ -895,14 +1227,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">HOU ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+130</td>
-                    <td>$301</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">BOS 4 - HOU 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$391
                     </td>
@@ -911,14 +1246,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+141</td>
-                    <td>$438</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">NYM 1 - STL 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$617
                     </td>
@@ -927,14 +1265,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">MIA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-150</td>
-                    <td>$541</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CWS 0 - MIA 10</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$361
                     </td>
@@ -943,14 +1284,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+105</td>
-                    <td>$433</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 5 - PHI 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$455
                     </td>
@@ -959,14 +1303,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+225</td>
-                    <td>$579</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 5 - PHI 6</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-579
                     </td>
@@ -975,14 +1322,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">CIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$466</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">PIT 8 - CIN 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-466
                     </td>
@@ -991,14 +1341,17 @@
                 <tr>
                     <td>2026-04-01</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-118</td>
-                    <td>$536</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 1 - ATL 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-536
                     </td>
@@ -1007,14 +1360,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">CLE ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+218</td>
-                    <td>$275</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CLE 1 - LAD 4</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-275
                     </td>
@@ -1023,14 +1379,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">SDP ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+122</td>
-                    <td>$386</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">SFG 9 - SDP 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-386
                     </td>
@@ -1039,14 +1398,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">BOS ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+134</td>
-                    <td>$311</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">BOS 2 - HOU 9</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-311
                     </td>
@@ -1055,14 +1417,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$431</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">NYM 0 - STL 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$604
                     </td>
@@ -1071,14 +1436,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">MIA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-149</td>
-                    <td>$465</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CWS 2 - MIA 9</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$312
                     </td>
@@ -1087,14 +1455,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-126</td>
-                    <td>$419</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 2 - PHI 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$332
                     </td>
@@ -1103,14 +1474,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+159</td>
-                    <td>$512</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 2 - PHI 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-512
                     </td>
@@ -1119,14 +1493,17 @@
                 <tr>
                     <td>2026-03-31</td>
                     <td style="font-weight: 700;">CIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-105</td>
-                    <td>$316</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">PIT 8 - CIN 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-316
                     </td>
@@ -1135,14 +1512,17 @@
                 <tr>
                     <td>2026-03-30</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+130</td>
-                    <td>$462</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">NYM 4 - STL 2</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-462
                     </td>
@@ -1151,14 +1531,17 @@
                 <tr>
                     <td>2026-03-30</td>
                     <td style="font-weight: 700;">MIA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-134</td>
-                    <td>$696</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CWS 9 - MIA 4</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-696
                     </td>
@@ -1167,14 +1550,17 @@
                 <tr>
                     <td>2026-03-30</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+152</td>
-                    <td>$414</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 13 - PHI 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$629
                     </td>
@@ -1183,14 +1569,17 @@
                 <tr>
                     <td>2026-03-30</td>
                     <td style="font-weight: 700;">MIN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+141</td>
-                    <td>$321</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">MIN 1 - KCR 3</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-321
                     </td>
@@ -1199,14 +1588,17 @@
                 <tr>
                     <td>2026-03-29</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+104</td>
-                    <td>$572</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 6 - CHC 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$595
                     </td>
@@ -1215,14 +1607,17 @@
                 <tr>
                     <td>2026-03-29</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+210</td>
-                    <td>$386</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 6 - CHC 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$810
                     </td>
@@ -1231,14 +1626,17 @@
                 <tr>
                     <td>2026-03-29</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+103</td>
-                    <td>$496</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 11 - STL 7</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-496
                     </td>
@@ -1247,14 +1645,17 @@
                 <tr>
                     <td>2026-03-29</td>
                     <td style="font-weight: 700;">LAA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+154</td>
-                    <td>$383</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 7 - HOU 9</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-383
                     </td>
@@ -1263,14 +1664,17 @@
                 <tr>
                     <td>2026-03-29</td>
                     <td style="font-weight: 700;">TEX ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$321</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TEX 8 - PHI 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$449
                     </td>
@@ -1279,14 +1683,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-130</td>
-                    <td>$611</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 7 - TOR 8</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$470
                     </td>
@@ -1295,14 +1702,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">WSN +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-105</td>
-                    <td>$499</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 2 - CHC 10</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-499
                     </td>
@@ -1311,14 +1721,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+200</td>
-                    <td>$538</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 2 - CHC 10</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-538
                     </td>
@@ -1327,14 +1740,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">CLE ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+158</td>
-                    <td>$264</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CLE 6 - SEA 5</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$417
                     </td>
@@ -1343,14 +1759,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">ARI +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-105</td>
-                    <td>$502</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">ARI 2 - LAD 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$478
                     </td>
@@ -1359,14 +1778,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">LAA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+126</td>
-                    <td>$338</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 9 - HOU 11</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-338
                     </td>
@@ -1375,14 +1797,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">PHI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-105</td>
-                    <td>$364</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TEX 5 - PHI 4</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-364
                     </td>
@@ -1391,14 +1816,17 @@
                 <tr>
                     <td>2026-03-28</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-110</td>
-                    <td>$455</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 5 - STL 6</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$414
                     </td>
@@ -1407,14 +1835,17 @@
                 <tr>
                     <td>2026-03-27</td>
                     <td style="font-weight: 700;">CLE ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+152</td>
-                    <td>$326</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">CLE 1 - SEA 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-326
                     </td>
@@ -1423,14 +1854,17 @@
                 <tr>
                     <td>2026-03-27</td>
                     <td style="font-weight: 700;">LAA ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+140</td>
-                    <td>$318</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">LAA 6 - HOU 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$445
                     </td>
@@ -1439,14 +1873,17 @@
                 <tr>
                     <td>2026-03-27</td>
                     <td style="font-weight: 700;">COL +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-130</td>
-                    <td>$347</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">COL 1 - MIA 2</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$267
                     </td>
@@ -1455,14 +1892,17 @@
                 <tr>
                     <td>2026-03-27</td>
                     <td style="font-weight: 700;">Athletics +1.5</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: rgba(128,0,255,0.08); color: #7c3aed;">RL</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">-135</td>
-                    <td>$414</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">Athletics 2 - TOR 3</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$306
                     </td>
@@ -1471,14 +1911,17 @@
                 <tr>
                     <td>2026-03-26</td>
                     <td style="font-weight: 700;">ARI ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+214</td>
-                    <td>$385</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">ARI 2 - LAD 8</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-385
                     </td>
@@ -1487,14 +1930,17 @@
                 <tr>
                     <td>2026-03-26</td>
                     <td style="font-weight: 700;">TEX ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+136</td>
-                    <td>$294</td>
                     <td>
                         
                         <span class="result-badge loss">L</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TEX 3 - PHI 5</td>
                     <td class="loss" style="font-family: monospace; font-weight: 700;">
                         $-294
                     </td>
@@ -1503,14 +1949,17 @@
                 <tr>
                     <td>2026-03-26</td>
                     <td style="font-weight: 700;">STL ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+110</td>
-                    <td>$379</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">TBR 7 - STL 9</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$417
                     </td>
@@ -1519,14 +1968,17 @@
                 <tr>
                     <td>2026-03-26</td>
                     <td style="font-weight: 700;">WSN ML</td>
+                    <td>
+                        
+                        <span class="result-badge" style="background: var(--accent-light); color: var(--accent);">ML</span>
+                        
+                    </td>
                     <td style="font-family: monospace;">+193</td>
-                    <td>$211</td>
                     <td>
                         
                         <span class="result-badge win">W</span>
                         
                     </td>
-                    <td style="font-size: 0.85rem; color: var(--text-muted);">WSN 10 - CHC 4</td>
                     <td class="profit" style="font-family: monospace; font-weight: 700;">
                         +$407
                     </td>
@@ -1618,27 +2070,29 @@
     </script>
 
     
-
 <script>
-const ctx = document.getElementById('pnlChart').getContext('2d');
-const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}, {"bankroll": 11001.42, "cumulative": 1001.42, "date": "2026-03-30", "day_profit": -850.2}, {"bankroll": 10449.56, "cumulative": 449.56, "date": "2026-03-31", "day_profit": -551.86}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-01", "day_profit": 1277.01}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-02", "day_profit": 0}, {"bankroll": 11261.09, "cumulative": 1261.09, "date": "2026-04-03", "day_profit": -465.48}, {"bankroll": 10250.3, "cumulative": 250.3, "date": "2026-04-04", "day_profit": -1010.79}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-05", "day_profit": 1253.45}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-06", "day_profit": 0}, {"bankroll": 10752.34, "cumulative": 752.34, "date": "2026-04-07", "day_profit": -751.41}, {"bankroll": 12593.2, "cumulative": 2593.2, "date": "2026-04-08", "day_profit": 1840.86}, {"bankroll": 14444.43, "cumulative": 4444.43, "date": "2026-04-09", "day_profit": 1851.23}, {"bankroll": 18651.43, "cumulative": 8651.43, "date": "2026-04-10", "day_profit": 4207.0}];
-const isPositive = data[data.length-1].cumulative >= 0;
+// Bankroll growth chart
+const bankrollCtx = document.getElementById('bankrollChart').getContext('2d');
+const dailyData = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}, {"bankroll": 11001.42, "cumulative": 1001.42, "date": "2026-03-30", "day_profit": -850.2}, {"bankroll": 10449.56, "cumulative": 449.56, "date": "2026-03-31", "day_profit": -551.86}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-01", "day_profit": 1277.01}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-02", "day_profit": 0}, {"bankroll": 11261.09, "cumulative": 1261.09, "date": "2026-04-03", "day_profit": -465.48}, {"bankroll": 10250.3, "cumulative": 250.3, "date": "2026-04-04", "day_profit": -1010.79}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-05", "day_profit": 1253.45}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-06", "day_profit": 0}, {"bankroll": 10752.34, "cumulative": 752.34, "date": "2026-04-07", "day_profit": -751.41}, {"bankroll": 12593.2, "cumulative": 2593.2, "date": "2026-04-08", "day_profit": 1840.86}, {"bankroll": 14444.43, "cumulative": 4444.43, "date": "2026-04-09", "day_profit": 1851.23}, {"bankroll": 18651.43, "cumulative": 8651.43, "date": "2026-04-10", "day_profit": 4207.0}];
+const finalBankroll = dailyData[dailyData.length - 1].bankroll;
+const isPositive = finalBankroll >= 10000;
 
-new Chart(ctx, {
+new Chart(bankrollCtx, {
     type: 'line',
     data: {
-        labels: data.map(d => d.date),
+        labels: dailyData.map(d => d.date),
         datasets: [{
-            label: 'Cumulative P&L ($)',
-            data: data.map(d => d.cumulative),
+            label: 'Bankroll ($)',
+            data: dailyData.map(d => d.bankroll),
             borderColor: isPositive ? '#31A24C' : '#FA383E',
-            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.06)' : 'rgba(250, 56, 62, 0.06)',
+            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.08)' : 'rgba(250, 56, 62, 0.08)',
             fill: true,
             tension: 0.3,
-            pointRadius: 3,
+            pointRadius: 4,
             pointBackgroundColor: isPositive ? '#31A24C' : '#FA383E',
             pointBorderColor: '#fff',
-            pointBorderWidth: 1.5,
+            pointBorderWidth: 2,
+            borderWidth: 2.5,
         }]
     },
     options: {
@@ -1652,6 +2106,9 @@ new Chart(ctx, {
                 bodyFont: { family: 'Inter' },
                 padding: 10,
                 cornerRadius: 8,
+                callbacks: {
+                    label: ctx => '$' + ctx.parsed.y.toLocaleString(),
+                },
             },
         },
         scales: {
@@ -1664,14 +2121,88 @@ new Chart(ctx, {
                 ticks: {
                     color: '#8A8D91',
                     font: { family: 'Inter', size: 11 },
-                    callback: v => '$' + v,
+                    callback: v => '$' + v.toLocaleString(),
+                },
+                suggestedMin: 9000,
+            },
+        },
+    },
+});
+
+// Daily P&L bar chart
+const pnlCtx = document.getElementById('dailyPnlChart').getContext('2d');
+new Chart(pnlCtx, {
+    type: 'bar',
+    data: {
+        labels: dailyData.map(d => d.date),
+        datasets: [{
+            label: 'Daily P&L ($)',
+            data: dailyData.map(d => d.day_profit),
+            backgroundColor: dailyData.map(d => d.day_profit >= 0 ? 'rgba(49, 162, 76, 0.7)' : 'rgba(250, 56, 62, 0.7)'),
+            borderColor: dailyData.map(d => d.day_profit >= 0 ? '#31A24C' : '#FA383E'),
+            borderWidth: 1,
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(28, 30, 33, 0.9)',
+                titleFont: { family: 'Inter' },
+                bodyFont: { family: 'Inter' },
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: ctx => {
+                        const v = ctx.parsed.y;
+                        return (v >= 0 ? '+$' : '-$') + Math.abs(v).toLocaleString();
+                    },
+                },
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: {
+                    color: '#8A8D91',
+                    font: { family: 'Inter', size: 11 },
+                    callback: v => '$' + v.toLocaleString(),
                 },
             },
         },
     },
 });
-</script>
 
+// Simple table sort
+function sortTable(colIndex) {
+    const table = document.getElementById('picksTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const currentDir = table.dataset.sortDir === 'asc' ? 'desc' : 'asc';
+    table.dataset.sortDir = currentDir;
+
+    rows.sort((a, b) => {
+        let aVal = a.cells[colIndex].textContent.trim();
+        let bVal = b.cells[colIndex].textContent.trim();
+        // Try numeric (strip $ and +)
+        const aNum = parseFloat(aVal.replace(/[$+,]/g, ''));
+        const bNum = parseFloat(bVal.replace(/[$+,]/g, ''));
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return currentDir === 'asc' ? aNum - bNum : bNum - aNum;
+        }
+        return currentDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+</script>
 
 </body>
 </html>

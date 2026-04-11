@@ -11,6 +11,32 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    {% if stats is defined and stats.total_profit is defined %}
+    <div class="top-banner" id="top-banner">
+        <div class="top-banner-inner container">
+            <span class="top-banner-text">
+                {% if stats.total_profit > 0 %}
+                We're up <strong>${{ "%.0f"|format(stats.total_profit) }}</strong> this season &mdash; get free daily picks in your inbox
+                {% else %}
+                Get free daily MLB picks delivered to your inbox
+                {% endif %}
+            </span>
+            <a href="#subscribe-section" class="top-banner-cta">Subscribe</a>
+            <button class="top-banner-close" aria-label="Dismiss" onclick="document.getElementById('top-banner').style.display='none';try{sessionStorage.setItem('banner_dismissed','1')}catch(e){}">&times;</button>
+        </div>
+    </div>
+    <script>try{if(sessionStorage.getItem('banner_dismissed'))document.getElementById('top-banner').style.display='none'}catch(e){}</script>
+    {% else %}
+    <div class="top-banner" id="top-banner">
+        <div class="top-banner-inner container">
+            <span class="top-banner-text">Get free daily MLB picks delivered to your inbox</span>
+            <a href="#subscribe-section" class="top-banner-cta">Subscribe</a>
+            <button class="top-banner-close" aria-label="Dismiss" onclick="document.getElementById('top-banner').style.display='none';try{sessionStorage.setItem('banner_dismissed','1')}catch(e){}">&times;</button>
+        </div>
+    </div>
+    <script>try{if(sessionStorage.getItem('banner_dismissed'))document.getElementById('top-banner').style.display='none'}catch(e){}</script>
+    {% endif %}
+
     <nav class="navbar">
         <div class="container">
             <a href="{{ base_url|default('') }}index.html" class="logo">Ozzy Analytics</a>
@@ -20,6 +46,7 @@
             <div class="nav-links">
                 <a href="{{ base_url|default('') }}index.html" class="{% if active == 'picks' %}active{% endif %}">Today's Picks</a>
                 <a href="{{ base_url|default('') }}results.html" class="{% if active == 'results' %}active{% endif %}">Results</a>
+                <a href="{{ base_url|default('') }}dashboard.html" class="{% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
                 <a href="{{ base_url|default('') }}backtest.html" class="{% if active == 'backtest' %}active{% endif %}">2025 Backtest</a>
                 <a href="{{ base_url|default('') }}simulate.html" class="{% if active == 'simulate' %}active{% endif %}">Simulate</a>
                 <a href="{{ base_url|default('') }}about.html" class="{% if active == 'about' %}active{% endif %}">About</a>
@@ -31,14 +58,23 @@
         {% block content %}{% endblock %}
     </main>
 
-    <section class="subscribe-section">
+    <section class="subscribe-section" id="subscribe-section">
         <div class="container">
             <div class="subscribe-inner glass">
                 <h3>Get daily picks in your inbox</h3>
-                <p>Free email with every day's model picks before first pitch.</p>
+                <p class="subscribe-social-proof">Join our subscribers getting free picks before first pitch.</p>
+                {% if stats is defined and stats.total_profit is defined and stats.total_profit != 0 %}
+                <p class="subscribe-track-record">
+                    {% if stats.total_profit > 0 %}
+                    The model is up <strong>${{ "%.0f"|format(stats.total_profit) }}</strong> this season{% if stats.roi is defined %} with <strong>{{ stats.roi }}% ROI</strong>{% endif %}.
+                    {% else %}
+                    Transparent results &mdash; every pick tracked, win or lose.
+                    {% endif %}
+                </p>
+                {% endif %}
                 <form class="subscribe-form" id="subscribe-form">
                     <input type="email" name="email" placeholder="you@email.com" required>
-                    <button type="submit" class="subscribe-btn">Subscribe</button>
+                    <button type="submit" class="subscribe-btn">Subscribe — It's Free</button>
                 </form>
                 <div class="subscribe-msg" id="subscribe-msg"></div>
             </div>
