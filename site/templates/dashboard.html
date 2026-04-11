@@ -304,17 +304,17 @@
             {% elif cell.profit > 0 %}
             <div class="cal-cell win-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+                <span class="cal-record">+${{ "%.0f"|format(cell.profit) }}</span>
             </div>
             {% elif cell.profit < 0 %}
             <div class="cal-cell loss-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+                <span class="cal-record">-${{ "%.0f"|format(cell.profit|abs) }}</span>
             </div>
             {% else %}
             <div class="cal-cell even-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">{{ cell.wins }}-{{ cell.losses }}</span>
+                <span class="cal-record">$0</span>
             </div>
             {% endif %}
             {% endfor %}
