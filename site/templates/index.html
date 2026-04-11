@@ -152,12 +152,15 @@
                     <span class="pick-row-stat-val">${{ "%.0f"|format(pick.wager) }}</span>
                     <span class="pick-row-stat-lbl">Wager</span>
                 </div>
-                {% if pick._sim_our_runs %}
                 <div class="pick-row-stat">
-                    <span class="pick-row-stat-val">{{ "%.1f"|format(pick._sim_our_runs) }}-{{ "%.1f"|format(pick._sim_their_runs) }}</span>
-                    <span class="pick-row-stat-lbl">Proj Runs</span>
+                    {% set odds_val = pick.odds|replace("+","")|int %}
+                    {% if odds_val > 0 %}
+                    <span class="pick-row-stat-val profit">${{ "%.0f"|format(pick.wager * odds_val / 100) }}</span>
+                    {% else %}
+                    <span class="pick-row-stat-val profit">${{ "%.0f"|format(pick.wager * 100 / (odds_val|abs)) }}</span>
+                    {% endif %}
+                    <span class="pick-row-stat-lbl">To Win</span>
                 </div>
-                {% endif %}
             </div>
 
             {# Right: Sportsbook odds #}
