@@ -56,58 +56,58 @@
 </section>
 {% endif %}
 
-<section class="intro-section fade-in">
-    <div class="intro-card glass">
-        <h2 class="intro-headline">Every game. 10,000 simulations. Zero gut feelings.</h2>
-        <p class="intro-text">Ozzy Analytics runs a full Monte Carlo simulation engine on every MLB game — modeling each plate appearance from Statcast data, blending batter-pitcher matchups, and comparing the results to sportsbook lines. When the model finds an edge, you'll see it here.</p>
-        <div class="intro-links">
-            <a href="about.html" class="intro-link glass">How It Works &rarr;</a>
-            <a href="backtest.html" class="intro-link glass">2025 Backtest Results &rarr;</a>
-            <a href="simulate.html" class="intro-link glass accent">Run Your Own Sim &rarr;</a>
+{% if today %}
+<section class="hero-compact">
+    <div class="hero-top">
+        <div class="hero-left">
+            <h1 class="hero-title">{{ display_date }}</h1>
+            <p class="hero-sub">{{ today.games|length if today.games else 0 }} games{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
+        </div>
+        <div class="hero-bankroll">
+            <span class="hero-bankroll-label">$10K &rarr;</span>
+            <span class="hero-bankroll-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.current_bankroll) }}</span>
         </div>
     </div>
-</section>
 
-<section class="hero">
-    {% if today %}
-    <h1 class="hero-date-big">{% if is_opening_day %}Opening Day Picks — {{ display_date }}{% else %}MLB Picks — {{ display_date }}{% endif %}</h1>
-    <p class="hero-sub">{{ today.games|length if today.games else 0 }} games on the slate{% if today.picks %} &middot; {{ today.picks|length }} pick{{ "s" if today.picks|length != 1 }}{% endif %}</p>
+    <div class="stats-strip fade-in">
+        <div class="strip-stat">
+            <span class="strip-value">{{ stats.wins }}-{{ stats.losses }}</span>
+            <span class="strip-label">Record</span>
+        </div>
+        <div class="strip-stat">
+            <span class="strip-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">{% if stats.total_profit >= 0 %}+{% endif %}${{ "%.0f"|format(stats.total_profit) }}</span>
+            <span class="strip-label">Profit</span>
+        </div>
+        <div class="strip-stat">
+            <span class="strip-value {% if stats.roi >= 0 %}profit{% else %}loss{% endif %}">{{ stats.roi }}%</span>
+            <span class="strip-label">ROI</span>
+        </div>
+        <div class="strip-stat">
+            <span class="strip-value">{{ stats.wins + stats.losses }}</span>
+            <span class="strip-label">Picks</span>
+        </div>
+    </div>
+
     {% if not is_past %}
     {% if today.run_mode == 'preview' %}
     <div class="preview-banner glass">
         <span class="preview-badge">PREVIEW</span>
-        Night-before projections using expected lineups. Picks auto-update throughout the day as lineups are confirmed.
+        Night-before projections. Updates when lineups are confirmed.
     </div>
     {% elif today.run_mode == 'early' and not is_opening_day %}
     <div class="preliminary-banner glass">
         <span class="preview-badge" style="background: rgba(24, 119, 242, 0.12); color: var(--accent);">UPDATING</span>
-        Picks are updating as lineups are confirmed. The model re-runs automatically when new lineups are posted.
+        Picks updating as lineups are confirmed.
     </div>
     {% endif %}
-    {% endif %}
-    <div class="stats-bar fade-in">
-        <div class="stat-card glass">
-            <span class="stat-value">{{ stats.wins }}-{{ stats.losses }}</span>
-            <span class="stat-label">Season Record</span>
-        </div>
-        <div class="stat-card glass">
-            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.total_profit) }}</span>
-            <span class="stat-label">Season P&L</span>
-        </div>
-        <div class="stat-card glass">
-            <span class="stat-value">{{ stats.roi }}%</span>
-            <span class="stat-label">ROI</span>
-        </div>
-        <div class="stat-card glass">
-            <span class="stat-value">${{ "%.0f"|format(stats.current_bankroll) }}</span>
-            <span class="stat-label">Bankroll</span>
-        </div>
-    </div>
-    {% else %}
-    <h1>No picks yet</h1>
-    <p class="hero-sub">The daily pipeline hasn't run yet. Check back after lineups are confirmed.</p>
     {% endif %}
 </section>
+{% else %}
+<section class="hero-compact">
+    <h1 class="hero-title">No picks yet</h1>
+    <p class="hero-sub">Check back after lineups are confirmed.</p>
+</section>
+{% endif %}
 
 {% if today and today.picks %}
 <section class="section fade-in">
@@ -165,15 +165,6 @@
 </section>
 {% endif %}
 
-<section class="sim-promo fade-in">
-    <div class="promo-card glass">
-        <div class="promo-content">
-            <h3 class="promo-title">Pick any matchup. Simulate it yourself.</h3>
-            <p class="promo-text">Our interactive simulator lets you pick two teams, set lineups, and watch 1,000 games play out pitch by pitch — complete with a live diamond, box score, and play-by-play. It's the same engine that powers these picks, running right in your browser.</p>
-            <a href="simulate.html" class="promo-btn">Launch Simulator &rarr;</a>
-        </div>
-    </div>
-</section>
 
 {% if today and today.games %}
 <section class="section fade-in">

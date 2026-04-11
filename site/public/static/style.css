@@ -397,24 +397,84 @@ body {
     .od-team { font-size: 0.85rem; }
 }
 
-/* ── Hero ── */
+/* ── Hero Compact ── */
+.hero-compact {
+    padding: 1.5rem 0 1rem;
+}
+.hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.hero-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0;
+}
+.hero-sub {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+.hero-bankroll {
+    text-align: right;
+}
+.hero-bankroll-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.hero-bankroll-value {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* ── Stats Strip ── */
+.stats-strip {
+    display: flex;
+    gap: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+.strip-stat {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    border-right: 1px solid var(--border);
+}
+.strip-stat:last-child { border-right: none; }
+.strip-value {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.strip-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.15rem;
+}
+
+/* ── Legacy Hero (keep for other pages) ── */
 .hero {
     padding: 2.5rem 0 1.5rem;
     text-align: center;
-}
-.hero-date {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
 }
 .hero-date-big {
     font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--text);
-    margin-bottom: 0.25rem;
     margin-bottom: 0.5rem;
 }
 .hero h1 {
@@ -423,13 +483,8 @@ body {
     letter-spacing: -0.03em;
     color: var(--text);
 }
-.hero-sub {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-top: 0.5rem;
-}
 
-/* ── Stats Bar ── */
+/* ── Stats Bar (legacy) ── */
 .stats-bar {
     display: flex;
     justify-content: center;
