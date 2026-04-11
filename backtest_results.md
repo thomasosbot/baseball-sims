@@ -898,16 +898,42 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 
 Tracking live performance from Opening Day (March 26, 2026). Bankroll computed as $10,000 + cumulative regular season profit (spring training excluded).
 
-### Opening Day — March 26, 2026
+### Season Summary (through April 10, 2026)
 
-| Pick | Type | Result | Odds | Profit |
-|------|------|--------|------|--------|
-| WSN ML | Moneyline | W | +193 | +$407 |
-| STL ML | Moneyline | W | +110 | +$417 |
-| TEX ML | Moneyline | L | +136 | -$294 |
-| ARI ML | Moneyline | L | +214 | -$385 |
+| Metric | Value |
+|--------|-------|
+| **Days** | 16 |
+| **Record** | 46W-32L (59.0%) |
+| **Profit** | +$8,651 |
+| **ROI** | 26.0% |
+| **Bankroll** | $10,000 → $18,651 (+86.5%) |
 
-**Day: 2W-2L, +$145.30, Bankroll: $10,145.30**
+### Daily Breakdown
+
+| Date | Record | P&L | Bankroll |
+|------|--------|-----|----------|
+| 03/26 | 2W-2L | +$145 | $10,145 |
+| 03/27 | 3W-1L | +$692 | $10,837 |
+| 03/28 | 4W-4L | +$40 | $10,877 |
+| 03/29 | 3W-2L | +$975 | $11,852 |
+| 03/30 | 1W-3L | -$850 | $11,001 |
+| 03/31 | 3W-5L | -$552 | $10,450 |
+| 04/01 | 6W-3L | +$1,277 | $11,727 |
+| 04/02 | 0W-0L | $0 | $11,727 |
+| 04/03 | 2W-3L | -$465 | $11,261 |
+| 04/04 | 1W-3L | -$1,011 | $10,250 |
+| 04/05 | 4W-1L | +$1,253 | $11,504 |
+| 04/06 | 0W-0L | $0 | $11,504 |
+| 04/07 | 2W-4L | -$751 | $10,752 |
+| 04/08 | 4W-0L | +$1,841 | $12,593 |
+| 04/09 | 4W-0L | +$1,851 | $14,444 |
+| 04/10 | 7W-1L | +$4,207 | $18,651 |
+
+### Key Observations
+- **Hot streak Apr 8-10:** 15-1, +$7,899 in 3 days. Two perfect sweeps followed by a 7-1 day.
+- **Model favors underdogs:** Majority of picks are plus-money. Wins pay more than losses cost.
+- **Resilience:** Two losing streaks (Mar 30-31 and Apr 3-4) followed by strong recoveries.
+- **Run line contributing:** Dog +1.5 picks adding value alongside moneyline.
 
 ---
 

@@ -312,12 +312,12 @@ Used in the daily pipeline for game-day weather forecasts. Free, no API key requ
 
 | Channel | Module | Status | Notes |
 |---------|--------|--------|-------|
-| **Website** | `site/generate.py` | Live | `ozzyanalytics.com` via Netlify. Homepage card grid (ML + RL odds), individual game preview pages (`/games/YYYY-MM-DD/`), results, backtest, simulator. |
-| **Newsletter** | `src/newsletter/sender.py` | Live | Daily email via Resend API from `picks@ozzyanalytics.com`. Game narratives from MLB play-by-play. |
-| **Twitter/X** | `src/twitter/poster.py` | Live | @Ozzy_Analytics. Daily tweet with recap + picks + season stats. Auto-trims to 280 chars. tweepy (X API v2). |
-| **Discord** | `src/discord/poster.py` | Built, awaiting config | Rich embed via webhook. Needs `DISCORD_WEBHOOK_URL` secret. |
-| **Reddit** | `src/reddit/poster.py` | Built, awaiting config | Comments on r/sportsbook daily threads + own subreddit via PRAW. Needs `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USERNAME`, `REDDIT_PASSWORD`. |
-| **TikTok** | `src/tiktok/video.py` | Paused | Video generator works (Pillow + MoviePy, 1080x1920) but TikTok community guidelines flag betting content. TikTok-safe version stripped too much context. Code retained. |
+| **Website** | `site/generate.py` | Live | `ozzyanalytics.com` via Netlify. Compact stats-first homepage, full-width pick rows with colored sportsbook badges, card grid for all games (ML + RL odds), individual game preview pages (`/games/YYYY-MM-DD/`) for SEO, results with P&L chart, backtest, simulator. Twitter + Discord links in footer. |
+| **Newsletter** | `src/newsletter/sender.py` | Live | Daily email via Resend API from `picks@ozzyanalytics.com`. Rich per-pick context (weather, pitchers, Elo, run projections). Yesterday's recap with boxscore batting lines. Retry logic for Resend rate limits. |
+| **Twitter/X** | `src/twitter/poster.py`, `results_poster.py` | Live | @Ozzy_Analytics (verified). Morning: pick card image + tweet with wager amounts. Nightly: results card image + tweet with bankroll growth ($10K → current). Via tweepy (v1.1 media + v2 tweet). |
+| **Discord** | `src/discord/poster.py` | Live | Ozzy Analytics server (discord.gg/mZPRnH44). Morning picks embed → `#daily-picks`. Nightly results embed → `#results`. Via webhooks. |
+| **Reddit** | `src/reddit/poster.py` | Awaiting API approval | u/ozzy_analytics. Code ready to comment on r/sportsbook daily threads + post to own subreddit via PRAW. API application submitted. |
+| **TikTok** | `src/tiktok/video.py` | Paused | Video generator works (Pillow + MoviePy, 1080x1920) but TikTok community guidelines flag betting content. Code retained. |
 
 ## Data Not Yet Integrated (planned)
 

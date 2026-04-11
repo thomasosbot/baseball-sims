@@ -113,41 +113,53 @@ The Odds API        →  park factors                             →  ROI / CLV
 |-----------|--------|---------|
 | `src/data/state.py` | State persistence | Saves/loads CumulativeStats, Elo, batter speeds, bankroll between daily runs as pickles in `data/state/` |
 | `scripts/init_season.py` | Preseason setup | One-time: builds Marcel+BHQ projections, seeds Elo from prior seasons, saves initial state |
-| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds (moneyline + spreads; totals fetch disabled for 2026), runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode early` (projected lineups from team's most recent game) and `--mode late` (confirmed lineups). Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, and Elo ratings for the expandable game detail view. |
-| `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L. Deduplicates results.json entries by date on re-runs. |
-| `site/generate.py` | Static site generator | Reads daily JSON files, enriches games with run line odds from spread cache, filters out totals picks, renders Jinja2 templates to `site/public/` (Netlify). Generates individual game preview pages at `/games/YYYY-MM-DD/AWAY-vs-HOME.html` with SEO meta tags. Builds embedded JSON for game simulator (30 teams, player profiles, park factors). Bankroll computed as `$10,000 + cumulative profits` (not from state, which carries spring training). |
-| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + footer, `base_url` for nested pages), `index.html` (picks + card-grid games table with ML/RL odds + opening day banner), `game.html` (individual game preview with WP breakdown, sim results, lineups, odds, park factors), `games_index.html` (daily games index), `history.html` → `results.html` (chart + results), `simulate.html` (interactive game simulator), `about.html` (model info) |
+| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds (moneyline + spreads; totals fetch disabled for 2026), runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode late` (confirmed lineups) with automatic fallback to RotoGrinders/platoon projected lineups per-game when confirmed aren't available. Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, and Elo ratings. |
+| `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L. Bankroll computed as `$10,000 + cumulative regular season profit` (not from state). Deduplicates results.json entries by date on re-runs. |
+| `site/generate.py` | Static site generator | Reads daily JSON files, enriches games with run line odds from spread cache, enriches picks with game context (pitchers, weather, sim runs), filters out totals picks, renders Jinja2 templates to `site/public/` (Netlify). Generates individual game preview pages at `/games/YYYY-MM-DD/AWAY-vs-HOME.html` with SEO meta tags (~15 new pages/day). |
+| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + Twitter/Discord links in footer), `index.html` (compact stats-first hero with bankroll growth, full-width pick rows with sportsbook badges, card-grid games table with ML/RL odds), `game.html` (individual game preview with WP breakdown, sim results, lineups, odds, park factors), `games_index.html` (daily games index), `history.html` → `results.html` (P&L chart + results), `simulate.html` (interactive game simulator), `about.html` (model info) |
 | `site/static/sim.js` | JS simulation engine | Faithful port of the Python MC engine to JavaScript — runs entirely client-side. Includes odds-ratio PA model, base advancement, SB/WP/errors, TTO, tiered bullpen, extra innings with ghost runner. |
-| `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: light gradient background, frosted glass cards, Inter font, sportsbook-colored odds badges, expandable game detail panels with CSS bar charts, SVG baseball diamond with runner animations |
+| `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: compact stats strip, full-width pick rows with colored sportsbook badges, card grid for games with ML/RL odds, game preview pages, responsive mobile layout |
 | `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
 | `site/netlify.toml` | Netlify config | Build settings, publish dir, functions dir |
-| `src/newsletter/sender.py` | Email newsletter | Fetches subscribers from Resend Contacts API (audience-based), sends daily picks HTML email from `picks@ozzyanalytics.com` with game narratives from MLB play-by-play API |
-| `src/twitter/poster.py` | Twitter/X posting | Posts daily picks tweet with yesterday's recap, today's picks, season stats, and hashtags. Auto-trims to 280 chars. |
-| `src/discord/poster.py` | Discord posting | Posts rich embed via webhook (picks, recap, season stats). Awaiting `DISCORD_WEBHOOK_URL` secret. |
-| `src/reddit/poster.py` | Reddit posting | Comments on r/sportsbook daily MLB threads via PRAW + posts to own subreddit. Awaiting Reddit API credentials. |
+| `src/newsletter/sender.py` | Email newsletter | Fetches subscribers from Resend Contacts API (with retry). Rich pick context (weather, park factors, Elo, pitchers, run projections). Yesterday's narratives enriched from MLB boxscores (batting lines, HRs). Rotating witty taglines and diverse blurbs. Sends from `picks@ozzyanalytics.com`. |
+| `src/twitter/poster.py` | Morning picks tweet | Generates pick card image (1200x675) via `card.py` and posts with tweet text showing season stats + total wagered. Uses v1.1 API for media upload, v2 for tweeting. Falls back to text-only. |
+| `src/twitter/card.py` | Picks card image | Dark-themed card with ML/RL badges, odds, wager per pick, model win %, edge, matchup. Yesterday's recap + season stats on right side. |
+| `src/twitter/results_poster.py` | Nightly results tweet | Generates results card image via `results_card.py` and posts with flavor text + season stats + bankroll growth. |
+| `src/twitter/results_card.py` | Results card image | W/L rows with scores, odds, profit per pick. Season stats sidebar. "PERFECT DAY" / "BIG DAY" callout badges. |
+| `src/discord/poster.py` | Discord posting | Morning: posts picks embed to `#daily-picks` channel. Nightly: posts results embed to `#results` channel. Both via webhooks. |
+| `src/reddit/poster.py` | Reddit posting | Comments on r/sportsbook daily MLB threads via PRAW + posts to own subreddit. Awaiting Reddit API approval. |
 | `src/tiktok/video.py` | TikTok video generator | Generates 1080x1920 vertical pick card videos (Pillow + MoviePy). Currently paused — TikTok community guidelines flagged betting content. Code retained for future use. |
-| `.github/workflows/daily_picks.yml` | Automation | Single daily run at 8 AM ET — grades results, generates picks, rebuilds website (including game preview pages), sends newsletter + tweet, posts to Discord/Reddit (when configured), commits + pushes. |
+| `.github/workflows/daily_picks.yml` | Morning automation | Triggered by cron-job.org at 8:30 AM ET via workflow_dispatch. Grades results, generates picks, rebuilds website, sends newsletter, tweets with pick card image, posts to Discord `#daily-picks`, commits + pushes. |
+| `.github/workflows/nightly_results.yml` | Nightly automation | Triggered by cron-job.org at 12:45 AM ET. Grades today's results, regenerates results.html only, tweets results card image, posts to Discord `#results`, commits + pushes. |
 
 **Daily pipeline flow:**
 ```
-[8 AM ET] Daily run (--mode late)
-    → update_results.py (grade yesterday's picks)
-    → run_daily.py --mode late (confirmed lineups, generate picks)
-    → site/generate.py (rebuild website + game preview pages)
-    → newsletter/sender.py (email subscribers)
-    → twitter/poster.py (post picks tweet)
-    → discord/poster.py (post embed — when configured)
-    → reddit/poster.py (post to daily threads — when configured)
+[8:30 AM ET] Morning run (cron-job.org → workflow_dispatch)
+    → update_results.py (grade yesterday, catches late west coast games)
+    → run_daily.py --mode late (confirmed + projected fallback lineups)
+    → site/generate.py (rebuild full website + game preview pages)
+    → newsletter/sender.py (email subscribers with rich context)
+    → twitter/poster.py (tweet with pick card image)
+    → discord/poster.py (embed to #daily-picks)
     → git commit + push (triggers Netlify deploy)
+
+[12:45 AM ET] Nightly run (cron-job.org → workflow_dispatch)
+    → update_results.py (grade today's results)
+    → regenerate results.html only (preserve picks tab)
+    → twitter/results_poster.py (tweet results card image)
+    → discord/poster.py (embed to #results)
+    → git commit + push
 ```
 
 ## Deployment
 
 - **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
-- **Live dashboard:** [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app) (Streamlit Community Cloud, auto-deploys from `main`)
-- **Picks website:** "Ozzy Analytics" at `ozzyanalytics.com` — static HTML in `site/public/`, deployed via Netlify (free tier). Meta-inspired pastel + glassmorphism design. Homepage card grid shows ML + RL odds with highlighted picks. Individual game preview pages at `/games/YYYY-MM-DD/` for SEO (~15 new pages/day, targeting long-tail search queries like "NYY vs BOS prediction"). Newsletter subscription via Netlify serverless function → Resend Contacts API.
-- **Twitter/X:** @Ozzy_Analytics — daily picks tweet at 8 AM ET via tweepy (X API v2).
-- **Newsletter:** Daily email via Resend API from `picks@ozzyanalytics.com`. Game narratives from MLB play-by-play data.
+- **Scheduling:** cron-job.org triggers GitHub workflow_dispatch (replaced unreliable GitHub Actions cron)
+- **Picks website:** "Ozzy Analytics" at `ozzyanalytics.com` — static HTML in `site/public/`, deployed via Netlify. Compact stats-first homepage with bankroll growth, full-width pick rows with colored sportsbook badges, card grid for all games with ML/RL odds, individual game preview pages for SEO (~15 new pages/day). Footer links to Twitter and Discord.
+- **Twitter/X:** @Ozzy_Analytics (verified) — morning picks tweet with card image, nightly results tweet with results card. Via tweepy (v1.1 media upload + v2 tweet).
+- **Discord:** Ozzy Analytics server — `#daily-picks` (morning) and `#results` (nightly) via webhooks. Invite: discord.gg/mZPRnH44
+- **Newsletter:** Daily email via Resend API from `picks@ozzyanalytics.com`. Rich context per pick (weather, pitchers, Elo, run projections). Yesterday's recap with boxscore batting lines.
+- **Reddit:** u/ozzy_analytics — API access pending approval. Code ready in `src/reddit/poster.py`.
 
 ## Validation Status
 
