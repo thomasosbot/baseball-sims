@@ -112,43 +112,62 @@
 {% if today and today.picks %}
 <section class="section fade-in">
     <h2 class="section-title">Picks</h2>
-    <div class="picks-grid">
+    <div class="picks-list">
         {% for pick in today.picks %}
-        <div class="pick-card glass">
-            <div class="pick-header">
-                <div class="pick-title-row">
-                    <span class="pick-name">{{ pick.pick }}</span>
-                    <span class="pick-type-badge {{ pick.type|default('moneyline') }}">{{ "RL" if pick.type == "run_line" else "ML" }}</span>
+        <div class="pick-row glass">
+            {# Left: Pick name + badge + matchup #}
+            <div class="pick-row-left">
+                <div class="pick-row-top">
+                    <span class="pick-type-badge {% if pick.type == 'run_line' %}badge-rl{% else %}badge-ml{% endif %}">{{ "RL" if pick.type == "run_line" else "ML" }}</span>
+                    <span class="pick-row-name">{{ pick.pick }}</span>
+                    <span class="pick-row-odds">{{ pick.odds }}</span>
                 </div>
-                <span class="pick-odds">{{ pick.odds }}</span>
-                {% if pick.lineup_status == 'projected' and not is_past %}
-                <span class="lineup-badge projected">projected lineup</span>
+                <div class="pick-row-matchup">
+                    {% if pick._pitcher_us %}
+                    <span class="pick-row-pitchers">{{ pick._pitcher_us }} vs {{ pick._pitcher_them }}</span>
+                    <span class="pick-row-sep">&middot;</span>
+                    {% endif %}
+                    <span>{{ pick.team }} {% if pick.side == 'away' %}@{% else %}vs{% endif %} {{ pick.opponent }}</span>
+                    {% if pick._weather and pick._weather.temperature %}
+                    <span class="pick-row-sep">&middot;</span>
+                    <span class="pick-row-weather">{{ "%.0f"|format(pick._weather.temperature) }}&deg;F{% if pick._weather.wind_speed and pick._weather.wind_speed > 8 %}, {{ "%.0f"|format(pick._weather.wind_speed) }}mph {{ pick._weather.wind_direction|default('') }}{% endif %}</span>
+                    {% elif pick._weather and pick._weather.condition == 'Dome' %}
+                    <span class="pick-row-sep">&middot;</span>
+                    <span class="pick-row-weather">Dome</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Center: Stats #}
+            <div class="pick-row-stats">
+                <div class="pick-row-stat">
+                    <span class="pick-row-stat-val">{{ "%.0f"|format(pick.model_prob * 100) }}%</span>
+                    <span class="pick-row-stat-lbl">Win %</span>
+                </div>
+                <div class="pick-row-stat">
+                    <span class="pick-row-stat-val edge">+{{ pick.edge_pct }}%</span>
+                    <span class="pick-row-stat-lbl">Edge</span>
+                </div>
+                <div class="pick-row-stat">
+                    <span class="pick-row-stat-val">${{ "%.0f"|format(pick.wager) }}</span>
+                    <span class="pick-row-stat-lbl">Wager</span>
+                </div>
+                {% if pick._sim_our_runs %}
+                <div class="pick-row-stat">
+                    <span class="pick-row-stat-val">{{ "%.1f"|format(pick._sim_our_runs) }}-{{ "%.1f"|format(pick._sim_their_runs) }}</span>
+                    <span class="pick-row-stat-lbl">Proj Runs</span>
+                </div>
                 {% endif %}
             </div>
-            <div class="pick-details">
-                <div class="pick-metric">
-                    <span class="metric-label">Edge</span>
-                    <span class="metric-value edge">{{ pick.edge_pct }}%</span>
-                </div>
-                <div class="pick-metric">
-                    <span class="metric-label">Model Win %</span>
-                    <span class="metric-value">{{ "%.0f"|format(pick.model_prob * 100) if pick.model_prob else "—" }}%</span>
-                </div>
-                <div class="pick-metric">
-                    <span class="metric-label">Wager</span>
-                    <span class="metric-value">${{ "%.0f"|format(pick.wager) if pick.wager else "—" }}</span>
-                </div>
-            </div>
-            {% if pick.explanation %}
-            <p class="pick-explanation">{{ pick.explanation }}</p>
-            {% endif %}
+
+            {# Right: Sportsbook odds #}
             {% if pick.sportsbook_odds %}
-            <div class="sportsbook-odds">
+            <div class="pick-row-books">
+                {% set best_odds = pick.sportsbook_odds.values()|list|max %}
                 {% for book, odds in pick.sportsbook_odds.items() %}
                 {% set odds_str = "+" ~ odds if odds > 0 else odds %}
-                {% set is_best = (odds|string == pick.odds|replace("+", "")|string) or (odds_str == pick.odds) %}
-                <span class="book-badge {{ book }} {% if is_best %}best-odds{% endif %}">
-                    <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("bovada", "Bovada") | replace("pinnacle", "Pinnacle") | replace("betrivers", "BetRivers") | replace("espnbet", "ESPN BET") | replace("fanatics", "Fanatics") }}</span>
+                <span class="book-badge {% if odds == best_odds %}best-odds{% endif %}">
+                    <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("bovada", "Bovada") }}</span>
                     {{ odds_str }}
                 </span>
                 {% endfor %}

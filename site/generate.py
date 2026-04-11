@@ -86,6 +86,24 @@ def generate_site():
     if is_opening_day:
         opening_day_schedule = _build_opening_day_schedule(latest)
 
+    # Enrich picks with game context (pitchers, weather, sim detail)
+    if latest and latest.get("picks") and latest.get("games"):
+        games_lookup = {}
+        for g in latest["games"]:
+            games_lookup[(g.get("away"), g.get("home"))] = g
+            games_lookup[(g.get("home"), g.get("away"))] = g
+        for pick in latest["picks"]:
+            team = pick.get("team", "")
+            opp = pick.get("opponent", "")
+            game = games_lookup.get((team, opp))
+            if game:
+                pick["_pitcher_us"] = game.get("home_pitcher") if pick.get("side") == "home" else game.get("away_pitcher")
+                pick["_pitcher_them"] = game.get("away_pitcher") if pick.get("side") == "home" else game.get("home_pitcher")
+                pick["_weather"] = game.get("weather", {})
+                pick["_sim_our_runs"] = game.get("sim_detail", {}).get("avg_home_runs" if pick.get("side") == "home" else "avg_away_runs")
+                pick["_sim_their_runs"] = game.get("sim_detail", {}).get("avg_away_runs" if pick.get("side") == "home" else "avg_home_runs")
+                pick["_park_hr"] = game.get("park_factors", {}).get("HR")
+
     # --- Render pages ---
     # Index (today's picks)
     template = env.get_template("index.html")

@@ -532,73 +532,94 @@ body {
 }
 
 /* ── Pick Cards ── */
+/* ── Pick Rows (full-width) ── */
+.picks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pick-row {
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--green);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.pick-row-left { flex: 1; min-width: 240px; }
+.pick-row-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+.pick-row-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.pick-row-odds {
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: 'Inter', monospace;
+}
+.pick-row-matchup {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+.pick-row-pitchers { font-weight: 600; color: var(--text); }
+.pick-row-sep { color: var(--text-muted); }
+.pick-row-weather { color: var(--text-muted); font-style: italic; }
+
+.pick-row-stats {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+.pick-row-stat { text-align: center; }
+.pick-row-stat-val {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+.pick-row-stat-lbl {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.1rem;
+}
+
+.pick-row-books {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .pick-row { flex-direction: column; gap: 0.75rem; }
+    .pick-row-stats { gap: 1rem; }
+}
+
+/* ── Legacy pick card styles (kept for reference) ── */
 .picks-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
-}
-
-.pick-card {
-    padding: 1.25rem 1.25rem 1.25rem 1.5rem;
-    border-left: 3px solid var(--green);
-    cursor: default;
-}
-.pick-card:hover {
-    transform: translateY(-2px);
-}
-
-.pick-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.pick-name {
-    font-size: 1.15rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-}
-.pick-odds {
-    background: var(--accent-light);
-    color: var(--accent);
-    padding: 0.2rem 0.65rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 0.9rem;
-    font-family: 'Inter', monospace;
-}
-
-.pick-details {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-}
-.pick-metric { flex: 1; }
-.metric-label {
-    display: block;
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-}
-.metric-value {
-    font-size: 1.05rem;
-    font-weight: 600;
-}
-
-.confidence-bar {
-    height: 5px;
-    background: var(--border);
-    border-radius: 3px;
-    margin-top: 0.5rem;
-    overflow: hidden;
-}
-.confidence-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #4F9CF7);
-    border-radius: 3px;
-    transition: width 0.4s ease;
 }
 
 /* ── Sportsbook Odds Badges ── */
