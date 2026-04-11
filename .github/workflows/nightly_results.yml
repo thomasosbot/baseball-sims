@@ -135,6 +135,18 @@ jobs:
           "
         continue-on-error: true
 
+      - name: Post results to Discord
+        env:
+          DISCORD_WEBHOOK_URL_RESULTS: ${{ secrets.DISCORD_WEBHOOK_URL_RESULTS }}
+        run: |
+          python3 -c "
+          import sys
+          sys.path.insert(0, '.')
+          from src.discord.poster import post_nightly_results
+          post_nightly_results()
+          "
+        continue-on-error: true
+
       - name: Commit and push updated results
         run: |
           git add data/state/ data/daily/ site/public/

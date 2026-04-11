@@ -148,3 +148,84 @@ def post_daily_picks(picks_data: dict):
             print(f"  ERROR: Discord returned {resp.status_code}: {resp.text}")
     except Exception as e:
         print(f"  ERROR posting to Discord: {e}")
+
+
+def format_results_embed(day_results: dict) -> dict:
+    """Build a Discord embed for nightly results."""
+    date = day_results.get("date", "")
+    picks = day_results.get("picks", [])
+    wins = day_results.get("wins", 0)
+    losses = day_results.get("losses", 0)
+    profit = day_results.get("day_profit", 0)
+    sign = "+" if profit >= 0 else ""
+
+    # Individual results
+    lines = []
+    for p in picks:
+        emoji = "\u2705" if p.get("won") else "\u274c"
+        pnl = p.get("profit", 0)
+        ps = "+" if pnl >= 0 else ""
+        lines.append(f"{emoji} **{p['pick']}** ({p.get('odds', '')}) — {p.get('actual_score', '')} ({ps}${pnl:.0f})")
+
+    results_text = "\n".join(lines) if lines else "No picks today."
+
+    # Season stats
+    stats = _load_season_stats()
+    footer_text = ""
+    if stats:
+        w, l = stats["wins"], stats["losses"]
+        sp = stats["total_profit"]
+        sp_sign = "+" if sp >= 0 else ""
+        footer_text = f"Season: {w}-{l} | {sp_sign}${sp:.0f} | {stats['roi']}% ROI | $10K → ${stats['bankroll']:,.0f}"
+
+    # Color: green for profit, red for loss
+    color = 0x31A24C if profit >= 0 else 0xFA383E
+
+    embed = {
+        "title": f"\u26be Results — {date} — {wins}W-{losses}L ({sign}${abs(profit):.0f})",
+        "description": results_text,
+        "color": color,
+        "footer": {"text": footer_text or "ozzyanalytics.com"},
+        "url": "https://ozzyanalytics.com/results.html",
+    }
+
+    return embed
+
+
+def post_nightly_results():
+    """Post nightly results to Discord #results channel."""
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL_RESULTS", "")
+    if not webhook_url:
+        print("  ERROR: DISCORD_WEBHOOK_URL_RESULTS not set")
+        return
+
+    if not RESULTS_PATH.exists():
+        print("  No results to post.")
+        return
+    with open(RESULTS_PATH) as f:
+        results = json.load(f)
+    if not results:
+        print("  No results to post.")
+        return
+
+    today = results[-1]
+    if not today.get("picks"):
+        print("  No picks to report.")
+        return
+
+    embed = format_results_embed(today)
+
+    payload = {
+        "username": "Ozzy Analytics",
+        "embeds": [embed],
+    }
+
+    print(f"  Posting results to Discord...")
+    try:
+        resp = requests.post(webhook_url, json=payload)
+        if resp.status_code in (200, 204):
+            print(f"  Posted results to Discord!")
+        else:
+            print(f"  ERROR: Discord returned {resp.status_code}: {resp.text}")
+    except Exception as e:
+        print(f"  ERROR posting to Discord: {e}")
