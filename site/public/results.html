@@ -35,7 +35,7 @@
     <h1>Season Results</h1>
     <div class="stats-bar fade-in">
         <div class="stat-card glass">
-            <span class="stat-value"></span>
+            <span class="stat-value">78</span>
             <span class="stat-label">Total Picks</span>
         </div>
         <div class="stat-card glass">
@@ -43,7 +43,7 @@
             <span class="stat-label">Record</span>
         </div>
         <div class="stat-card glass">
-            <span class="stat-value">%</span>
+            <span class="stat-value">59.0%</span>
             <span class="stat-label">Win Rate</span>
         </div>
         <div class="stat-card glass">
@@ -57,6 +57,15 @@
     </div>
 </section>
 
+
+<section class="section fade-in">
+    <h2 class="section-title">Cumulative P&L</h2>
+    <div class="chart-card glass">
+        <div class="chart-container">
+            <canvas id="pnlChart"></canvas>
+        </div>
+    </div>
+</section>
 
 
 
@@ -1531,6 +1540,10 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-socials">
+                <a href="https://x.com/Ozzy_Analytics" target="_blank" class="footer-social">𝕏 Twitter</a>
+                <a href="https://discord.gg/mZPRnH44" target="_blank" class="footer-social">Discord</a>
+            </div>
             <p>Monte Carlo simulation model. Not financial advice. Gamble responsibly.</p>
             <p></p>
         </div>
@@ -1582,6 +1595,59 @@
     </script>
 
     
+
+<script>
+const ctx = document.getElementById('pnlChart').getContext('2d');
+const data = [{"bankroll": 10145.3, "cumulative": 145.3, "date": "2026-03-26", "day_profit": 145.3}, {"bankroll": 10837.47, "cumulative": 837.47, "date": "2026-03-27", "day_profit": 692.17}, {"bankroll": 10877.04, "cumulative": 877.04, "date": "2026-03-28", "day_profit": 39.57}, {"bankroll": 11851.62, "cumulative": 1851.62, "date": "2026-03-29", "day_profit": 974.58}, {"bankroll": 11001.42, "cumulative": 1001.42, "date": "2026-03-30", "day_profit": -850.2}, {"bankroll": 10449.56, "cumulative": 449.56, "date": "2026-03-31", "day_profit": -551.86}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-01", "day_profit": 1277.01}, {"bankroll": 11726.57, "cumulative": 1726.57, "date": "2026-04-02", "day_profit": 0}, {"bankroll": 11261.09, "cumulative": 1261.09, "date": "2026-04-03", "day_profit": -465.48}, {"bankroll": 10250.3, "cumulative": 250.3, "date": "2026-04-04", "day_profit": -1010.79}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-05", "day_profit": 1253.45}, {"bankroll": 11503.75, "cumulative": 1503.75, "date": "2026-04-06", "day_profit": 0}, {"bankroll": 10752.34, "cumulative": 752.34, "date": "2026-04-07", "day_profit": -751.41}, {"bankroll": 12593.2, "cumulative": 2593.2, "date": "2026-04-08", "day_profit": 1840.86}, {"bankroll": 14444.43, "cumulative": 4444.43, "date": "2026-04-09", "day_profit": 1851.23}, {"bankroll": 18651.43, "cumulative": 8651.43, "date": "2026-04-10", "day_profit": 4207.0}];
+const isPositive = data[data.length-1].cumulative >= 0;
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: data.map(d => d.date),
+        datasets: [{
+            label: 'Cumulative P&L ($)',
+            data: data.map(d => d.cumulative),
+            borderColor: isPositive ? '#31A24C' : '#FA383E',
+            backgroundColor: isPositive ? 'rgba(49, 162, 76, 0.06)' : 'rgba(250, 56, 62, 0.06)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: isPositive ? '#31A24C' : '#FA383E',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(28, 30, 33, 0.9)',
+                titleFont: { family: 'Inter' },
+                bodyFont: { family: 'Inter' },
+                padding: 10,
+                cornerRadius: 8,
+            },
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: { color: '#8A8D91', font: { family: 'Inter', size: 11 } },
+            },
+            y: {
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                ticks: {
+                    color: '#8A8D91',
+                    font: { family: 'Inter', size: 11 },
+                    callback: v => '$' + v,
+                },
+            },
+        },
+    },
+});
+</script>
 
 
 </body>

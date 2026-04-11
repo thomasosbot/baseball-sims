@@ -1565,6 +1565,26 @@ body {
 .footer p + p {
     margin-top: 0.2rem;
 }
+.footer-socials {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+.footer-social {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: color 0.2s, border-color 0.2s;
+}
+.footer-social:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
 
 /* ── Fade-in animation ── */
 .fade-in {
