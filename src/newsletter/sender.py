@@ -682,15 +682,25 @@ def send_daily_picks(picks_data: dict, season_stats: dict = None):
                 season_stats = build_season_stats(all_results)
 
     # Try Resend audience first, fall back to local file
+    import time
     audience_id = os.getenv("RESEND_AUDIENCE_ID", "")
     subscribers = []
     if audience_id:
-        try:
-            contacts = resend.Contacts.list(audience_id=audience_id)
-            contact_list = contacts.get('data', []) if hasattr(contacts, 'get') else []
-            subscribers = [c['email'] for c in contact_list if not c.get('unsubscribed')]
-        except Exception as e:
-            print(f"  Warning: could not fetch Resend audience: {e}")
+        for attempt in range(3):
+            try:
+                contacts = resend.Contacts.list(audience_id=audience_id)
+                if hasattr(contacts, 'get'):
+                    contact_list = contacts.get('data', [])
+                elif hasattr(contacts, 'data'):
+                    contact_list = contacts.data
+                else:
+                    contact_list = list(contacts) if contacts else []
+                subscribers = [c['email'] for c in contact_list if not c.get('unsubscribed')]
+                if subscribers:
+                    break
+            except Exception as e:
+                print(f"  Warning: Resend audience fetch attempt {attempt + 1} failed: {e}")
+                time.sleep(2)
     if not subscribers:
         subscribers = load_subscribers()
     if not subscribers:
