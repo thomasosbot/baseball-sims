@@ -127,21 +127,12 @@ def generate_site():
         for pick in day.get("picks", []):
             all_picks.append({**pick, "date": day["date"]})
 
-    template = env.get_template("history.html")
-    html = template.render(
-        results=season_results,
-        stats=stats,
-        all_days=all_days,
-        all_picks=all_picks,
-    )
-    (OUTPUT_DIR / "results.html").write_text(html)
-
-    # Dashboard
+    # Results page (dashboard template)
     dashboard_ctx = _compute_dashboard_context(season_results, stats, all_picks)
     template = env.get_template("dashboard.html")
     html = template.render(**dashboard_ctx)
-    (OUTPUT_DIR / "dashboard.html").write_text(html)
-    print("  dashboard.html")
+    (OUTPUT_DIR / "results.html").write_text(html)
+    print("  results.html")
 
     # Backtest
     backtest_data, chart_data, combined_data, combined_chart = _load_backtest_data()

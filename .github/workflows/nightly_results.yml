@@ -59,10 +59,15 @@ jobs:
       - name: Regenerate results page only
         run: |
           python3 -c "
-          import json, sys
+          import json, sys, importlib.util
           sys.path.insert(0, '.')
           from pathlib import Path
           from jinja2 import Environment, FileSystemLoader
+
+          # Import generate.py via importlib (avoids conflict with built-in 'site' module)
+          spec = importlib.util.spec_from_file_location('generate', 'site/generate.py')
+          gen = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gen)
 
           SITE_DIR = Path('site')
           OUTPUT_DIR = SITE_DIR / 'public'
@@ -76,45 +81,16 @@ jobs:
               with open(RESULTS_PATH) as f:
                   season_results = json.load(f)
 
-          total_wins = sum(r.get('wins', 0) for r in season_results)
-          total_losses = sum(r.get('losses', 0) for r in season_results)
-          total_profit = sum(r.get('day_profit', 0) for r in season_results)
-          total_wagered = sum(sum(abs(p.get('wager', 0)) for p in r.get('picks', [])) for r in season_results)
-          roi = round(total_profit / total_wagered * 100, 1) if total_wagered > 0 else 0
-          # Build daily P&L for chart
-          cumulative = 0
-          daily_pnl = []
-          for d in season_results:
-              cumulative += d['day_profit']
-              daily_pnl.append({'date': d['date'], 'day_profit': d['day_profit'],
-                                'cumulative': round(cumulative, 2), 'bankroll': round(10000.0 + cumulative, 2)})
-
-          # Streak
-          streak = 0
-          if season_results:
-              for d in reversed(season_results):
-                  if d['day_profit'] > 0: streak += 1
-                  else: break
-
-          stats = {'wins': total_wins, 'losses': total_losses, 'total_profit': total_profit,
-                   'roi': roi, 'bankroll': round(10000.0 + total_profit, 2),
-                   'current_bankroll': round(10000.0 + total_profit, 2),
-                   'starting_bankroll': 10000, 'daily_pnl': daily_pnl, 'streak': streak}
+          stats = gen._compute_season_stats(season_results)
 
           all_picks = []
           for day in season_results:
               for pick in day.get('picks', []):
                   all_picks.append({**pick, 'date': day['date']})
 
-          all_days = []
-          for f in sorted(DAILY_DIR.glob('2026-*.json')):
-              if f.name in ('results.json', 'changelog.json') or f.name.startswith(('odds_cache', 'spread_cache')):
-                  continue
-              with open(f) as fh:
-                  all_days.append(json.load(fh))
-
-          template = env.get_template('history.html')
-          html = template.render(results=season_results, stats=stats, all_days=all_days, all_picks=all_picks)
+          dashboard_ctx = gen._compute_dashboard_context(season_results, stats, all_picks)
+          template = env.get_template('dashboard.html')
+          html = template.render(**dashboard_ctx)
           (OUTPUT_DIR / 'results.html').write_text(html)
           print('  results.html regenerated')
           "
