@@ -166,7 +166,7 @@
                 {% set best_odds = pick.sportsbook_odds.values()|list|max %}
                 {% for book, odds in pick.sportsbook_odds.items() %}
                 {% set odds_str = "+" ~ odds if odds > 0 else odds %}
-                <span class="book-badge {% if odds == best_odds %}best-odds{% endif %}">
+                <span class="book-badge {{ book }} {% if odds == best_odds %}best-odds{% endif %}">
                     <span class="book-name">{{ book | replace("_", " ") | replace("williamhill us", "Caesars") | replace("fanduel", "FanDuel") | replace("draftkings", "DraftKings") | replace("betmgm", "BetMGM") | replace("bovada", "Bovada") }}</span>
                     {{ odds_str }}
                 </span>
