@@ -890,5 +890,62 @@
         "actual_score": "TEX 7 - LAD 8"
       }
     ]
+  },
+  {
+    "date": "2026-04-11",
+    "games_played": 14,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 1389.1,
+    "bankroll": 20040.53,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 590.32,
+        "profit": -590.32,
+        "odds": "+124",
+        "actual_score": "MIA 1 - DET 6"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 863.85,
+        "profit": 1200.75,
+        "odds": "+139",
+        "actual_score": "Athletics 11 - NYM 6"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 537.32,
+        "profit": 805.98,
+        "odds": "+150",
+        "actual_score": "WSN 3 - MIL 1"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1284.65,
+        "profit": 917.61,
+        "odds": "-140",
+        "actual_score": "WSN 3 - MIL 1"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 944.92,
+        "profit": -944.92,
+        "odds": "+120",
+        "actual_score": "BOS 7 - STL 1"
+      }
+    ]
   }
 ]
