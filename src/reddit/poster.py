@@ -21,6 +21,8 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from src.betting.units import fmt_u, fmt_ud
+
 RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
 
 # Subreddits with daily pick threads
@@ -103,14 +105,12 @@ def format_comment(picks_data: dict) -> str:
         wins = yesterday.get("wins", 0)
         losses = yesterday.get("losses", 0)
         profit = yesterday.get("day_profit", 0)
-        sign = "+" if profit >= 0 else ""
-        lines.append(f"*Yesterday: {wins}-{losses} ({sign}${profit:.0f})*")
+        lines.append(f"*Yesterday: {wins}-{losses} ({fmt_ud(profit, signed=True)})*")
         for p in yesterday["picks"]:
             result = "\u2705" if p.get("won") else "\u274c"
             score = p.get("actual_score", "")
             pnl = p.get("profit", 0)
-            ps = "+" if pnl >= 0 else ""
-            lines.append(f"- {result} {p['pick']} ({score}) {ps}${pnl:.0f}")
+            lines.append(f"- {result} {p['pick']} ({score}) {fmt_ud(pnl, signed=True)}")
         lines.append("")
 
     # Today's picks
@@ -134,8 +134,7 @@ def format_comment(picks_data: dict) -> str:
     if stats:
         w, l = stats["wins"], stats["losses"]
         profit = stats["total_profit"]
-        sign = "+" if profit >= 0 else ""
-        lines.append(f"**Season:** {w}-{l} | {sign}${profit:.0f} | {stats['roi']}% ROI")
+        lines.append(f"**Season:** {w}-{l} | {fmt_ud(profit, signed=True)} | {stats['roi']}% ROI")
         lines.append("")
 
     lines.append("*10,000 Monte Carlo simulations per game. Full analysis at [ozzyanalytics.com](https://ozzyanalytics.com)*")

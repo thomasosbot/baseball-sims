@@ -16,6 +16,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from src.betting.units import fmt_u
+
 WIDTH = 1200
 HEIGHT = 675
 
@@ -105,10 +107,12 @@ def generate_results_card(
 
     profit_sign = "+" if day_profit >= 0 else "-"
     profit_color = GREEN if day_profit >= 0 else RED
-    profit_text = f"{profit_sign}${abs(day_profit):,.0f}"
+    profit_units = fmt_u(day_profit, signed=True)
+    profit_dollars = f"{profit_sign}${abs(day_profit):,.0f}"
     bbox = draw.textbbox((0, 0), record_text, font=_font(52, bold=True))
     record_w = bbox[2] - bbox[0]
-    draw.text((40 + record_w + 24, 95), profit_text, font=_font(42, bold=True), fill=profit_color)
+    draw.text((40 + record_w + 24, 88), profit_units, font=_font(42, bold=True), fill=profit_color)
+    draw.text((40 + record_w + 24, 132), profit_dollars, font=_font(20), fill=TEXT_MUT)
 
     # ── Pick results rows ──
     x = 40
@@ -144,14 +148,18 @@ def generate_results_card(
         odds = p.get("odds", "")
         draw.text((x + 380, ry + 15), odds, font=_font(18), fill=TEXT_SEC)
 
-        # Profit
+        # Profit (units-first)
         pnl = p.get("profit", 0)
-        pnl_sign = "+" if pnl >= 0 else ""
         pnl_color = GREEN if pnl >= 0 else RED
-        pnl_text = f"{pnl_sign}${pnl:,.0f}"
-        bbox = draw.textbbox((0, 0), pnl_text, font=_font(22, bold=True))
+        pnl_u = fmt_u(pnl, signed=True)
+        pnl_d_sign = "+" if pnl >= 0 else "-"
+        pnl_d = f"{pnl_d_sign}${abs(pnl):,.0f}"
+        bbox = draw.textbbox((0, 0), pnl_u, font=_font(22, bold=True))
         ptw = bbox[2] - bbox[0]
-        draw.text((x + row_w - 14 - ptw, ry + 14), pnl_text, font=_font(22, bold=True), fill=pnl_color)
+        draw.text((x + row_w - 14 - ptw, ry + 6), pnl_u, font=_font(22, bold=True), fill=pnl_color)
+        bbox = draw.textbbox((0, 0), pnl_d, font=_font(13))
+        pdw = bbox[2] - bbox[0]
+        draw.text((x + row_w - 14 - pdw, ry + 32), pnl_d, font=_font(13), fill=TEXT_MUT)
 
     # ── Right side: Season stats ──
     rx = 790
@@ -160,7 +168,7 @@ def generate_results_card(
     draw.text((rx, ry), "SEASON", font=_font(14, bold=True), fill=TEXT_MUT)
     ry += 24
 
-    draw.rounded_rectangle([rx, ry, WIDTH - 40, ry + 200], radius=12, fill=CARD_BG)
+    draw.rounded_rectangle([rx, ry, WIDTH - 40, ry + 240], radius=12, fill=CARD_BG)
 
     sw, sl = season_stats.get("wins", 0), season_stats.get("losses", 0)
     draw.text((rx + 16, ry + 14), f"{sw}W-{sl}L", font=_font(30, bold=True), fill=TEXT)
@@ -168,23 +176,25 @@ def generate_results_card(
     sp = season_stats.get("total_profit", 0)
     sp_sign = "+" if sp >= 0 else "-"
     sp_color = GREEN if sp >= 0 else RED
-    draw.text((rx + 16, ry + 54), f"{sp_sign}${abs(sp):,.0f}", font=_font(26, bold=True), fill=sp_color)
+    draw.text((rx + 16, ry + 54), fmt_u(sp, signed=True), font=_font(26, bold=True), fill=sp_color)
+    draw.text((rx + 16, ry + 84), f"{sp_sign}${abs(sp):,.0f}", font=_font(14), fill=TEXT_MUT)
 
     roi = season_stats.get("roi", 0)
     roi_color = GREEN if roi >= 0 else RED
-    draw.text((rx + 16, ry + 92), f"ROI: {roi}%", font=_font(20), fill=roi_color)
+    draw.text((rx + 16, ry + 104), f"ROI: {roi}%", font=_font(18), fill=roi_color)
 
     bankroll = season_stats.get("bankroll", 10000)
-    draw.text((rx + 16, ry + 120), f"Bankroll: ${bankroll:,.0f}", font=_font(18), fill=TEXT_SEC)
+    draw.text((rx + 16, ry + 128), f"Roll: {fmt_u(bankroll)}", font=_font(18), fill=TEXT_SEC)
+    draw.text((rx + 16, ry + 150), f"${bankroll:,.0f}", font=_font(14), fill=TEXT_MUT)
 
     # Win rate
     total_picks = sw + sl
     win_pct = round(sw / total_picks * 100, 1) if total_picks > 0 else 0
-    draw.text((rx + 16, ry + 152), f"Win Rate: {win_pct}%", font=_font(18), fill=TEXT_SEC)
+    draw.text((rx + 16, ry + 184), f"Win Rate: {win_pct}%", font=_font(18), fill=TEXT_SEC)
 
     # Days
     days = season_stats.get("days", 0)
-    draw.text((rx + 16, ry + 176), f"{days} days tracked", font=_font(16), fill=TEXT_MUT)
+    draw.text((rx + 16, ry + 212), f"{days} days tracked", font=_font(16), fill=TEXT_MUT)
 
     # ── Callout line ──
     if wins > 0 and losses == 0:
@@ -207,8 +217,8 @@ def generate_results_card(
         bbox = draw.textbbox((0, 0), callout, font=_font(16, bold=True))
         cw = bbox[2] - bbox[0]
         cx = rx + (WIDTH - 40 - rx - cw) // 2
-        draw.rounded_rectangle([cx - 12, ry + 210, cx + cw + 12, ry + 236], radius=10, fill=BG, outline=callout_color, width=2)
-        draw.text((cx, ry + 213), callout, font=_font(16, bold=True), fill=callout_color)
+        draw.rounded_rectangle([cx - 12, ry + 252, cx + cw + 12, ry + 278], radius=10, fill=BG, outline=callout_color, width=2)
+        draw.text((cx, ry + 255), callout, font=_font(16, bold=True), fill=callout_color)
 
     # ── Footer ──
     draw.text((40, HEIGHT - 38), "10,000 simulations per game", font=_font(14), fill=TEXT_MUT)

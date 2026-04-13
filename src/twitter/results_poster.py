@@ -17,6 +17,7 @@ import random
 from pathlib import Path
 
 from src.twitter.results_card import generate_results_card
+from src.betting.units import fmt_u
 
 RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
 
@@ -89,6 +90,8 @@ def format_results_tweet(today: dict, season: dict) -> str:
     date = today.get("date", "")
 
     sign = "+" if profit >= 0 else ""
+    u = fmt_u(profit, signed=True)
+    pnl = f"{u} ({sign}${abs(profit):,.0f})"
 
     # Flavor line based on performance
     if wins > 0 and losses == 0:
@@ -104,29 +107,32 @@ def format_results_tweet(today: dict, season: dict) -> str:
         ]
     elif profit > 500:
         flavors = [
-            f"Big night. {wins}-{losses} for {sign}${profit:,.0f}.",
-            f"The model ate tonight. {wins}-{losses}, {sign}${profit:,.0f}.",
-            f"Underdogs cashing. {wins}-{losses} for {sign}${profit:,.0f}.",
+            f"Big night. {wins}-{losses} for {pnl}.",
+            f"The model ate tonight. {wins}-{losses}, {pnl}.",
+            f"Underdogs cashing. {wins}-{losses} for {pnl}.",
         ]
     elif profit > 0:
         flavors = [
-            f"Solid night: {wins}-{losses} ({sign}${profit:,.0f}).",
-            f"Another green day: {wins}-{losses} for {sign}${profit:,.0f}.",
+            f"Solid night: {wins}-{losses} ({pnl}).",
+            f"Another green day: {wins}-{losses} for {pnl}.",
         ]
     else:
         flavors = [
-            f"Down {sign}${profit:,.0f} tonight ({wins}-{losses}). Long season.",
-            f"{wins}-{losses} for {sign}${profit:,.0f}. Shake it off.",
+            f"Down {pnl} tonight ({wins}-{losses}). Long season.",
+            f"{wins}-{losses} for {pnl}. Shake it off.",
         ]
 
     parts = [random.choice(flavors)]
 
-    # Season line with starting bankroll context
+    # Season line (units-first)
     sw, sl = season["wins"], season["losses"]
     sp = season["total_profit"]
     sp_sign = "+" if sp >= 0 else ""
     bankroll = season.get("bankroll", 10000)
-    parts.append(f"Season: {sw}-{sl} | {sp_sign}${sp:,.0f} | {season['roi']}% ROI\n$10,000 starting bankroll → ${bankroll:,.0f}")
+    parts.append(
+        f"Season: {sw}-{sl} | {fmt_u(sp, signed=True)} ({sp_sign}${abs(sp):,.0f}) | {season['roi']}% ROI\n"
+        f"100u → {fmt_u(bankroll)} ($10K → ${bankroll:,.0f})"
+    )
 
     parts.append("Full results: ozzyanalytics.com/results.html\n\n#MLB #SportsBetting #MLBPicks")
 

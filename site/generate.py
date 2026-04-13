@@ -36,6 +36,12 @@ def generate_site():
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
 
+    from src.betting.units import fmt_u, fmt_ud, UNIT_SIZE, to_units
+    env.filters["fmt_u"] = fmt_u
+    env.filters["fmt_ud"] = fmt_ud
+    env.filters["to_units"] = to_units
+    env.globals["UNIT_SIZE"] = UNIT_SIZE
+
     # Load all daily picks
     daily_files = sorted(DAILY_DIR.glob("*.json"))
     all_days = []

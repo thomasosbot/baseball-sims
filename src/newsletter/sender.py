@@ -19,6 +19,8 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from src.betting.units import fmt_u, fmt_ud, to_units, UNIT_SIZE
+
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 SUBSCRIBERS_PATH = Path(__file__).parent.parent.parent / "data" / "subscribers.json"
 RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
@@ -346,20 +348,22 @@ def generate_recap_blurb(yesterday: dict) -> str:
             f"Yesterday was pain. 0-{losses}. But one bad day doesn't break a model built on 10,000 sims.",
         ]
     elif profit > 0:
+        pu = fmt_u(profit, signed=True)
         blurbs = [
-            f"Went {wins}-{losses} yesterday for +${profit:.0f}. The winners hit harder than the losses stung.",
-            f"{wins}-{losses} on the day, banking +${profit:.0f}. Underdogs paid rent.",
-            f"A {wins}-{losses} day that netted +${profit:.0f}. We'll take it.",
-            f"Cashed +${profit:.0f} yesterday going {wins}-{losses}. Not every pick needs to hit when the math is on your side.",
-            f"{wins} wins, {losses} losses, +${profit:.0f} in the bankroll. The model keeps grinding.",
+            f"Went {wins}-{losses} yesterday for {pu}. The winners hit harder than the losses stung.",
+            f"{wins}-{losses} on the day, banking {pu}. Underdogs paid rent.",
+            f"A {wins}-{losses} day that netted {pu}. We'll take it.",
+            f"Cashed {pu} yesterday going {wins}-{losses}. Not every pick needs to hit when the math is on your side.",
+            f"{wins} wins, {losses} losses, {pu} in the bankroll. The model keeps grinding.",
         ]
     else:
+        pu = fmt_u(profit, signed=True)
         blurbs = [
-            f"Went {wins}-{losses} for -${abs(profit):.0f}. The right side of variance will come back around.",
-            f"{wins}-{losses} yesterday, down ${abs(profit):.0f}. Long season. Short memory.",
-            f"A {wins}-{losses} day at -${abs(profit):.0f}. Shake it off — 10,000 sims don't lie over time.",
-            f"Down ${abs(profit):.0f} yesterday ({wins}-{losses}). Some days the ball doesn't bounce your way. The edge is still real.",
-            f"{wins}-{losses} for -${abs(profit):.0f}. Baseball has 162 games for a reason. We play the long game.",
+            f"Went {wins}-{losses} for {pu}. The right side of variance will come back around.",
+            f"{wins}-{losses} yesterday, down {fmt_u(abs(profit))}. Long season. Short memory.",
+            f"A {wins}-{losses} day at {pu}. Shake it off — 10,000 sims don't lie over time.",
+            f"Down {fmt_u(abs(profit))} yesterday ({wins}-{losses}). Some days the ball doesn't bounce your way. The edge is still real.",
+            f"{wins}-{losses} for {pu}. Baseball has 162 games for a reason. We play the long game.",
         ]
 
     return random.choice(blurbs)
@@ -623,6 +627,10 @@ def render_email(picks_data: dict, season_stats: dict = None,
                  yesterday: dict = None) -> str:
     """Render the daily picks email as HTML."""
     env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
+    env.filters["fmt_u"] = fmt_u
+    env.filters["fmt_ud"] = fmt_ud
+    env.filters["to_units"] = to_units
+    env.globals["UNIT_SIZE"] = UNIT_SIZE
     template = env.get_template("daily_email.html")
 
     tagline = random.choice(TAGLINES)

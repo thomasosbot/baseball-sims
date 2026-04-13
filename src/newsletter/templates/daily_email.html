@@ -78,9 +78,9 @@
         </div>
         <div class="stat">
             <div class="stat-val {% if stats.total_profit|default(0) >= 0 %}green{% else %}red{% endif %}">
-                {% if stats.total_profit|default(0) >= 0 %}+{% endif %}${{ "%.0f"|format(stats.total_profit|default(0)) }}
+                {{ stats.total_profit|default(0)|fmt_u(signed=True) }}
             </div>
-            <div class="stat-lbl">Season P&amp;L</div>
+            <div class="stat-lbl">Season P&amp;L <span style="color:#94a3b8; font-weight:400;">({% if stats.total_profit|default(0) >= 0 %}+{% endif %}${{ "{:,.0f}".format(stats.total_profit|default(0)) }})</span></div>
         </div>
         <div class="stat">
             <div class="stat-val {% if stats.roi|default(0) >= 0 %}green{% else %}red{% endif %}">
@@ -89,8 +89,8 @@
             <div class="stat-lbl">ROI</div>
         </div>
         <div class="stat">
-            <div class="stat-val">${{ "%.0f"|format(stats.bankroll|default(10000)) }}</div>
-            <div class="stat-lbl">Bankroll</div>
+            <div class="stat-val">{{ stats.bankroll|default(10000)|fmt_u }}</div>
+            <div class="stat-lbl">Bankroll <span style="color:#94a3b8; font-weight:400;">(${{ "{:,.0f}".format(stats.bankroll|default(10000)) }})</span></div>
         </div>
     </div>
     {% endif %}
@@ -114,10 +114,12 @@
                 <span>
                     {% if pick.won %}
                     <span class="recap-result green">W</span>
-                    <span class="recap-profit green">+${{ "%.0f"|format(pick.profit) }}</span>
+                    <span class="recap-profit green">{{ pick.profit|fmt_u(signed=True) }}</span>
+                    <span style="color:#94a3b8; font-size:11px;">(+${{ "{:,.0f}".format(pick.profit) }})</span>
                     {% elif pick.won == false %}
                     <span class="recap-result red">L</span>
-                    <span class="recap-profit red">-${{ "%.0f"|format(pick.profit|abs) }}</span>
+                    <span class="recap-profit red">{{ pick.profit|fmt_u(signed=True) }}</span>
+                    <span style="color:#94a3b8; font-size:11px;">(-${{ "{:,.0f}".format(pick.profit|abs) }})</span>
                     {% else %}
                     <span class="recap-result" style="color:#64748b;">P</span>
                     {% endif %}
@@ -134,7 +136,10 @@
         <div style="text-align: center; margin-top: 12px; font-size: 14px; font-weight: 700;">
             Day P&L:
             <span class="{% if yesterday.day_profit >= 0 %}green{% else %}red{% endif %}">
-                {% if yesterday.day_profit >= 0 %}+{% endif %}${{ "%.0f"|format(yesterday.day_profit) }}
+                {{ yesterday.day_profit|fmt_u(signed=True) }}
+            </span>
+            <span style="color:#94a3b8; font-weight: 400;">
+                ({% if yesterday.day_profit >= 0 %}+{% endif %}${{ "{:,.0f}".format(yesterday.day_profit) }})
             </span>
         </div>
 
@@ -157,7 +162,7 @@
                 &nbsp;&middot;&nbsp;
                 Model Win: <span class="wager">{{ "%.1f"|format(pick.model_prob * 100) }}%</span>
                 &nbsp;&middot;&nbsp;
-                Wager: <span class="wager">${{ "%.0f"|format(pick.wager) }}</span>
+                Wager: <span class="wager">{{ pick.wager|fmt_u }}</span> <span style="color:#94a3b8;">(${{ "{:,.0f}".format(pick.wager) }})</span>
             </div>
             {% if pick.sportsbook_odds %}
             <div class="books-row">

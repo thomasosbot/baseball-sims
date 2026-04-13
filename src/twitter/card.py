@@ -16,6 +16,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from src.betting.units import fmt_u
+
 # ── Dimensions (Twitter recommended 1200x675 for summary_large_image) ──
 WIDTH = 1200
 HEIGHT = 675
@@ -168,10 +170,14 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
             # Pick name
             draw.text((x + 65, row_y + 10), p.get("pick", ""), font=_font(26, bold=True), fill=TEXT)
 
-            # Odds + Wager
+            # Odds + Wager (units-first)
             odds = p.get("odds", "")
             wager = p.get("wager", 0)
-            draw.text((x + 65, row_y + 38), f"{odds}  •  ${wager:,.0f}", font=_font(16), fill=TEXT_SEC)
+            draw.text(
+                (x + 65, row_y + 38),
+                f"{odds}  •  {fmt_u(wager)} (${wager:,.0f})",
+                font=_font(16), fill=TEXT_SEC,
+            )
 
             # Model Win %
             prob = p.get("model_prob", 0)
@@ -209,8 +215,9 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
         sign = "+" if profit >= 0 else "-"
         p_color = GREEN if profit >= 0 else RED
         draw.text((rx, ry), f"{wins}W-{losses}L", font=_font(26, bold=True), fill=TEXT)
-        draw.text((rx + 85, ry + 4), f"{sign}${abs(profit):.0f}", font=_font(22, bold=True), fill=p_color)
-        ry += 38
+        draw.text((rx + 85, ry + 4), f"{fmt_u(profit, signed=True)}", font=_font(22, bold=True), fill=p_color)
+        draw.text((rx + 85, ry + 32), f"{sign}${abs(profit):,.0f}", font=_font(13), fill=TEXT_MUT)
+        ry += 54
 
         for p in yesterday["picks"][:4]:
             won = p.get("won", False)
@@ -228,7 +235,7 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
         draw.text((rx, ry), "SEASON", font=_font(14, bold=True), fill=TEXT_MUT)
         ry += 24
 
-        draw.rounded_rectangle([rx, ry, rx + right_w, ry + 120], radius=12, fill=CARD_BG)
+        draw.rounded_rectangle([rx, ry, rx + right_w, ry + 130], radius=12, fill=CARD_BG)
 
         w, l = season["wins"], season["losses"]
         draw.text((rx + 14, ry + 10), f"{w}W-{l}L", font=_font(24, bold=True), fill=TEXT)
@@ -236,10 +243,12 @@ def generate_pick_card(picks_data: dict, output_path: str | Path = None) -> Path
         profit = season["total_profit"]
         sign = "+" if profit >= 0 else "-"
         p_color = GREEN if profit >= 0 else RED
-        draw.text((rx + 14, ry + 42), f"{sign}${abs(profit):.0f}", font=_font(22, bold=True), fill=p_color)
+        draw.text((rx + 14, ry + 42), f"{fmt_u(profit, signed=True)}", font=_font(22, bold=True), fill=p_color)
+        draw.text((rx + 14, ry + 68), f"{sign}${abs(profit):,.0f}", font=_font(13), fill=TEXT_MUT)
 
-        draw.text((rx + 14, ry + 72), f"ROI: {season['roi']}%", font=_font(18), fill=TEXT_SEC)
-        draw.text((rx + 14, ry + 96), f"Bankroll: ${season['bankroll']:,.0f}", font=_font(16), fill=TEXT_MUT)
+        draw.text((rx + 14, ry + 88), f"ROI: {season['roi']}%", font=_font(16), fill=TEXT_SEC)
+        bankroll = season['bankroll']
+        draw.text((rx + 14, ry + 108), f"Roll: {fmt_u(bankroll)} (${bankroll:,.0f})", font=_font(13), fill=TEXT_MUT)
 
     # ── Footer ──
     draw.text((x, HEIGHT - 38), "10,000 simulations per game", font=_font(16), fill=TEXT_MUT)

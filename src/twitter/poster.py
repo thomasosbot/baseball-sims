@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.twitter.card import generate_pick_card
+from src.betting.units import fmt_u
 
 RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
 
@@ -94,19 +95,25 @@ def format_tweet(picks_data: dict) -> str:
 
     parts = []
 
-    # Season line
+    # Season line (units-first)
     stats = _load_season_stats()
     if stats:
         w, l = stats["wins"], stats["losses"]
         profit = stats["total_profit"]
         sign = "+" if profit >= 0 else "-"
-        parts.append(f"Season: {w}-{l} | {sign}${abs(profit):.0f} | {stats['roi']}% ROI")
+        parts.append(
+            f"Season: {w}-{l} | {fmt_u(profit, signed=True)} "
+            f"({sign}${abs(profit):,.0f}) | {stats['roi']}% ROI"
+        )
 
     # Pick summary with total wagered
     if picks:
         num = len(picks)
         total_wagered = sum(p.get("wager", 0) for p in picks)
-        parts.append(f"{num} pick{'s' if num != 1 else ''} for {date} — ${total_wagered:,.0f} wagered")
+        parts.append(
+            f"{num} pick{'s' if num != 1 else ''} for {date} — "
+            f"{fmt_u(total_wagered)} (${total_wagered:,.0f}) wagered"
+        )
     else:
         parts.append(f"No edges today ({date})")
 

@@ -189,33 +189,33 @@
             <span class="stat-label">Record</span>
         </div>
         <div class="dash-card glass">
-            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(stats.total_profit) }}</span>
-            <span class="stat-label">Total P&L</span>
+            <span class="stat-value {% if stats.total_profit >= 0 %}profit{% else %}loss{% endif %}">{{ stats.total_profit|fmt_u(signed=True) }}</span>
+            <span class="stat-label">Total P&L <span class="stat-dollars">({% if stats.total_profit >= 0 %}+{% endif %}${{ "{:,.0f}".format(stats.total_profit) }})</span></span>
         </div>
         <div class="dash-card glass">
             <span class="stat-value">{{ stats.roi }}%</span>
             <span class="stat-label">ROI</span>
         </div>
         <div class="dash-card glass">
-            <span class="stat-value">${{ "%.0f"|format(stats.current_bankroll) }}</span>
-            <span class="stat-label">Bankroll</span>
+            <span class="stat-value">{{ stats.current_bankroll|fmt_u }}</span>
+            <span class="stat-label">Bankroll <span class="stat-dollars">(${{ "{:,.0f}".format(stats.current_bankroll) }})</span></span>
         </div>
         <div class="dash-card glass">
             <span class="stat-value">{{ stats.win_rate }}%</span>
             <span class="stat-label">Win Rate</span>
         </div>
         <div class="dash-card glass">
-            <span class="stat-value {% if avg_pick_profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(avg_pick_profit) }}</span>
-            <span class="stat-label">Avg Pick P&L</span>
+            <span class="stat-value {% if avg_pick_profit >= 0 %}profit{% else %}loss{% endif %}">{{ avg_pick_profit|fmt_u(signed=True) }}</span>
+            <span class="stat-label">Avg Pick P&L <span class="stat-dollars">({% if avg_pick_profit >= 0 %}+{% endif %}${{ "{:,.0f}".format(avg_pick_profit) }})</span></span>
         </div>
         <div class="dash-card glass">
-            <span class="stat-value profit">${{ "%.0f"|format(stats.best_day) }}</span>
-            <span class="stat-label">Best Day</span>
+            <span class="stat-value profit">{{ stats.best_day|fmt_u(signed=True) }}</span>
+            <span class="stat-label">Best Day <span class="stat-dollars">(+${{ "{:,.0f}".format(stats.best_day) }})</span></span>
             <span class="stat-sub">{{ best_day_date }}</span>
         </div>
         <div class="dash-card glass">
-            <span class="stat-value loss">${{ "%.0f"|format(stats.worst_day) }}</span>
-            <span class="stat-label">Worst Day</span>
+            <span class="stat-value loss">{{ stats.worst_day|fmt_u(signed=True) }}</span>
+            <span class="stat-label">Worst Day <span class="stat-dollars">(-${{ "{:,.0f}".format(stats.worst_day|abs) }})</span></span>
             <span class="stat-sub">{{ worst_day_date }}</span>
         </div>
     </div>
@@ -240,7 +240,7 @@
                 <span class="type-label">Moneyline</span>
                 <div class="type-stats">
                     <span>{{ ml_stats.wins }}-{{ ml_stats.losses }}</span>
-                    <span class="{% if ml_stats.profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(ml_stats.profit) }}</span>
+                    <span class="{% if ml_stats.profit >= 0 %}profit{% else %}loss{% endif %}">{{ ml_stats.profit|fmt_u(signed=True) }}</span>
                     <span>{{ ml_stats.roi }}%</span>
                 </div>
             </div>
@@ -248,7 +248,7 @@
                 <span class="type-label">Run Line</span>
                 <div class="type-stats">
                     <span>{{ rl_stats.wins }}-{{ rl_stats.losses }}</span>
-                    <span class="{% if rl_stats.profit >= 0 %}profit{% else %}loss{% endif %}">${{ "%.0f"|format(rl_stats.profit) }}</span>
+                    <span class="{% if rl_stats.profit >= 0 %}profit{% else %}loss{% endif %}">{{ rl_stats.profit|fmt_u(signed=True) }}</span>
                     <span>{{ rl_stats.roi }}%</span>
                 </div>
             </div>
@@ -305,17 +305,17 @@
             {% elif cell.profit > 0 %}
             <div class="cal-cell win-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">+${{ "%.0f"|format(cell.profit) }}</span>
+                <span class="cal-record">{{ cell.profit|fmt_u(signed=True) }}</span>
             </div>
             {% elif cell.profit < 0 %}
             <div class="cal-cell loss-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">-${{ "%.0f"|format(cell.profit|abs) }}</span>
+                <span class="cal-record">{{ cell.profit|fmt_u(signed=True) }}</span>
             </div>
             {% else %}
             <div class="cal-cell even-day">
                 <span class="cal-date">{{ cell.day }}</span>
-                <span class="cal-record">$0</span>
+                <span class="cal-record">0u</span>
             </div>
             {% endif %}
             {% endfor %}
@@ -363,7 +363,10 @@
                         {% endif %}
                     </td>
                     <td class="{% if pick.profit > 0 %}profit{% elif pick.profit < 0 %}loss{% endif %}" style="font-family: monospace; font-weight: 700;">
-                        {% if pick.profit > 0 %}+{% endif %}${{ "%.0f"|format(pick.profit) }}
+                        {{ pick.profit|fmt_u(signed=True) }}
+                        <div style="font-size: 11px; font-weight: 400; color: var(--text-muted);">
+                            {% if pick.profit > 0 %}+{% endif %}${{ "{:,.0f}".format(pick.profit) }}
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

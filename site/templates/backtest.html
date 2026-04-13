@@ -33,7 +33,7 @@
             <span class="stat-value {% if data.total_profit > 0 %}profit{% else %}loss{% endif %}">
                 ${{ "{:,.0f}".format(data.total_profit) }}
             </span>
-            <span class="stat-label">Total Profit</span>
+            <span class="stat-label">Total Profit <span class="stat-dollars">({{ data.total_profit|fmt_u(signed=True) }})</span></span>
         </div>
         <div class="stat-card glass">
             <span class="stat-value {% if data.total_roi > 0 %}profit{% else %}loss{% endif %}">
@@ -69,7 +69,7 @@
                 </div>
                 <div class="result-row">
                     <span class="result-label">Profit</span>
-                    <span class="result-value {% if data.ml_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.ml_profit) }}</span>
+                    <span class="result-value {% if data.ml_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.ml_profit) }} <span class="stat-dollars">({{ data.ml_profit|fmt_u(signed=True) }})</span></span>
                 </div>
                 <div class="result-row highlight">
                     <span class="result-label">ROI</span>
@@ -100,7 +100,7 @@
                 </div>
                 <div class="result-row">
                     <span class="result-label">Profit</span>
-                    <span class="result-value {% if data.spread_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.spread_profit) }}</span>
+                    <span class="result-value {% if data.spread_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.spread_profit) }} <span class="stat-dollars">({{ data.spread_profit|fmt_u(signed=True) }})</span></span>
                 </div>
                 <div class="result-row highlight">
                     <span class="result-label">ROI</span>
@@ -131,7 +131,7 @@
                 </div>
                 <div class="result-row">
                     <span class="result-label">Profit</span>
-                    <span class="result-value {% if data.totals_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.totals_profit) }}</span>
+                    <span class="result-value {% if data.totals_profit > 0 %}profit{% else %}loss{% endif %}">${{ "{:,.0f}".format(data.totals_profit) }} <span class="stat-dollars">({{ data.totals_profit|fmt_u(signed=True) }})</span></span>
                 </div>
                 <div class="result-row highlight">
                     <span class="result-label">ROI</span>

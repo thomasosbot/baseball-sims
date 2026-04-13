@@ -17,6 +17,8 @@ from pathlib import Path
 
 import requests
 
+from src.betting.units import fmt_u, fmt_ud
+
 RESULTS_PATH = Path(__file__).parent.parent.parent / "data" / "daily" / "results.json"
 
 
@@ -67,13 +69,11 @@ def format_embed(picks_data: dict) -> dict:
         wins = yesterday.get("wins", 0)
         losses = yesterday.get("losses", 0)
         profit = yesterday.get("day_profit", 0)
-        sign = "+" if profit >= 0 else ""
-        lines = [f"**{wins}W-{losses}L** ({sign}${profit:.0f})"]
+        lines = [f"**{wins}W-{losses}L** ({fmt_ud(profit, signed=True)})"]
         for p in yesterday["picks"]:
             emoji = "\u2705" if p.get("won") else "\u274c"
             pnl = p.get("profit", 0)
-            ps = "+" if pnl >= 0 else ""
-            lines.append(f"{emoji} {p['pick']} — {p.get('actual_score', '')} ({ps}${pnl:.0f})")
+            lines.append(f"{emoji} {p['pick']} — {p.get('actual_score', '')} ({fmt_ud(pnl, signed=True)})")
         recap_field = {
             "name": f"\U0001f4ca Yesterday ({yesterday['date']})",
             "value": "\n".join(lines),
@@ -83,7 +83,6 @@ def format_embed(picks_data: dict) -> dict:
     # Today's picks
     pick_lines = []
     for p in picks:
-        pick_type = "ML" if p.get("type") == "moneyline" else "RL"
         odds = p.get("odds", "")
         prob = p.get("model_prob", 0)
         edge = p.get("edge_pct", 0)
@@ -91,9 +90,12 @@ def format_embed(picks_data: dict) -> dict:
         opponent = p.get("opponent", "")
         side = p.get("side", "")
         matchup = f"{team} @ {opponent}" if side == "away" else f"{opponent} @ {team}"
+        wager = abs(p.get("wager", 0))
+        bet_line = f"Bet: {fmt_ud(wager)}" if wager else ""
         pick_lines.append(
             f"**{p['pick']}** ({odds}) | {prob:.0%} win | +{edge:.1f}% edge\n"
             f"\u2003{matchup}"
+            + (f"\n\u2003{bet_line}" if bet_line else "")
         )
 
     picks_value = "\n\n".join(pick_lines) if pick_lines else "No edges found today. The model is sitting tight."
@@ -104,8 +106,12 @@ def format_embed(picks_data: dict) -> dict:
     if stats:
         w, l = stats["wins"], stats["losses"]
         profit = stats["total_profit"]
-        sign = "+" if profit >= 0 else ""
-        footer_text = f"Season: {w}-{l} | {sign}${profit:.0f} | {stats['roi']}% ROI | Bankroll: ${stats['bankroll']:,.0f}"
+        ps = "+" if profit >= 0 else "-"
+        footer_text = (
+            f"Season: {w}-{l} | {fmt_u(profit, signed=True)} "
+            f"({ps}${abs(profit):,.0f}) | {stats['roi']}% ROI | "
+            f"Bankroll: {fmt_u(stats['bankroll'])} (${stats['bankroll']:,.0f})"
+        )
 
     # Build embed
     embed = {
@@ -157,15 +163,18 @@ def format_results_embed(day_results: dict) -> dict:
     wins = day_results.get("wins", 0)
     losses = day_results.get("losses", 0)
     profit = day_results.get("day_profit", 0)
-    sign = "+" if profit >= 0 else ""
 
     # Individual results
     lines = []
     for p in picks:
         emoji = "\u2705" if p.get("won") else "\u274c"
         pnl = p.get("profit", 0)
-        ps = "+" if pnl >= 0 else ""
-        lines.append(f"{emoji} **{p['pick']}** ({p.get('odds', '')}) — {p.get('actual_score', '')} ({ps}${pnl:.0f})")
+        wager = abs(p.get("wager", 0))
+        bet_str = f" — Bet {fmt_ud(wager)}" if wager else ""
+        lines.append(
+            f"{emoji} **{p['pick']}** ({p.get('odds', '')}) — {p.get('actual_score', '')} "
+            f"({fmt_ud(pnl, signed=True)}){bet_str}"
+        )
 
     results_text = "\n".join(lines) if lines else "No picks today."
 
@@ -175,14 +184,19 @@ def format_results_embed(day_results: dict) -> dict:
     if stats:
         w, l = stats["wins"], stats["losses"]
         sp = stats["total_profit"]
-        sp_sign = "+" if sp >= 0 else ""
-        footer_text = f"Season: {w}-{l} | {sp_sign}${sp:.0f} | {stats['roi']}% ROI | $10K → ${stats['bankroll']:,.0f}"
+        ps = "+" if sp >= 0 else "-"
+        footer_text = (
+            f"Season: {w}-{l} | {fmt_u(sp, signed=True)} "
+            f"({ps}${abs(sp):,.0f}) | {stats['roi']}% ROI | "
+            f"100u \u2192 {fmt_u(stats['bankroll'])} "
+            f"($10K \u2192 ${stats['bankroll']:,.0f})"
+        )
 
     # Color: green for profit, red for loss
     color = 0x31A24C if profit >= 0 else 0xFA383E
 
     embed = {
-        "title": f"\u26be Results — {date} — {wins}W-{losses}L ({sign}${abs(profit):.0f})",
+        "title": f"\u26be Results — {date} — {wins}W-{losses}L ({fmt_ud(profit, signed=True)})",
         "description": results_text,
         "color": color,
         "footer": {"text": footer_text or "ozzyanalytics.com"},

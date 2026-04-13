@@ -16,7 +16,7 @@
         <div class="top-banner-inner container">
             <span class="top-banner-text">
                 {% if stats.total_profit > 0 %}
-                We're up <strong>${{ "%.0f"|format(stats.total_profit) }}</strong> this season &mdash; get free daily picks in your inbox
+                We're up <strong>{{ stats.total_profit|fmt_u(signed=True) }}</strong> this season &mdash; get free daily picks in your inbox
                 {% else %}
                 Get free daily MLB picks delivered to your inbox
                 {% endif %}
@@ -65,7 +65,7 @@
                 {% if stats is defined and stats.total_profit is defined and stats.total_profit != 0 %}
                 <p class="subscribe-track-record">
                     {% if stats.total_profit > 0 %}
-                    The model is up <strong>${{ "%.0f"|format(stats.total_profit) }}</strong> this season{% if stats.roi is defined %} with <strong>{{ stats.roi }}% ROI</strong>{% endif %}.
+                    The model is up <strong>{{ stats.total_profit|fmt_u(signed=True) }}</strong> this season{% if stats.roi is defined %} with <strong>{{ stats.roi }}% ROI</strong>{% endif %}.
                     {% else %}
                     Transparent results &mdash; every pick tracked, win or lose.
                     {% endif %}
