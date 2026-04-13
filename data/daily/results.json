@@ -947,5 +947,71 @@
         "actual_score": "BOS 7 - STL 1"
       }
     ]
+  },
+  {
+    "date": "2026-04-12",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 3,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 1986.75,
+    "bankroll": 22027.28,
+    "picks": [
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1136.71,
+        "profit": 1705.07,
+        "odds": "+150",
+        "actual_score": "Athletics 1 - NYM 0"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1097.06,
+        "profit": -1097.06,
+        "odds": "+170",
+        "actual_score": "MIA 2 - DET 8"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1287.08,
+        "profit": 2381.1,
+        "odds": "+185",
+        "actual_score": "WSN 8 - MIL 6"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1461.15,
+        "profit": 1270.57,
+        "odds": "-115",
+        "actual_score": "WSN 8 - MIL 6"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1478.22,
+        "profit": -1478.22,
+        "odds": "-123",
+        "actual_score": "TEX 5 - LAD 2"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 794.71,
+        "profit": -794.71,
+        "odds": "+165",
+        "actual_score": "CLE 1 - ATL 13"
+      }
+    ]
   }
 ]
