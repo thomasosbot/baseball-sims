@@ -1136,5 +1136,44 @@
         "actual_score": "COL 6 - HOU 7"
       }
     ]
+  },
+  {
+    "date": "2026-04-15",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -1012.27,
+    "bankroll": 24670.4,
+    "picks": [
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1095.91,
+        "profit": 1534.27,
+        "odds": "+140",
+        "actual_score": "ARI 8 - BAL 5"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1319.94,
+        "profit": -1319.94,
+        "odds": "+114",
+        "actual_score": "BOS 9 - MIN 5"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1226.6,
+        "profit": -1226.6,
+        "odds": "+150",
+        "actual_score": "WSN 0 - PIT 2"
+      }
+    ]
   }
 ]
