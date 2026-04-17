@@ -1175,5 +1175,71 @@
         "actual_score": "WSN 0 - PIT 2"
       }
     ]
+  },
+  {
+    "date": "2026-04-16",
+    "games_played": 10,
+    "picks_count": 6,
+    "wins": 5,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 6920.81,
+    "bankroll": 31591.21,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 974.35,
+        "profit": 1315.37,
+        "odds": "+135",
+        "actual_score": "WSN 8 - PIT 7"
+      },
+      {
+        "pick": "DET ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1361.79,
+        "profit": 1389.03,
+        "odds": "+102",
+        "actual_score": "KCR 9 - DET 10"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1060.59,
+        "profit": 2492.39,
+        "odds": "+235",
+        "actual_score": "LAA 11 - NYY 4"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1381.42,
+        "profit": 1602.45,
+        "odds": "+116",
+        "actual_score": "LAA 11 - NYY 4"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1017.36,
+        "profit": -1017.36,
+        "odds": "+100",
+        "actual_score": "TEX 9 - Athletics 6"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1116.6,
+        "profit": 1138.93,
+        "odds": "+102",
+        "actual_score": "SEA 2 - SDP 5"
+      }
+    ]
   }
 ]
