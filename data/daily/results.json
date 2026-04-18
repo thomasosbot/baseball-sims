@@ -1241,5 +1241,62 @@
         "actual_score": "SEA 2 - SDP 5"
       }
     ]
+  },
+  {
+    "date": "2026-04-17",
+    "games_played": 14,
+    "picks_count": 5,
+    "wins": 2,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -3045.61,
+    "bankroll": 28545.6,
+    "picks": [
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1708.46,
+        "profit": 1220.33,
+        "odds": "-140",
+        "actual_score": "NYM 4 - CHC 12"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2078.13,
+        "profit": -2078.13,
+        "odds": "+136",
+        "actual_score": "SFG 10 - WSN 5"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1400.23,
+        "profit": 1666.27,
+        "odds": "+119",
+        "actual_score": "STL 9 - HOU 4"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1624.35,
+        "profit": -1624.35,
+        "odds": "+117",
+        "actual_score": "SDP 0 - LAA 8"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2229.73,
+        "profit": -2229.73,
+        "odds": "-156",
+        "actual_score": "CWS 9 - Athletics 2"
+      }
+    ]
   }
 ]
