@@ -123,6 +123,27 @@ jobs:
           "
         continue-on-error: true
 
+      - name: Weekly transparency tweet (Sundays only)
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+        run: |
+          DOW=$(date +%a)
+          if [ "$DOW" = "Sun" ]; then
+            echo "  Sunday — posting weekly audit tweet"
+            python3 -c "
+          import sys
+          sys.path.insert(0, '.')
+          from src.twitter.weekly_audit import post_weekly_audit
+          post_weekly_audit()
+          "
+          else
+            echo "  Not Sunday ($DOW) — skipping weekly audit"
+          fi
+        continue-on-error: true
+
       - name: Commit and push updated results
         run: |
           git add data/state/ data/daily/ site/public/
