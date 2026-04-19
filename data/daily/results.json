@@ -1298,5 +1298,98 @@
         "actual_score": "CWS 9 - Athletics 2"
       }
     ]
+  },
+  {
+    "date": "2026-04-18",
+    "games_played": 15,
+    "picks_count": 9,
+    "wins": 5,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": 2521.28,
+    "bankroll": 31066.88,
+    "picks": [
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1981.38,
+        "profit": 1869.23,
+        "odds": "-106",
+        "actual_score": "NYM 2 - CHC 4"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1022.24,
+        "profit": -1022.24,
+        "odds": "-102",
+        "actual_score": "SFG 7 - WSN 6"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1226.41,
+        "profit": 1790.56,
+        "odds": "+146",
+        "actual_score": "TBR 8 - PIT 7"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1680.73,
+        "profit": -1680.73,
+        "odds": "+154",
+        "actual_score": "DET 4 - BOS 1"
+      },
+      {
+        "pick": "BOS +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1781.97,
+        "profit": -1781.97,
+        "odds": "-111",
+        "actual_score": "DET 4 - BOS 1"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1516.84,
+        "profit": 1880.88,
+        "odds": "+124",
+        "actual_score": "STL 7 - HOU 5"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1115.44,
+        "profit": -1115.44,
+        "odds": "+125",
+        "actual_score": "TEX 3 - SEA 7"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1244.42,
+        "profit": 1368.86,
+        "odds": "+110",
+        "actual_score": "ATL 3 - PHI 1"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1454.55,
+        "profit": 1212.13,
+        "odds": "-120",
+        "actual_score": "TOR 2 - ARI 6"
+      }
+    ]
   }
 ]
