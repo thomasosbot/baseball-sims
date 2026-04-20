@@ -1391,5 +1391,80 @@
         "actual_score": "TOR 2 - ARI 6"
       }
     ]
+  },
+  {
+    "date": "2026-04-19",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 5,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 5708.4,
+    "bankroll": 36775.28,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1328.51,
+        "profit": 1727.06,
+        "odds": "+130",
+        "actual_score": "SFG 0 - WSN 3"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1597.88,
+        "profit": 1079.65,
+        "odds": "-148",
+        "actual_score": "KCR 0 - NYY 7"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1922.93,
+        "profit": 2403.66,
+        "odds": "+125",
+        "actual_score": "STL 7 - HOU 5"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2580.86,
+        "profit": 2064.69,
+        "odds": "-125",
+        "actual_score": "NYM 1 - CHC 2"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1579.62,
+        "profit": -1579.62,
+        "odds": "-155",
+        "actual_score": "CWS 7 - Athletics 4"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1767.61,
+        "profit": -1767.61,
+        "odds": "-106",
+        "actual_score": "TOR 10 - ARI 4"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1712.09,
+        "profit": 1780.57,
+        "odds": "+104",
+        "actual_score": "ATL 4 - PHI 2"
+      }
+    ]
   }
 ]
