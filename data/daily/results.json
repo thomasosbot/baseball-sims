@@ -1466,5 +1466,53 @@
         "actual_score": "ATL 4 - PHI 2"
       }
     ]
+  },
+  {
+    "date": "2026-04-20",
+    "games_played": 10,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -5601.95,
+    "bankroll": 31173.33,
+    "picks": [
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3151.7,
+        "profit": -3151.7,
+        "odds": "-115",
+        "actual_score": "HOU 9 - CLE 2"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2297.28,
+        "profit": 2252.24,
+        "odds": "-102",
+        "actual_score": "PHI 1 - CHC 5"
+      },
+      {
+        "pick": "COL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1550.79,
+        "profit": -1550.79,
+        "odds": "+220",
+        "actual_score": "LAD 12 - COL 3"
+      },
+      {
+        "pick": "COL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3151.7,
+        "profit": -3151.7,
+        "odds": "+149",
+        "actual_score": "LAD 12 - COL 3"
+      }
+    ]
   }
 ]
