@@ -1514,5 +1514,53 @@
         "actual_score": "LAD 12 - COL 3"
       }
     ]
+  },
+  {
+    "date": "2026-04-21",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 5636.06,
+    "bankroll": 36809.39,
+    "picks": [
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1947.43,
+        "profit": 3076.94,
+        "odds": "+158",
+        "actual_score": "MIN 5 - NYM 3"
+      },
+      {
+        "pick": "BAL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1510.23,
+        "profit": -1510.23,
+        "odds": "+116",
+        "actual_score": "BAL 5 - KCR 6"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2238.43,
+        "profit": 1896.97,
+        "odds": "-118",
+        "actual_score": "PHI 4 - CHC 7"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1448.25,
+        "profit": 2172.38,
+        "odds": "+150",
+        "actual_score": "Athletics 5 - SEA 2"
+      }
+    ]
   }
 ]
