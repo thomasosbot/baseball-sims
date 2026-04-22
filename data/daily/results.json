@@ -1517,13 +1517,13 @@
   },
   {
     "date": "2026-04-21",
-    "games_played": 14,
-    "picks_count": 4,
+    "games_played": 15,
+    "picks_count": 5,
     "wins": 3,
-    "losses": 1,
+    "losses": 2,
     "pushes": 0,
-    "day_profit": 5636.06,
-    "bankroll": 36809.39,
+    "day_profit": 3876.01,
+    "bankroll": 35049.34,
     "picks": [
       {
         "pick": "MIN ML",
@@ -1560,6 +1560,15 @@
         "profit": 2172.38,
         "odds": "+150",
         "actual_score": "Athletics 5 - SEA 2"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1760.05,
+        "profit": -1760.05,
+        "odds": "-146",
+        "actual_score": "CWS 11 - ARI 5"
       }
     ]
   }
