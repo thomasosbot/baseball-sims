@@ -120,14 +120,26 @@ def build_brief(pick: dict, game: dict, rollup_year: int = 2025) -> str:
     team_sp = game["home_pitcher"] if is_home else game["away_pitcher"]
     opp_sp = game["away_pitcher"] if is_home else game["home_pitcher"]
 
-    # Model vs market
-    model_team = game["model_home_wp"] if is_home else game["model_away_wp"]
-    market_team = game["market_home_wp"] if is_home else game["market_away_wp"]
+    # Model vs market — use pick-level probabilities so run lines cite cover%,
+    # not ML win%. pick["model_prob"] is win prob for ML and cover prob for RL.
+    pick_type = pick.get("type", "moneyline")
+    model_team = pick.get("model_prob")
+    edge_pct = pick.get("edge_pct", 0)
+    if model_team is None:
+        model_team = game["model_home_wp"] if is_home else game["model_away_wp"]
+        market_team = game["market_home_wp"] if is_home else game["market_away_wp"]
+    else:
+        market_team = model_team - edge_pct / 100
+
+    prob_label = "cover" if pick_type == "run_line" else "win"
 
     lines = []
     lines.append(f"PICK: {pick['pick']} at odds {pick['odds']}")
-    lines.append(f"TYPE: {pick.get('type','moneyline')}")
-    lines.append(f"EDGE: model {model_team*100:.1f}% vs market {market_team*100:.1f}% = {(model_team-market_team)*100:+.1f} pts")
+    lines.append(f"TYPE: {pick_type}")
+    lines.append(
+        f"EDGE: model {model_team*100:.1f}% {prob_label} vs market {market_team*100:.1f}% "
+        f"= {(model_team-market_team)*100:+.1f} pts"
+    )
     lines.append(f"ELO: {team} {game.get('elo_home_rating' if is_home else 'elo_away_rating')} vs {opp} {game.get('elo_away_rating' if is_home else 'elo_home_rating')}")
     sim = game.get("sim_detail", {}) or {}
     team_r = sim.get("avg_home_runs" if is_home else "avg_away_runs")

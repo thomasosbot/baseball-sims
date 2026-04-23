@@ -181,6 +181,14 @@
                 {% endfor %}
             </div>
             {% endif %}
+
+            {# Expandable analysis paragraph #}
+            {% if pick.explanation %}
+            <details class="pick-analysis">
+                <summary>Analysis</summary>
+                <p class="pick-analysis-body">{{ pick.explanation }}</p>
+            </details>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
