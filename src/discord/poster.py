@@ -80,8 +80,8 @@ def format_embed(picks_data: dict) -> dict:
             "inline": False,
         }
 
-    # Today's picks
-    pick_lines = []
+    # Today's picks \u2014 one field per pick (header + narrative)
+    pick_fields = []
     for p in picks:
         odds = p.get("odds", "")
         prob = p.get("model_prob", 0)
@@ -91,14 +91,20 @@ def format_embed(picks_data: dict) -> dict:
         side = p.get("side", "")
         matchup = f"{team} @ {opponent}" if side == "away" else f"{opponent} @ {team}"
         wager = abs(p.get("wager", 0))
-        bet_line = f"Bet: {fmt_ud(wager)}" if wager else ""
-        pick_lines.append(
-            f"**{p['pick']}** ({odds}) | {prob:.0%} win | +{edge:.1f}% edge\n"
-            f"\u2003{matchup}"
-            + (f"\n\u2003{bet_line}" if bet_line else "")
-        )
+        bet_line = f"\u2003{fmt_ud(wager)} wager" if wager else ""
+        narrative = p.get("explanation", "").strip()
+        # Discord field value cap is 1024 chars
+        header = f"\u2003{matchup}{bet_line}"
+        body = f"{header}\n\n{narrative}" if narrative else header
+        if len(body) > 1020:
+            body = body[:1017] + "..."
+        pick_fields.append({
+            "name": f"{p['pick']} ({odds}) | {prob:.0%} win | +{edge:.1f}% edge",
+            "value": body,
+            "inline": False,
+        })
 
-    picks_value = "\n\n".join(pick_lines) if pick_lines else "No edges found today. The model is sitting tight."
+    picks_value = "No edges found today. The model is sitting tight." if not pick_fields else None
 
     # Season stats
     stats = _load_season_stats()
@@ -116,15 +122,17 @@ def format_embed(picks_data: dict) -> dict:
     # Build embed
     embed = {
         "title": f"\u26be Today's Picks — {date}",
-        "description": picks_value,
         "color": 0x1877F2,  # accent blue
         "footer": {"text": footer_text or "ozzyanalytics.com"},
         "url": "https://ozzyanalytics.com",
     }
+    if picks_value:
+        embed["description"] = picks_value
 
     fields = []
     if recap_field:
         fields.append(recap_field)
+    fields.extend(pick_fields)
     if fields:
         embed["fields"] = fields
 

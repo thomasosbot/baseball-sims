@@ -175,10 +175,10 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if pick.rich_context %}
-            <div class="explanation">{{ pick.rich_context }}</div>
-            {% elif pick.explanation %}
+            {% if pick.explanation %}
             <div class="explanation">{{ pick.explanation }}</div>
+            {% elif pick.rich_context %}
+            <div class="explanation">{{ pick.rich_context }}</div>
             {% endif %}
         </div>
         {% endfor %}

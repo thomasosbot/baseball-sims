@@ -138,8 +138,68 @@ def _find_game_id(date: str, team_abbr: str) -> int | None:
     return None
 
 
+def _build_pbp_brief(game_data: dict, pbp: dict, pick: dict) -> str:
+    """Extract structured play-by-play highlights into an LLM brief."""
+    plays = pbp.get("allPlays", [])
+    live = game_data.get("liveData", {})
+    linescore = live.get("linescore", {})
+    decisions = live.get("decisions", {})
+    innings = linescore.get("currentInning", 9)
+    extras = innings > 9
+
+    team = pick.get("pick", "").replace(" ML", "").replace(" +1.5", "").replace(" -1.5", "")
+    won = pick.get("won", False)
+    score = pick.get("actual_score", "")
+
+    scoring = [p for p in plays if p.get("about", {}).get("isScoringPlay")]
+    home_runs = [p for p in plays if p.get("result", {}).get("event") == "Home Run"]
+
+    def fmt_play(p):
+        batter = p.get("matchup", {}).get("batter", {}).get("fullName", "?")
+        inn = p.get("about", {}).get("inning", 0)
+        event = p.get("result", {}).get("event", "")
+        our = _is_our_team_batting(p, team, game_data)
+        side = "our" if our else "opp"
+        return f"  [{side}] {_ordinal(inn)}: {batter} {event}"
+
+    game_info = game_data.get("gameData", {})
+    venue = game_info.get("venue", {}).get("name", "")
+    away_name = game_info.get("teams", {}).get("away", {}).get("abbreviation", "")
+    home_name = game_info.get("teams", {}).get("home", {}).get("abbreviation", "")
+    profit_line = ""
+    if pick.get("profit") is not None:
+        profit_line = f"RESULT: {fmt_u(pick['profit'], signed=True)}"
+    lines = [
+        f"PICK: {pick.get('pick','')} at {pick.get('odds','')} — {'WON' if won else 'LOST'}",
+        f"MATCHUP: {away_name} @ {home_name}" + (f" at {venue}" if venue else ""),
+        f"FINAL: {score}",
+        f"INNINGS: {innings}{' (extras)' if extras else ''}",
+    ]
+    if profit_line:
+        lines.append(profit_line)
+    wp = decisions.get("winner", {}).get("fullName", "")
+    lp = decisions.get("loser", {}).get("fullName", "")
+    sv = decisions.get("save", {}).get("fullName", "")
+    if wp: lines.append(f"WIN: {wp}")
+    if lp: lines.append(f"LOSS: {lp}")
+    if sv: lines.append(f"SAVE: {sv}")
+
+    if home_runs:
+        lines.append("HRs:")
+        for hr in home_runs[:5]:
+            lines.append(fmt_play(hr))
+
+    late = [p for p in scoring if p.get("about", {}).get("inning", 0) >= 7]
+    if late:
+        lines.append("Late scoring (7+):")
+        for p in late[:4]:
+            lines.append(fmt_play(p))
+
+    return "\n".join(lines)
+
+
 def _build_game_narrative(game_id: int, pick: dict) -> str:
-    """Build a short, exciting narrative from play-by-play data."""
+    """Build a short narrative. Tries LLM first, falls back to rule-based."""
     try:
         import statsapi
         game_data = statsapi.get("game", {"gamePk": game_id})
@@ -151,6 +211,16 @@ def _build_game_narrative(game_id: int, pick: dict) -> str:
     plays = pbp.get("allPlays", [])
     if not plays:
         return ""
+
+    # Try LLM first
+    try:
+        from src.betting.narrative import generate_pick_recap
+        brief = _build_pbp_brief(game_data, pbp, pick)
+        llm = generate_pick_recap(brief)
+        if llm:
+            return llm
+    except Exception as e:
+        print(f"  pick recap LLM failed, falling back: {e}")
 
     won = pick.get("won", False)
     score = pick.get("actual_score", "")
@@ -320,8 +390,42 @@ def build_season_stats(results: list) -> dict:
     }
 
 
+def _build_day_story_brief(yesterday: dict) -> str:
+    """Structured brief for the day-level LLM recap."""
+    lines = [
+        f"DATE: {yesterday.get('date','')}",
+        f"RECORD: {yesterday.get('wins', 0)}W-{yesterday.get('losses', 0)}L",
+        f"PROFIT: {fmt_u(yesterday.get('day_profit', 0), signed=True)}",
+        f"BANKROLL: {fmt_u(yesterday.get('bankroll', 0))}",
+        "PICKS:",
+    ]
+    for p in yesterday.get("picks", []):
+        result = "WON" if p.get("won") else "LOST"
+        pnl = fmt_u(p.get("profit", 0), signed=True)
+        score = p.get("actual_score", "")
+        note = p.get("narrative", "")
+        line = f"  - {p.get('pick','')} ({p.get('odds','')}) {result} {pnl}"
+        if score:
+            line += f" | {score}"
+        if note:
+            line += f" | recap: {note}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def generate_recap_blurb(yesterday: dict) -> str:
-    """Generate a witty recap of yesterday's results."""
+    """Generate a witty recap of yesterday's results. Tries LLM first, falls back to rule-based."""
+    # LLM first — only if we have at least one pick to anchor the story
+    if yesterday and yesterday.get("picks"):
+        try:
+            from src.betting.narrative import generate_day_story
+            brief = _build_day_story_brief(yesterday)
+            llm = generate_day_story(brief)
+            if llm:
+                return llm
+        except Exception as e:
+            print(f"  day story LLM failed, falling back: {e}")
+
     wins = yesterday.get("wins", 0)
     losses = yesterday.get("losses", 0)
     profit = yesterday.get("day_profit", 0)

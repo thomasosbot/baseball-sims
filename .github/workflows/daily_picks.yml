@@ -64,6 +64,7 @@ jobs:
           echo "REDDIT_USERNAME=${{ secrets.REDDIT_USERNAME }}" >> .env
           echo "REDDIT_PASSWORD=${{ secrets.REDDIT_PASSWORD }}" >> .env
           echo "REDDIT_SUBREDDIT=${{ secrets.REDDIT_SUBREDDIT }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
 
       - name: Restore state from repo
         run: |

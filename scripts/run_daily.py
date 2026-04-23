@@ -47,6 +47,7 @@ from src.features.weather import (
 )
 from src.simulation.constants import LEAGUE_RATES
 from src.simulation.game_sim import monte_carlo_win_probability
+from src.betting.narrative import generate_narrative
 
 DAILY_DIR = DATA_DIR / "daily"
 DAILY_DIR.mkdir(parents=True, exist_ok=True)
@@ -594,6 +595,9 @@ def run_daily(
 
         output_games.append(game_out)
         _print_game_summary(game_out)
+
+    # --- 5b. Enrich pick explanations via LLM (Claude Opus, snark voice) ---
+    _enrich_narratives(picks, output_games)
 
     # --- 6. Write output JSON ---
     output = {
@@ -1320,6 +1324,57 @@ def _generate_explanation(team, opponent, side, team_pitcher, opp_pitcher,
             parts.append(f"{opponent} is the better team on paper — but the matchup favors {team} today")
 
     return ". ".join(parts[:3]) + "."
+
+
+def _enrich_narratives(picks, output_games):
+    """Replace rule-based explanations with Claude Opus narratives (parallel).
+
+    Keeps the rule-based explanation as fallback if the LLM call fails, so
+    the pipeline never breaks on a narrative failure.
+    """
+    import os
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        print("  ANTHROPIC_API_KEY not set — keeping rule-based explanations.")
+        return
+    if not picks:
+        return
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    games_by_teams = {(g["away"], g["home"]): g for g in output_games}
+
+    def game_for_pick(p):
+        for (a, h), g in games_by_teams.items():
+            if p["team"] in (a, h) and p["opponent"] in (a, h):
+                return g
+        return None
+
+    def enrich(p):
+        g = game_for_pick(p)
+        if not g:
+            return p, None
+        try:
+            text = generate_narrative(p, g)
+            return p, text
+        except Exception as e:
+            print(f"  narrative failure for {p['pick']}: {e}")
+            return p, None
+
+    print(f"\n  Enriching {len(picks)} pick narratives via Claude Opus...")
+    with ThreadPoolExecutor(max_workers=min(len(picks), 6)) as ex:
+        results = list(ex.map(enrich, picks))
+
+    enriched = 0
+    for p, text in results:
+        if not text:
+            continue
+        p["explanation"] = text
+        # Sync into matching game_out (ML picks mirror into game_out["explanation"])
+        g = game_for_pick(p)
+        if g and g.get("pick") == p.get("pick"):
+            g["explanation"] = text
+        enriched += 1
+    print(f"  Enriched {enriched}/{len(picks)} explanations.")
 
 
 def _print_game_summary(game_out):
