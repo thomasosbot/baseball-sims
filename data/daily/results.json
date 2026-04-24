@@ -1637,5 +1637,62 @@
         "actual_score": "LAD 0 - SFG 3"
       }
     ]
+  },
+  {
+    "date": "2026-04-23",
+    "games_played": 9,
+    "picks_count": 5,
+    "wins": 2,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -956.07,
+    "bankroll": 31850.25,
+    "picks": [
+      {
+        "pick": "MIL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1836.4,
+        "profit": -1836.4,
+        "odds": "+194",
+        "actual_score": "MIL 4 - DET 5"
+      },
+      {
+        "pick": "MIL +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1941.73,
+        "profit": 1688.46,
+        "odds": "-115",
+        "actual_score": "MIL 4 - DET 5"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2388.45,
+        "profit": 2531.76,
+        "odds": "+106",
+        "actual_score": "PHI 7 - CHC 8"
+      },
+      {
+        "pick": "BOS +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1912.51,
+        "profit": -1912.51,
+        "odds": "-125",
+        "actual_score": "NYY 4 - BOS 2"
+      },
+      {
+        "pick": "PIT ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1427.38,
+        "profit": -1427.38,
+        "odds": "+140",
+        "actual_score": "PIT 1 - TEX 6"
+      }
+    ]
   }
 ]
