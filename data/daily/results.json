@@ -1694,5 +1694,35 @@
         "actual_score": "PIT 1 - TEX 6"
       }
     ]
+  },
+  {
+    "date": "2026-04-24",
+    "games_played": 12,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 290.72,
+    "bankroll": 32140.97,
+    "picks": [
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2747.2,
+        "profit": 1934.65,
+        "odds": "-142",
+        "actual_score": "PHI 3 - ATL 5"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1643.93,
+        "profit": -1643.93,
+        "odds": "+136",
+        "actual_score": "SEA 3 - STL 2"
+      }
+    ]
   }
 ]
