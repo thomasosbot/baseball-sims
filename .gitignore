@@ -8,8 +8,9 @@ data/raw/
 .claude/
 *.pkl
 *.pickle
-# Allow state pickles (needed by CI pipeline)
+# Allow state + precomputed rollup pickles (needed by CI pipeline)
 !data/state/*.pkl
+!data/processed/*.pkl
 data/tiktok/
 .DS_Store
 data/twitter/

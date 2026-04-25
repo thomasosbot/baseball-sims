@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 
 CACHE_DIR = Path(__file__).parent.parent.parent / "data" / "cache"
+ROLLUP_DIR = Path(__file__).parent.parent.parent / "data" / "processed"
 
 
 def _load_statcast(year: int) -> pd.DataFrame:
@@ -150,6 +151,28 @@ def build_pitcher_rollup(statcast_df: pd.DataFrame) -> dict:
 
 @lru_cache(maxsize=1)
 def get_rollups(year: int = 2025) -> tuple[dict, dict]:
-    """Cached rollup build. Returns (hitters, pitchers)."""
+    """Cached rollup build. Prefers precomputed rollup pickle (committed to repo)
+    so production runs don't need the multi-GB raw Statcast cache. Falls back
+    to rebuilding from raw if the precomputed file is missing."""
+    rollup_path = ROLLUP_DIR / f"statcast_rollup_{year}.pkl"
+    if rollup_path.exists():
+        with open(rollup_path, "rb") as f:
+            data = pickle.load(f)
+        return data["hitters"], data["pitchers"]
+
     df = _load_statcast(year)
     return build_hitter_rollup(df), build_pitcher_rollup(df)
+
+
+def save_rollup(year: int = 2025) -> Path:
+    """Build and persist the precomputed rollup. Run locally before committing."""
+    df = _load_statcast(year)
+    out = {
+        "hitters": build_hitter_rollup(df),
+        "pitchers": build_pitcher_rollup(df),
+    }
+    ROLLUP_DIR.mkdir(parents=True, exist_ok=True)
+    path = ROLLUP_DIR / f"statcast_rollup_{year}.pkl"
+    with open(path, "wb") as f:
+        pickle.dump(out, f)
+    return path

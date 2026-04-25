@@ -8,7 +8,7 @@ from pathlib import Path
 
 import requests
 
-CACHE_PATH = Path(__file__).parent.parent.parent / "data" / "cache" / "name_to_mlbam.json"
+CACHE_PATH = Path(__file__).parent.parent.parent / "data" / "processed" / "name_to_mlbam.json"
 
 
 def _load_disk_cache() -> dict:
