@@ -189,6 +189,20 @@
         margin-top: 0.4rem;
     }
 
+    /* Honest note */
+    .honest {
+        margin: 1.25rem 0 0;
+        padding: 1rem 1.25rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 3px solid var(--text-muted);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+    }
+    .honest strong { color: var(--text); font-weight: 600; }
+
     /* Bankroll transformation banner */
     .transform {
         margin: 2.5rem 0 1rem;
@@ -655,6 +669,10 @@
                 <div class="sub">Apr 8–19 · 12 days, 47–19 picks</div>
             </div>
         </div>
+
+        <p class="honest">
+            <strong>And one thing we don't bet:</strong> totals (over/under). The model crunches them, but 30 days in we still haven't found a real edge there &mdash; so we sit out. Pretending otherwise would defeat the point of running a model in the first place.
+        </p>
 
         <h2>What's under the hood</h2>
         <div class="method">
