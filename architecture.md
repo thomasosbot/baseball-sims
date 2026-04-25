@@ -53,6 +53,9 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `src/backtest/runner.py` | Two modes: `run_backtest()` (full-season profiles, look-ahead) and `run_rolling_backtest()` (cumulative pre-game profiles, no look-ahead). Both use team-specific bullpen profiles and simulate moneyline and run line (spread) bets when historical odds are available. Totals evaluation retained in backtest for analysis but excluded from combined P&L. `_attach_spreads()` computes cover probabilities directly from the simulation margin distribution (no heuristics). |
 | `src/backtest/metrics.py` | Brier score, log loss, ROI, CLV, calibration tables, bankroll growth tracking. |
 | `dashboard/` | **v1 (`app.py`):** Streamlit app with 5 pages: Performance, How It Works, Predictions, Betting, Diagnostics. Custom Plotly template and CSS. **v2 (`v2.py`):** Single-page dashboard with ROI chart + bet tables ($20K bankroll). Deployed at [baseball-sims.streamlit.app](https://baseball-sims-mqdefvx4nq6bt9mpbvcnb7.streamlit.app). Run locally with `streamlit run dashboard/app.py` or `streamlit run dashboard/v2.py`. |
+| `src/features/statcast_summary.py` | Per-player Statcast rollup (xwOBA, xBA, K%, BB%, barrel%, hard-hit%, whiff%, chase%) with handedness splits. `get_rollups()` prefers a precomputed pickle at `data/processed/statcast_rollup_{year}.pkl` (committed to repo, ~520 KB) so CI runs don't need the multi-GB raw Statcast cache. `save_rollup()` regenerates from raw Statcast locally before committing. |
+| `src/features/name_resolver.py` | Resolves lineup names to MLBAM IDs via MLB Stats API search. Disk cache lives at `data/processed/name_to_mlbam.json` (committed, not gitignored). |
+| `src/betting/narrative.py` | LLM enrichment via Anthropic API (Claude Opus 4.7). Three generators: `generate_narrative()` (5-6 sentence forward-looking pick brief in @Ozzy_Analytics snark voice), `generate_pick_recap()` (2-3 sentence post-game recap), `generate_day_story()` (4-6 sentence newsletter opener). Each call falls back silently to the rule-based explanation on failure, so the pipeline never breaks if `ANTHROPIC_API_KEY` is missing or the API hiccups. Cost ~$0.15/day. |
 
 ## Key Decisions
 
@@ -113,10 +116,11 @@ The Odds API        →  park factors                             →  ROI / CLV
 |-----------|--------|---------|
 | `src/data/state.py` | State persistence | Saves/loads CumulativeStats, Elo, batter speeds, bankroll between daily runs as pickles in `data/state/` |
 | `scripts/init_season.py` | Preseason setup | One-time: builds Marcel+BHQ projections, seeds Elo from prior seasons, saves initial state |
-| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds (moneyline + spreads; totals fetch disabled for 2026), runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode late` (confirmed lineups) with automatic fallback to RotoGrinders/platoon projected lineups per-game when confirmed aren't available. Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, and Elo ratings. |
+| `scripts/run_daily.py` | Daily pipeline | Fetches lineups + live odds (moneyline + spreads; totals fetch disabled for 2026), runs MC simulation, finds edges, outputs picks to `data/daily/YYYY-MM-DD.json`. Supports `--mode late` (confirmed lineups) with automatic fallback to RotoGrinders/platoon projected lineups per-game when confirmed aren't available. After picks are assembled, enriches each pick in parallel with an LLM-generated narrative via `src/betting/narrative.py` before writing JSON. Enriched JSON output includes lineup names, sim detail histograms (margin + run distributions), weather, park factors, Elo ratings, and per-pick `explanation` text. |
 | `scripts/update_results.py` | Results grading | Fetches yesterday's scores, grades picks (W/L), updates CumulativeStats + Elo from boxscores, tracks P&L. Bankroll computed as `$10,000 + cumulative regular season profit` (not from state). Deduplicates results.json entries by date on re-runs. |
 | `site/generate.py` | Static site generator | Reads daily JSON files, enriches games with run line odds from spread cache, enriches picks with game context (pitchers, weather, sim runs), filters out totals picks, renders Jinja2 templates to `site/public/` (Netlify). Generates individual game preview pages at `/games/YYYY-MM-DD/AWAY-vs-HOME.html` with SEO meta tags (~15 new pages/day). |
-| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + Twitter/Discord links in footer), `index.html` (compact stats-first hero with bankroll growth, full-width pick rows with sportsbook badges, card-grid games table with ML/RL odds), `game.html` (individual game preview with WP breakdown, sim results, lineups, odds, park factors), `games_index.html` (daily games index), `history.html` → `results.html` (P&L chart + results), `simulate.html` (interactive game simulator), `about.html` (model info) |
+| `site/templates/` | Jinja2 templates | `base.html` (nav + subscribe + Twitter/Discord links in footer), `index.html` (announcement card linking to /30-days.html, compact stats-first hero with bankroll growth, full-width pick rows with sportsbook badges + Analysis toggle showing LLM narrative, card-grid games table with ML/RL odds), `game.html` (individual game preview with WP breakdown, sim results, lineups, odds, park factors), `games_index.html` (daily games index), `history.html` → `results.html` (P&L chart + results), `simulate.html` (interactive game simulator), `about.html` (model info) |
+| `site/public/30-days.html` | 30-day check-in flyer | Self-contained dark-mode one-pager hand-built (not regenerated by `site/generate.py`). `noindex` and not linked from nav — direct URL only (`/30-days.html`). Personal lede, $10K → $32K transformation banner with inline SVG bankroll chart, stat tiles, "what's working" breakdown, totals-honesty note, 9-tile method grid, story arc, and "every pick in the open" receipts grid: 152 colored W/L pills grouped by date with daily P&L column, each pill linking to its `/games/{date}/{away}-vs-{home}.html` game analysis. Twitter and Discord buttons under the lede and in the CTA. |
 | `site/static/sim.js` | JS simulation engine | Faithful port of the Python MC engine to JavaScript — runs entirely client-side. Includes odds-ratio PA model, base advancement, SB/WP/errors, TTO, tiered bullpen, extra innings with ghost runner. |
 | `site/static/style.css` | Site styling | Meta-inspired pastel + glassmorphism UI: compact stats strip, full-width pick rows with colored sportsbook badges, card grid for games with ML/RL odds, game preview pages, responsive mobile layout |
 | `site/netlify/functions/subscribe.js` | Newsletter subscribe | Serverless function on Netlify — POSTs email to Resend Contacts API |
@@ -129,7 +133,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 | `src/discord/poster.py` | Discord posting | Morning: posts picks embed to `#daily-picks` channel. Nightly: posts results embed to `#results` channel. Both via webhooks. |
 | `src/reddit/poster.py` | Reddit posting | Comments on r/sportsbook daily MLB threads via PRAW + posts to own subreddit. Awaiting Reddit API approval. |
 | `src/tiktok/video.py` | TikTok video generator | Generates 1080x1920 vertical pick card videos (Pillow + MoviePy). Currently paused — TikTok community guidelines flagged betting content. Code retained for future use. |
-| `.github/workflows/daily_picks.yml` | Morning automation | Triggered by cron-job.org at 8:30 AM ET via workflow_dispatch. Grades results, generates picks, rebuilds website, sends newsletter, tweets with pick card image, posts to Discord `#daily-picks`, commits + pushes. |
+| `.github/workflows/daily_picks.yml` | Morning automation | Triggered by cron-job.org at 8:30 AM ET via workflow_dispatch. Grades results, generates picks (with LLM narrative enrichment if `ANTHROPIC_API_KEY` set as secret), rebuilds website, sends newsletter, tweets with pick card image, posts to Discord `#daily-picks`, commits + pushes. |
 | `.github/workflows/nightly_results.yml` | Nightly automation | Triggered by cron-job.org at 12:45 AM ET. Grades today's results, regenerates results.html only, tweets results card image, posts to Discord `#results`, commits + pushes. |
 
 **Daily pipeline flow:**
@@ -155,7 +159,7 @@ The Odds API        →  park factors                             →  ROI / CLV
 
 - **GitHub:** [github.com/thomasosbot/baseball-sims](https://github.com/thomasosbot/baseball-sims) (public)
 - **Scheduling:** cron-job.org triggers GitHub workflow_dispatch (replaced unreliable GitHub Actions cron)
-- **Picks website:** "Ozzy Analytics" at `ozzyanalytics.com` — static HTML in `site/public/`, deployed via Netlify. Compact stats-first homepage with bankroll growth, full-width pick rows with colored sportsbook badges, card grid for all games with ML/RL odds, individual game preview pages for SEO (~15 new pages/day). Footer links to Twitter and Discord.
+- **Picks website:** "Ozzy Analytics" at `ozzyanalytics.com` — static HTML in `site/public/`, deployed via Netlify. Compact stats-first homepage with bankroll growth, full-width pick rows with colored sportsbook badges, card grid for all games with ML/RL odds, individual game preview pages for SEO (~15 new pages/day). Hidden one-pager at `/30-days.html` for milestone recaps (not in nav, `noindex`, direct URL only). Footer links to Twitter and Discord.
 - **Twitter/X:** @Ozzy_Analytics (verified) — morning picks tweet with card image, nightly results tweet with results card. Via tweepy (v1.1 media upload + v2 tweet).
 - **Discord:** Ozzy Analytics server — `#daily-picks` (morning) and `#results` (nightly) via webhooks. Invite: discord.gg/mZPRnH44
 - **Newsletter:** Daily email via Resend API from `picks@ozzyanalytics.com`. Rich context per pick (weather, pitchers, Elo, run projections). Yesterday's recap with boxscore batting lines.
@@ -169,6 +173,14 @@ The Odds API        →  park factors                             →  ROI / CLV
 - Run Line (dog +1.5 only): 228 bets, **+0.5% ROI** (+$457). Roughly breakeven.
 - Ending bankroll: $19,669 (+96.7% from $10K)
 - Conclusion: **Moneyline is the primary profit driver. 6% edge threshold optimal (more volume, same ROI). Dog +1.5 marginal. Totals market too efficient.**
+
+**2026 live performance (through Apr 24, 30 days):**
+- 152 picks · 86-66 (56.6%) · **+15.2% ROI** on $145.6K wagered
+- Bankroll $10,000 → $32,141 (+221.4%) · Peak $36,775 on Apr 19 · Max single-day drawdown 15.2%
+- Run line outperforming long-run target: 24-8 (75%, +27.1% ROI) — sample small, regression expected
+- Moneyline closer to long-run profile: 62-58 (51.7%, +12.2% ROI), carried by plus-money winners
+- Last 7 days flat (50%, +5.2% ROI) after the Apr 8-19 heater. Cooldown is variance, not regime change.
+- Totals stayed off the menu the full 30 days per 2025 backtest finding.
 
 ## Current Limitations (v1.0)
 

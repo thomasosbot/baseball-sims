@@ -147,6 +147,24 @@ Empty cells = neutral (1.00). Loaded in `src/features/park_factors.py`. BB and K
 
 **Per-sportsbook odds in daily pipeline:** `parse_odds_response()` now collects `books_home` / `books_away` dicts with every sportsbook's American odds per game. `run_daily.py` attaches `sportsbook_odds` to each pick in the daily JSON output. The website renders these as color-coded badges per book (FanDuel=blue, DraftKings=green, BetMGM=gold, Caesars=burgundy, BetRivers=purple, ESPN BET=red, Fanatics=teal, Pinnacle=dark gray), with the best odds highlighted.
 
+## Anthropic API (Claude Opus — narrative enrichment)
+
+**Service:** [api.anthropic.com](https://api.anthropic.com) — Claude Opus 4.7 used to draft pick narratives, post-game recaps, and the daily newsletter opener.
+
+| Component | Details |
+|-----------|---------|
+| **Module** | `src/betting/narrative.py` |
+| **Model** | `claude-opus-4-7` (snark voice via `SYSTEM_PROMPT_SNARK`) |
+| **Functions** | `generate_narrative()` (5-6 sentence pick brief), `generate_pick_recap()` (2-3 sentence post-game), `generate_day_story()` (4-6 sentence newsletter opener) |
+| **Inputs** | Structured brief built from `src/features/statcast_summary.py` rollups (xwOBA / barrel% / K% / hard-hit% with handedness splits) plus matchup metadata, edge math, weather, and play-by-play highlights |
+| **Cost** | ~$0.15/day, ~$27/full season |
+| **Auth** | `ANTHROPIC_API_KEY` env var (also a GitHub Actions secret for CI) |
+| **Failure mode** | Every call wrapped in try/except; on any failure (missing key, API hiccup, rate limit) returns the existing rule-based explanation. Pipeline is unchanged if the LLM is unavailable. |
+
+**Statcast rollup file:** Rollups are built from raw 2025 Statcast pitch-level data and persisted to `data/processed/statcast_rollup_2025.pkl` (~520 KB, committed to repo). The committed pickle holds 1,248 hitters and 723 pitchers with handedness splits. CI loads from this file; the multi-GB raw Statcast cache lives only on the local box. To regenerate after fetching new Statcast: `python -c "from src.features.statcast_summary import save_rollup; save_rollup(2025)"`.
+
+**Name resolution cache:** `data/processed/name_to_mlbam.json` (committed) maps lineup names to MLBAM IDs via MLB Stats API search.
+
 ## Resend (Email Newsletter)
 
 **Service:** [resend.com](https://resend.com) — transactional email API.
@@ -312,10 +330,10 @@ Used in the daily pipeline for game-day weather forecasts. Free, no API key requ
 
 | Channel | Module | Status | Notes |
 |---------|--------|--------|-------|
-| **Website** | `site/generate.py` | Live | `ozzyanalytics.com` via Netlify. Compact stats-first homepage, full-width pick rows with colored sportsbook badges, card grid for all games (ML + RL odds), individual game preview pages (`/games/YYYY-MM-DD/`) for SEO, results with P&L chart, backtest, simulator. Twitter + Discord links in footer. |
-| **Newsletter** | `src/newsletter/sender.py` | Live | Daily email via Resend API from `picks@ozzyanalytics.com`. Rich per-pick context (weather, pitchers, Elo, run projections). Yesterday's recap with boxscore batting lines. Retry logic for Resend rate limits. |
-| **Twitter/X** | `src/twitter/poster.py`, `results_poster.py` | Live | @Ozzy_Analytics (verified). Morning: pick card image + tweet with wager amounts. Nightly: results card image + tweet with bankroll growth ($10K → current). Via tweepy (v1.1 media + v2 tweet). |
-| **Discord** | `src/discord/poster.py` | Live | Ozzy Analytics server (discord.gg/mZPRnH44). Morning picks embed → `#daily-picks`. Nightly results embed → `#results`. Via webhooks. |
+| **Website** | `site/generate.py` | Live | `ozzyanalytics.com` via Netlify. Compact stats-first homepage with announcement banner linking to /30-days.html, full-width pick rows with colored sportsbook badges + Analysis toggle showing LLM narrative, card grid for all games (ML + RL odds), individual game preview pages (`/games/YYYY-MM-DD/`) for SEO, results with P&L chart, backtest, simulator. Hidden 30-day check-in flyer at `/30-days.html` (noindex, not linked from nav). Twitter + Discord links in footer. |
+| **Newsletter** | `src/newsletter/sender.py` | Live | Daily email via Resend API from `picks@ozzyanalytics.com`. Rich per-pick context (weather, pitchers, Elo, run projections) plus LLM-generated narrative per pick. Yesterday's recap with boxscore batting lines and LLM day-story opener. Retry logic for Resend rate limits. |
+| **Twitter/X** | `src/twitter/poster.py`, `results_poster.py` | Live | @Ozzy_Analytics (verified). Morning: pick card image + tweet with wager amounts. Nightly: results card image + tweet with bankroll growth ($10K → current). Milestone tweets (e.g. 30-day check-in) sent ad-hoc via tweepy directly. Via tweepy (v1.1 media + v2 tweet). |
+| **Discord** | `src/discord/poster.py` | Live | Ozzy Analytics server (discord.gg/mZPRnH44). Morning picks embed (with per-pick narrative) → `#daily-picks`. Nightly results embed → `#results`. Milestone embeds sent ad-hoc via webhook. Via webhooks. |
 | **Reddit** | `src/reddit/poster.py` | Awaiting API approval | u/ozzy_analytics. Code ready to comment on r/sportsbook daily threads + post to own subreddit via PRAW. API application submitted. |
 | **TikTok** | `src/tiktok/video.py` | Paused | Video generator works (Pillow + MoviePy, 1080x1920) but TikTok community guidelines flag betting content. Code retained. |
 

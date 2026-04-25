@@ -898,15 +898,28 @@ The run gap closed from -0.34 to -0.18 (model now slightly over-predicts). Error
 
 Tracking live performance from Opening Day (March 26, 2026). Bankroll computed as $10,000 + cumulative regular season profit (spring training excluded).
 
-### Season Summary (through April 10, 2026)
+### Season Summary (through April 24, 2026 — 30 days)
 
 | Metric | Value |
 |--------|-------|
-| **Days** | 16 |
-| **Record** | 46W-32L (59.0%) |
-| **Profit** | +$8,651 |
-| **ROI** | 26.0% |
-| **Bankroll** | $10,000 → $18,651 (+86.5%) |
+| **Days** | 30 (28 with picks) |
+| **Picks** | 152 (86W-66L, 56.6%) |
+| **Profit** | +$22,141 |
+| **Total wagered** | $145,641 |
+| **ROI** | 15.2% |
+| **Bankroll** | $10,000 → $32,141 (+221.4%) |
+| **Peak bankroll** | $36,775 (Apr 19) |
+| **Max drawdown** | $5,602 (15.2%) — single day Apr 19→20 |
+
+### Cuts that worked
+
+| Cut | Record | ROI | Notes |
+|---|---|---|---|
+| **Run line (dog +1.5)** | 24-8 (75%) | +27.1% | Strongest single edge; expect regression |
+| Moneyline | 62-58 (51.7%) | +12.2% | Volume play; carried by plus-money winners |
+| **Underdogs (any +)** | 54-49 (52.4%) | +17.9% | Where most dollar P&L lives |
+| Favorites (any -) | 32-17 (65.3%) | +10.9% | Higher hit rate, smaller payouts |
+| Pickem (-100 to +110) | 11-3 | +77.5% | Tiny sample (n=14) |
 
 ### Daily Breakdown
 
@@ -928,12 +941,37 @@ Tracking live performance from Opening Day (March 26, 2026). Bankroll computed a
 | 04/08 | 4W-0L | +$1,841 | $12,593 |
 | 04/09 | 4W-0L | +$1,851 | $14,444 |
 | 04/10 | 7W-1L | +$4,207 | $18,651 |
+| 04/11 | 3W-2L | +$1,389 | $20,041 |
+| 04/12 | 3W-3L | +$1,987 | $22,027 |
+| 04/13 | 3W-3L | -$193 | $21,835 |
+| 04/14 | 4W-1L | +$3,848 | $25,683 |
+| 04/15 | 1W-2L | -$1,012 | $24,670 |
+| 04/16 | 5W-1L | +$6,921 | $31,591 |
+| 04/17 | 2W-3L | -$3,046 | $28,546 |
+| 04/18 | 5W-4L | +$2,521 | $31,067 |
+| 04/19 | 5W-2L | +$5,708 | $36,775 |
+| 04/20 | 1W-3L | -$5,602 | $31,173 |
+| 04/21 | 3W-2L | +$3,876 | $35,049 |
+| 04/22 | 2W-4L | -$2,243 | $32,806 |
+| 04/23 | 2W-3L | -$956 | $31,850 |
+| 04/24 | 1W-1L | +$291 | $32,141 |
+
+### Three Phases
+
+- **Phase 1 (Mar 26 – Apr 7, slow burn):** +$752 over 13 days. Even split of W/L days. Discipline mattered more than picks.
+- **Phase 2 (Apr 8 – Apr 19, the run):** +$26,022 in 12 days. 47-19 picks (71%). Five days ≥ +$1,800. Best day Apr 16 (+$6,921 on 5-1). Peak bankroll $36,775 on Apr 19.
+- **Phase 3 (Apr 20 – Apr 24, cooldown):** -$4,633 in 5 days. Variance reasserts. Equity stays above $30K throughout.
 
 ### Key Observations
-- **Hot streak Apr 8-10:** 15-1, +$7,899 in 3 days. Two perfect sweeps followed by a 7-1 day.
-- **Model favors underdogs:** Majority of picks are plus-money. Wins pay more than losses cost.
-- **Resilience:** Two losing streaks (Mar 30-31 and Apr 3-4) followed by strong recoveries.
-- **Run line contributing:** Dog +1.5 picks adding value alongside moneyline.
+- **No 3+ day losing streaks.** Longest was 2 consecutive losing days. Longest losing pick streak was 6.
+- **Run line at 75% is unsustainable.** Long-run target ~58-62%. Expect regression in this bucket.
+- **ML record (51.7%) is barely above breakeven** for average price. ROI carried by plus-money winners; a few flips erase it.
+- **Last 7 days flat:** 19-19, +5% ROI. Cooldown after the heater. Last 14 still healthy at 54%, +12% ROI.
+- **Totals stayed disabled** for the full 30 days. 2025 backtest showed no edge; iterating offline.
+
+### Public-facing recap
+
+Hidden one-pager flyer at `/30-days.html` (`site/public/30-days.html`) summarizes the 30-day check-in for sharing — no nav link, `noindex`, direct URL only. Linked from homepage announcement card. Tweet thread + Discord embed posted Apr 25.
 
 ---
 
