@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>30 Days In — Ozzy Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --bg-start: #0A0E1A;
+        --bg-mid: #131A2D;
+        --bg-end: #0F1424;
+        --card-bg: rgba(255, 255, 255, 0.04);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text: #F4F6FA;
+        --text-secondary: #B8BFCC;
+        --text-muted: #6B7280;
+        --accent: #4D9FFF;
+        --green: #4ADE80;
+        --green-deep: #16A34A;
+        --red: #F87171;
+        --gold: #FBBF24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg-start); }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background:
+            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(77, 159, 255, 0.18), transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 30%, rgba(74, 222, 128, 0.12), transparent 60%),
+            linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+        background-attachment: fixed;
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+    }
+    .flyer {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+    }
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
+    }
+    .brand-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 12px var(--green);
+    }
+    .eyebrow {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--green);
+        background: rgba(74, 222, 128, 0.1);
+        border: 1px solid rgba(74, 222, 128, 0.25);
+        padding: 0.4rem 0.85rem;
+        border-radius: 99px;
+        margin-bottom: 1.5rem;
+    }
+    h1 {
+        font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        margin-bottom: 1.25rem;
+    }
+    h1 .accent { color: var(--green); }
+    h2 {
+        font-size: clamp(1.4rem, 3vw, 1.85rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 3.5rem 0 1.25rem;
+    }
+    .lede {
+        font-size: 1.15rem;
+        color: var(--text-secondary);
+        max-width: 680px;
+        margin-bottom: 2.5rem;
+    }
+    .lede strong { color: var(--text); font-weight: 600; }
+
+    /* Hero KPI block */
+    .hero-kpi {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 1.5rem;
+        margin: 2.5rem 0 1rem;
+    }
+    .hero-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+    }
+    .hero-card.primary {
+        background: linear-gradient(135deg, rgba(74, 222, 128, 0.12), rgba(77, 159, 255, 0.06));
+        border-color: rgba(74, 222, 128, 0.2);
+    }
+    .kpi-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+    }
+    .kpi-bankroll {
+        font-size: clamp(2.4rem, 6vw, 3.6rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin-bottom: 0.6rem;
+    }
+    .kpi-from {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    .kpi-from .strike { text-decoration: line-through; }
+    .kpi-delta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--green);
+        background: rgba(74, 222, 128, 0.12);
+        padding: 0.45rem 0.9rem;
+        border-radius: 99px;
+    }
+    .hero-card.secondary {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .secondary-stack {
+        display: grid;
+        gap: 1.4rem;
+    }
+    .secondary-stat .num {
+        font-size: 2.1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1;
+    }
+    .secondary-stat .num .unit {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-left: 0.2rem;
+    }
+    .secondary-stat .lbl {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+    }
+
+    /* Stat grid */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .stat-tile {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+    }
+    .stat-tile .v {
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+    .stat-tile .l {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    .stat-tile.green .v { color: var(--green); }
+    .stat-tile.gold .v { color: var(--gold); }
+    .stat-tile.blue .v { color: var(--accent); }
+
+    /* Chart */
+    .chart-wrap {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.75rem;
+        margin: 1.25rem 0;
+        overflow: hidden;
+    }
+    .chart-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .bankroll-chart { width: 100%; height: auto; display: block; }
+    /* Override chart text colors for dark bg */
+    .chart-wrap text { fill: #B8BFCC !important; }
+    .chart-wrap line[stroke="#E5E8EC"] { stroke: rgba(255,255,255,0.06) !important; }
+    .chart-wrap line[stroke="#1C1E21"] { stroke: rgba(255,255,255,0.4) !important; }
+
+    /* Story / rows */
+    .story p {
+        font-size: 1.02rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.1rem;
+    }
+    .story p strong { color: var(--text); font-weight: 600; }
+
+    .breakdown {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.25rem 0;
+    }
+    .bd-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+    }
+    .bd-card .h {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    .bd-card .v {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+    .bd-card .v .pos { color: var(--green); }
+    .bd-card .sub {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin-top: 0.4rem;
+    }
+
+    /* Pull quote */
+    .pull {
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.4;
+        letter-spacing: -0.01em;
+        color: var(--text);
+        border-left: 3px solid var(--green);
+        padding: 0.5rem 0 0.5rem 1.5rem;
+        margin: 2.5rem 0;
+    }
+    .pull em { font-style: normal; color: var(--green); }
+
+    /* Method */
+    .method {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .method-tile {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 1.25rem;
+    }
+    .method-tile .ico {
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+    .method-tile .t {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+    }
+    .method-tile .d {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.45;
+    }
+
+    /* CTA */
+    .cta {
+        margin-top: 3.5rem;
+        background: linear-gradient(135deg, rgba(77, 159, 255, 0.12), rgba(74, 222, 128, 0.08));
+        border: 1px solid rgba(77, 159, 255, 0.25);
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+    }
+    .cta h3 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.6rem;
+    }
+    .cta p {
+        color: var(--text-secondary);
+        max-width: 480px;
+        margin: 0 auto 1.5rem;
+    }
+    .cta-buttons {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.85rem 1.6rem;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary {
+        background: var(--green);
+        color: #0A0E1A;
+    }
+    .btn.primary:hover { box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3); }
+    .btn.secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border: 1px solid var(--card-border);
+    }
+
+    .footer-note {
+        margin-top: 3rem;
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+    .footer-note a { color: var(--text-secondary); }
+
+    @media (max-width: 720px) {
+        .flyer { padding: 2rem 1rem 3rem; }
+        .hero-kpi { grid-template-columns: 1fr; }
+        .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        .breakdown, .method { grid-template-columns: 1fr; }
+        .pull { font-size: 1.15rem; }
+    }
+    </style>
+</head>
+<body>
+    <div class="flyer">
+        <div class="brand"><span class="brand-dot"></span> Ozzy Analytics</div>
+
+        <span class="eyebrow">30 days in · 2026 Season</span>
+        <h1>I built a cutting-edge MLB model.<br><span class="accent">Here's how it's gone.</span></h1>
+
+        <p class="lede">
+            Before Opening Day, I went all-in: <strong>machine learning, modern Statcast research, Bayesian statistics, Monte Carlo simulation, and AI-generated analysis</strong> &mdash; bundled into a single model that simulates every MLB game 10,000 times before first pitch and only bets when the math says the market is wrong.
+            <br><br>
+            One month in, here's what the receipts look like.
+        </p>
+
+        <div class="hero-kpi">
+            <div class="hero-card primary">
+                <div class="kpi-label">Bankroll · 30 days</div>
+                <div class="kpi-bankroll">$32,140.97</div>
+                <div class="kpi-from"><span class="strike">$10,000</span> → today</div>
+                <div class="kpi-delta">▲ +$22,141 &nbsp;·&nbsp; +221.4 units</div>
+            </div>
+            <div class="hero-card secondary">
+                <div class="secondary-stack">
+                    <div class="secondary-stat">
+                        <div class="num">+221%</div>
+                        <div class="lbl">Return on starting bankroll</div>
+                    </div>
+                    <div class="secondary-stat">
+                        <div class="num">15.2<span class="unit">% ROI</span></div>
+                        <div class="lbl">Across $145.6K wagered</div>
+                    </div>
+                    <div class="secondary-stat">
+                        <div class="num">86<span class="unit">– 66</span></div>
+                        <div class="lbl">56.6% win rate · 152 picks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-wrap">
+            <div class="chart-title">
+                <span>Bankroll growth · Mar 26 → Apr 24</span>
+                <span style="color: var(--text-muted)">Starting at $10,000</span>
+            </div>
+<svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" class="bankroll-chart" preserveAspectRatio="xMidYMid meet">
+<defs>
+<linearGradient id="lineGrad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#4D9FFF"/>
+<stop offset="100%" stop-color="#4ADE80"/>
+</linearGradient>
+<linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4ADE80" stop-opacity="0.35"/>
+<stop offset="100%" stop-color="#4ADE80" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<line x1="64" y1="280.0" x2="856" y2="280.0" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="284.0" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$10k</text>
+<line x1="64" y1="237.3" x2="856" y2="237.3" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="241.3" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$15k</text>
+<line x1="64" y1="194.7" x2="856" y2="194.7" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="198.7" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$20k</text>
+<line x1="64" y1="152.0" x2="856" y2="152.0" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="156.0" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$25k</text>
+<line x1="64" y1="109.3" x2="856" y2="109.3" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="113.3" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$30k</text>
+<line x1="64" y1="66.7" x2="856" y2="66.7" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="70.7" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$35k</text>
+<line x1="64" y1="24.0" x2="856" y2="24.0" stroke="#E5E8EC" stroke-width="1"/>
+<text x="56" y="28.0" text-anchor="end" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">$40k</text>
+<line x1="64" y1="280.0" x2="856" y2="280.0" stroke="#1C1E21" stroke-width="1" stroke-dasharray="3,3" opacity="0.3"/>
+<text x="64.0" y="302.0" text-anchor="middle" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">Mar 25</text>
+<text x="328.0" y="302.0" text-anchor="middle" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">Apr 4</text>
+<text x="592.0" y="302.0" text-anchor="middle" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">Apr 14</text>
+<text x="856.0" y="302.0" text-anchor="middle" font-size="11" fill="#8A8D91" font-family="Inter, sans-serif">Apr 24</text>
+<path d="M64.0,280.0 L64.0,280.0 L90.4,278.8 L116.8,272.9 L143.2,272.5 L169.6,264.2 L196.0,271.5 L222.4,276.2 L248.8,265.3 L275.2,265.3 L301.6,269.2 L328.0,277.9 L354.4,267.2 L380.8,267.2 L407.2,273.6 L433.6,257.9 L460.0,242.1 L486.4,206.2 L512.8,194.3 L539.2,177.4 L565.6,179.0 L592.0,146.2 L618.4,154.8 L644.8,95.8 L671.2,121.7 L697.6,100.2 L724.0,51.5 L750.4,99.3 L776.8,66.2 L803.2,85.4 L829.6,93.5 L856.0,91.1 L856.0,280.0 Z" fill="url(#areaGrad)"/>
+<polyline points="64.0,280.0 90.4,278.8 116.8,272.9 143.2,272.5 169.6,264.2 196.0,271.5 222.4,276.2 248.8,265.3 275.2,265.3 301.6,269.2 328.0,277.9 354.4,267.2 380.8,267.2 407.2,273.6 433.6,257.9 460.0,242.1 486.4,206.2 512.8,194.3 539.2,177.4 565.6,179.0 592.0,146.2 618.4,154.8 644.8,95.8 671.2,121.7 697.6,100.2 724.0,51.5 750.4,99.3 776.8,66.2 803.2,85.4 829.6,93.5 856.0,91.1" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="64.0" cy="280.0" r="4" fill="#4D9FFF"/>
+<text x="74.0" y="270.0" font-size="12" font-weight="600" fill="#4D9FFF" font-family="Inter, sans-serif">$10,000 start</text>
+<circle cx="856.0" cy="91.1" r="5" fill="#4ADE80"/>
+<text x="846.0" y="79.1" text-anchor="end" font-size="13" font-weight="700" fill="#4ADE80" font-family="Inter, sans-serif">$32.1k today</text>
+<circle cx="724.0" cy="51.5" r="3.5" fill="#F87171"/>
+<text x="724.0" y="41.5" text-anchor="middle" font-size="11" font-weight="600" fill="#F87171" font-family="Inter, sans-serif">peak $36.8k</text>
+</svg>
+        </div>
+
+        <h2>By the numbers</h2>
+        <div class="stat-grid">
+            <div class="stat-tile green"><div class="v">+221.4u</div><div class="l">Profit</div></div>
+            <div class="stat-tile blue"><div class="v">15.2%</div><div class="l">ROI</div></div>
+            <div class="stat-tile gold"><div class="v">75%</div><div class="l">Run-line hit rate</div></div>
+            <div class="stat-tile"><div class="v">10,000</div><div class="l">Sims per game</div></div>
+        </div>
+
+        <p class="pull">"The model isn't trying to pick winners &mdash; it's trying to find <em>where the market is wrong</em>. 30 days, 152 picks, and the gap shows up."</p>
+
+        <h2>What's actually working</h2>
+        <div class="breakdown">
+            <div class="bd-card">
+                <div class="h">Run line picks</div>
+                <div class="v"><span class="pos">24–8</span> · 75%</div>
+                <div class="sub">+27.1% ROI · the model's strongest edge</div>
+            </div>
+            <div class="bd-card">
+                <div class="h">Underdogs (+ money)</div>
+                <div class="v"><span class="pos">54–49</span> · 52%</div>
+                <div class="sub">+17.9% ROI · where the dollars come from</div>
+            </div>
+            <div class="bd-card">
+                <div class="h">Best single day</div>
+                <div class="v"><span class="pos">+$6,920</span></div>
+                <div class="sub">Apr 16 · 5–1 on the board</div>
+            </div>
+            <div class="bd-card">
+                <div class="h">Hottest stretch</div>
+                <div class="v"><span class="pos">+$26,022</span></div>
+                <div class="sub">Apr 8–19 · 12 days, 47–19 picks</div>
+            </div>
+        </div>
+
+        <h2>What's under the hood</h2>
+        <div class="method">
+            <div class="method-tile">
+                <div class="ico">⚙️</div>
+                <div class="t">Monte Carlo simulation</div>
+                <div class="d">Every MLB game simulated 10,000 times, plate appearance by plate appearance.</div>
+            </div>
+            <div class="method-tile">
+                <div class="ico">📊</div>
+                <div class="t">Statcast + Bayesian regression</div>
+                <div class="d">Pitch-level data, regressed for small samples, blended with park factors and platoon splits.</div>
+            </div>
+            <div class="method-tile">
+                <div class="ico">🧠</div>
+                <div class="t">Multiplicative odds-ratio</div>
+                <div class="d">Modern matchup math (b·p/l) for batter-vs-pitcher outcome probabilities.</div>
+            </div>
+            <div class="method-tile">
+                <div class="ico">📐</div>
+                <div class="t">Quarter-Kelly sizing</div>
+                <div class="d">Conservative bet sizing with a 5% cap and 3% minimum edge to enter.</div>
+            </div>
+            <div class="method-tile">
+                <div class="ico">🔄</div>
+                <div class="t">Elo-blended priors</div>
+                <div class="d">Team-strength signal merged with the simulation output to keep estimates honest.</div>
+            </div>
+            <div class="method-tile">
+                <div class="ico">✍️</div>
+                <div class="t">AI-written analysis</div>
+                <div class="d">Claude Opus drafts the why-this-pick narrative for every play. Numbers stay grounded; voice doesn't.</div>
+            </div>
+        </div>
+
+        <p class="pull">"Quarter-Kelly. Five-percent cap. <em>Smooth equity curve.</em> Max drawdown was a single 15% day &mdash; the rest is just math compounding."</p>
+
+        <h2>How it actually went</h2>
+        <div class="story">
+            <p><strong>Phase 1 — Mar 26 to Apr 7 (slow burn).</strong> Treaded water. +$752 in 13 days. The model wasn't broken; the variance just hadn't broken open yet. Discipline mattered more than picks.</p>
+            <p><strong>Phase 2 — Apr 8 to Apr 19 (the run).</strong> +$26,022 in 12 days. 47–19 on picks (71%). Five days over +$1,800. The model had been right all along; the slate finally cooperated.</p>
+            <p><strong>Phase 3 — Apr 20 to today (cooldown).</strong> Some give-back, but the bankroll is still nine consecutive sessions above $30K. Variance giveth, variance taketh; the process doesn't change.</p>
+        </div>
+
+        <div class="cta">
+            <h3>Free daily picks. Receipts on the site.</h3>
+            <p>Every pick, every result, every dollar tracked publicly. No paywall. No hype. Just the model and the math.</p>
+            <div class="cta-buttons">
+                <a href="/index.html" class="btn primary">See today's picks →</a>
+                <a href="/results.html" class="btn secondary">View full results</a>
+            </div>
+        </div>
+
+        <p class="footer-note">
+            Monte Carlo simulation model · Not financial advice · Gamble responsibly<br>
+            <a href="https://x.com/Ozzy_Analytics" target="_blank">@Ozzy_Analytics</a>
+            &nbsp;·&nbsp;
+            <a href="/about.html">How it works</a>
+        </p>
+    </div>
+</body>
+</html>
