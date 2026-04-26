@@ -1724,5 +1724,16 @@
         "actual_score": "SEA 3 - STL 2"
       }
     ]
+  },
+  {
+    "date": "2026-04-25",
+    "games_played": 14,
+    "picks_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 0,
+    "bankroll": 32140.97,
+    "picks": []
   }
 ]
