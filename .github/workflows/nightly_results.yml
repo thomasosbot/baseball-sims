@@ -151,6 +151,7 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Nightly results: $(date +%Y-%m-%d)"
-            git pull --rebase || (git rebase --abort 2>/dev/null; git stash && git pull --rebase && git stash pop)
+            # --autostash handles any unstaged changes; same fix as daily_picks.yml.
+            git pull --rebase --autostash || git reset --hard origin/main
             git push || echo "Push failed"
           fi

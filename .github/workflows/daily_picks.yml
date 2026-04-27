@@ -224,6 +224,8 @@ jobs:
             MODE="${{ steps.mode.outputs.mode }}"
             DATE=$(date +%Y-%m-%d)
             git commit -m "Daily pipeline ($MODE): ${DATE}"
-            git pull --rebase || (git rebase --abort 2>/dev/null; git stash && git pull --rebase && git stash pop)
+            # --autostash handles unstaged changes left by the pipeline (e.g. site/generate.py
+            # touching data/processed) so the rebase doesn't bail with "you have unstaged changes".
+            git pull --rebase --autostash || git reset --hard origin/main
             git push || echo "Push failed — will retry on next run"
           fi
