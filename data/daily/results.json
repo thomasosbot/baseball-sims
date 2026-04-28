@@ -1746,5 +1746,35 @@
     "day_profit": 0,
     "bankroll": 32140.97,
     "picks": []
+  },
+  {
+    "date": "2026-04-27",
+    "games_played": 6,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 49.06,
+    "bankroll": 32190.03,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1155.69,
+        "profit": 1375.27,
+        "odds": "+119",
+        "actual_score": "TBR 3 - CLE 2"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1326.21,
+        "profit": -1326.21,
+        "odds": "+158",
+        "actual_score": "NYY 4 - TEX 2"
+      }
+    ]
   }
 ]
