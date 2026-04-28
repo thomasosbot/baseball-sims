@@ -1749,13 +1749,13 @@
   },
   {
     "date": "2026-04-27",
-    "games_played": 6,
-    "picks_count": 2,
-    "wins": 1,
-    "losses": 1,
+    "games_played": 8,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
     "pushes": 0,
-    "day_profit": 49.06,
-    "bankroll": 32190.03,
+    "day_profit": 2131.56,
+    "bankroll": 34272.53,
     "picks": [
       {
         "pick": "TBR ML",
@@ -1774,6 +1774,24 @@
         "profit": -1326.21,
         "odds": "+158",
         "actual_score": "NYY 4 - TEX 2"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1231.58,
+        "profit": -1231.58,
+        "odds": "+250",
+        "actual_score": "MIA 4 - LAD 5"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2761.73,
+        "profit": 3314.08,
+        "odds": "+120",
+        "actual_score": "MIA 4 - LAD 5"
       }
     ]
   }
