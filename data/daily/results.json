@@ -1794,5 +1794,71 @@
         "actual_score": "MIA 4 - LAD 5"
       }
     ]
+  },
+  {
+    "date": "2026-04-28",
+    "games_played": 14,
+    "picks_count": 6,
+    "wins": 2,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -4733.05,
+    "bankroll": 29539.48,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1441.0,
+        "profit": 1700.38,
+        "odds": "+118",
+        "actual_score": "TBR 1 - CLE 0"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1979.17,
+        "profit": -1979.17,
+        "odds": "+144",
+        "actual_score": "SFG 0 - PHI 7"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2176.08,
+        "profit": -2176.08,
+        "odds": "+158",
+        "actual_score": "WSN 0 - NYM 8"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1244.05,
+        "profit": 1443.1,
+        "odds": "+116",
+        "actual_score": "LAA 2 - CWS 5"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2105.12,
+        "profit": -2105.12,
+        "odds": "+100",
+        "actual_score": "KCR 4 - Athletics 1"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1616.16,
+        "profit": -1616.16,
+        "odds": "+105",
+        "actual_score": "CHC 8 - SDP 3"
+      }
+    ]
   }
 ]
