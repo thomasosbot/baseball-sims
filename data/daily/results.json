@@ -1797,13 +1797,13 @@
   },
   {
     "date": "2026-04-28",
-    "games_played": 14,
-    "picks_count": 6,
-    "wins": 2,
+    "games_played": 15,
+    "picks_count": 8,
+    "wins": 4,
     "losses": 4,
     "pushes": 0,
-    "day_profit": -4733.05,
-    "bankroll": 29539.48,
+    "day_profit": 2262.44,
+    "bankroll": 36534.97,
     "picks": [
       {
         "pick": "TBR ML",
@@ -1858,6 +1858,24 @@
         "profit": -1616.16,
         "odds": "+105",
         "actual_score": "CHC 8 - SDP 3"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1477.65,
+        "profit": 3694.12,
+        "odds": "+250",
+        "actual_score": "MIA 2 - LAD 1"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2870.76,
+        "profit": 3301.37,
+        "odds": "+115",
+        "actual_score": "MIA 2 - LAD 1"
       }
     ]
   }
