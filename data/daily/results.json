@@ -1878,5 +1878,53 @@
         "actual_score": "MIA 2 - LAD 1"
       }
     ]
+  },
+  {
+    "date": "2026-04-29",
+    "games_played": 13,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 1317.62,
+    "bankroll": 37852.59,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1119.48,
+        "profit": -1119.48,
+        "odds": "+100",
+        "actual_score": "TBR 1 - CLE 3"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1179.15,
+        "profit": -1179.15,
+        "odds": "-118",
+        "actual_score": "NYY 0 - TEX 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1698.42,
+        "profit": 2377.79,
+        "odds": "+140",
+        "actual_score": "WSN 14 - NYM 2"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1424.23,
+        "profit": 1238.46,
+        "odds": "-115",
+        "actual_score": "KCR 2 - Athletics 5"
+      }
+    ]
   }
 ]
