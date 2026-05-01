@@ -1926,5 +1926,53 @@
         "actual_score": "KCR 2 - Athletics 5"
       }
     ]
+  },
+  {
+    "date": "2026-04-30",
+    "games_played": 11,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 5086.15,
+    "bankroll": 42938.74,
+    "picks": [
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2017.25,
+        "profit": 3812.6,
+        "odds": "+189",
+        "actual_score": "STL 10 - PIT 5"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1236.52,
+        "profit": -1236.52,
+        "odds": "+124",
+        "actual_score": "SFG 2 - PHI 3"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1289.06,
+        "profit": -1289.06,
+        "odds": "+124",
+        "actual_score": "SFG 2 - PHI 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2110.63,
+        "profit": 3799.13,
+        "odds": "+180",
+        "actual_score": "WSN 5 - NYM 4"
+      }
+    ]
   }
 ]
