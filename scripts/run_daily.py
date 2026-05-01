@@ -596,6 +596,14 @@ def run_daily(
         output_games.append(game_out)
         _print_game_summary(game_out)
 
+    # --- 5a. Dedupe picks by (team, bet_type) ---
+    # Doubleheaders produce two MLB schedule entries with identical pitchers /
+    # lineups / odds, so the model emits the same pick twice. Keep the higher-
+    # edge entry per team-and-type so we don't double our exposure on what's
+    # really one bet thesis.
+    picks, dropped_total_wager = _dedupe_picks_by_team(picks)
+    total_wagered -= dropped_total_wager
+
     # --- 5b. Enrich pick explanations via LLM (Claude Opus, snark voice) ---
     _enrich_narratives(picks, output_games)
 
@@ -1324,6 +1332,55 @@ def _generate_explanation(team, opponent, side, team_pitcher, opp_pitcher,
             parts.append(f"{opponent} is the better team on paper — but the matchup favors {team} today")
 
     return ". ".join(parts[:3]) + "."
+
+
+def _dedupe_picks_by_team(picks):
+    """Collapse duplicate (team, bet_type) picks to the highest-edge entry.
+
+    Doubleheaders create two schedule rows with the same pitchers/lineups, so
+    the model emits the same pick twice. Treating them as independent edges
+    doubles exposure on what is really one bet thesis.
+
+    Returns (deduped_picks, total_wager_dropped).
+    """
+    seen = {}  # (team, type) -> winning pick
+    dropped_wager = 0.0
+    dropped = []  # for logging
+
+    for p in picks:
+        key = (p.get("team"), p.get("type", "moneyline"))
+        if None in key:
+            # Defensive: if we can't form a key, keep the pick rather than risk
+            # silently dropping a real edge.
+            seen[(id(p),)] = p
+            continue
+
+        prev = seen.get(key)
+        if prev is None:
+            seen[key] = p
+            continue
+
+        # Same team + bet type already in. Keep higher edge_pct.
+        prev_edge = prev.get("edge_pct") or 0
+        cur_edge = p.get("edge_pct") or 0
+        if cur_edge > prev_edge:
+            dropped.append((prev, p))
+            dropped_wager += prev.get("wager", 0) or 0
+            seen[key] = p
+        else:
+            dropped.append((p, prev))
+            dropped_wager += p.get("wager", 0) or 0
+
+    if dropped:
+        print(f"\n  Deduped {len(dropped)} duplicate pick(s) (likely doubleheader):")
+        for loser, winner in dropped:
+            print(
+                f"    dropped {loser['pick']} edge={loser.get('edge_pct')} "
+                f"wager=${loser.get('wager', 0):,.0f} (kept edge={winner.get('edge_pct')})"
+            )
+
+    deduped = list(seen.values())
+    return deduped, dropped_wager
 
 
 def _enrich_narratives(picks, output_games):
