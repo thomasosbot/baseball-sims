@@ -1974,5 +1974,71 @@
         "actual_score": "WSN 5 - NYM 4"
       }
     ]
+  },
+  {
+    "date": "2026-05-01",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 1,
+    "losses": 5,
+    "pushes": 0,
+    "day_profit": -5940.65,
+    "bankroll": 36998.09,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1808.25,
+        "profit": -1808.25,
+        "odds": "+116",
+        "actual_score": "CIN 1 - PIT 9"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1507.9,
+        "profit": -1507.9,
+        "odds": "+135",
+        "actual_score": "MIL 6 - WSN 1"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1482.01,
+        "profit": -1482.01,
+        "odds": "+105",
+        "actual_score": "PHI 6 - MIA 5"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1712.87,
+        "profit": 2654.95,
+        "odds": "+155",
+        "actual_score": "LAD 2 - STL 7"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1753.4,
+        "profit": -1753.4,
+        "odds": "+109",
+        "actual_score": "NYM 4 - LAA 3"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2044.04,
+        "profit": -2044.04,
+        "odds": "-110",
+        "actual_score": "CLE 8 - Athletics 5"
+      }
+    ]
   }
 ]
