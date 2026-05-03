@@ -2040,5 +2040,44 @@
         "actual_score": "CLE 8 - Athletics 5"
       }
     ]
+  },
+  {
+    "date": "2026-05-02",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 1541.72,
+    "bankroll": 38539.81,
+    "picks": [
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1587.06,
+        "profit": 991.91,
+        "odds": "-160",
+        "actual_score": "BAL 4 - NYY 9"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1507.3,
+        "profit": -1507.3,
+        "odds": "-124",
+        "actual_score": "HOU 6 - BOS 3"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2221.68,
+        "profit": 2057.11,
+        "odds": "-108",
+        "actual_score": "SFG 1 - TBR 5"
+      }
+    ]
   }
 ]
