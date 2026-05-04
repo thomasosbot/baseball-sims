@@ -2079,5 +2079,62 @@
         "actual_score": "SFG 1 - TBR 5"
       }
     ]
+  },
+  {
+    "date": "2026-05-03",
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 0,
+    "losses": 5,
+    "pushes": 0,
+    "day_profit": -7996.47,
+    "bankroll": 30543.34,
+    "picks": [
+      {
+        "pick": "BAL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1968.79,
+        "profit": -1968.79,
+        "odds": "+100",
+        "actual_score": "BAL 3 - NYY 11"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1708.1,
+        "profit": -1708.1,
+        "odds": "+124",
+        "actual_score": "PHI 7 - MIA 2"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1515.94,
+        "profit": -1515.94,
+        "odds": "+130",
+        "actual_score": "LAD 4 - STL 1"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1622.76,
+        "profit": -1622.76,
+        "odds": "+115",
+        "actual_score": "NYM 5 - LAA 1"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1180.88,
+        "profit": -1180.88,
+        "odds": "+158",
+        "actual_score": "CWS 3 - SDP 4"
+      }
+    ]
   }
 ]
