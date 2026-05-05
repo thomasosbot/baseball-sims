@@ -2136,5 +2136,53 @@
         "actual_score": "CWS 3 - SDP 4"
       }
     ]
+  },
+  {
+    "date": "2026-05-04",
+    "games_played": 12,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 429.12,
+    "bankroll": 30972.46,
+    "picks": [
+      {
+        "pick": "BAL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1751.95,
+        "profit": -1751.95,
+        "odds": "+100",
+        "actual_score": "BAL 1 - NYY 12"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2082.19,
+        "profit": 1983.04,
+        "odds": "-105",
+        "actual_score": "CIN 4 - CHC 5"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1390.49,
+        "profit": 1946.69,
+        "odds": "+140",
+        "actual_score": "CWS 6 - LAA 0"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1748.66,
+        "profit": -1748.66,
+        "odds": "+138",
+        "actual_score": "ATL 4 - SEA 5"
+      }
+    ]
   }
 ]
