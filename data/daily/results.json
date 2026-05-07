@@ -2268,5 +2268,53 @@
         "actual_score": "ATL 3 - SEA 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-06",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -3659.15,
+    "bankroll": 35377.5,
+    "picks": [
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1616.58,
+        "profit": -1616.58,
+        "odds": "+184",
+        "actual_score": "LAD 12 - HOU 2"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2078.66,
+        "profit": -2078.66,
+        "odds": "+120",
+        "actual_score": "ATL 1 - SEA 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1516.24,
+        "profit": 1758.84,
+        "odds": "+116",
+        "actual_score": "MIN 2 - WSN 15"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1722.75,
+        "profit": -1722.75,
+        "odds": "+126",
+        "actual_score": "PIT 1 - ARI 0"
+      }
+    ]
   }
 ]
