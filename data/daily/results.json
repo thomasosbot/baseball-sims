@@ -2316,5 +2316,26 @@
         "actual_score": "PIT 1 - ARI 0"
       }
     ]
+  },
+  {
+    "date": "2026-05-07",
+    "games_played": 10,
+    "picks_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 1942.85,
+    "bankroll": 37320.35,
+    "picks": [
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1295.23,
+        "profit": 1942.85,
+        "odds": "+150",
+        "actual_score": "STL 2 - SDP 1"
+      }
+    ]
   }
 ]
