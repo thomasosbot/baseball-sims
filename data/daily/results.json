@@ -2385,5 +2385,80 @@
         "actual_score": "STL 6 - SDP 0"
       }
     ]
+  },
+  {
+    "date": "2026-05-09",
+    "games_played": 14,
+    "picks_count": 7,
+    "wins": 1,
+    "losses": 6,
+    "pushes": 0,
+    "day_profit": -7615.67,
+    "bankroll": 29778.09,
+    "picks": [
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1788.94,
+        "profit": -1788.94,
+        "odds": "-135",
+        "actual_score": "LAA 1 - TOR 14"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1409.37,
+        "profit": 1550.31,
+        "odds": "+110",
+        "actual_score": "Athletics 6 - BAL 2"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1655.71,
+        "profit": -1655.71,
+        "odds": "+140",
+        "actual_score": "HOU 1 - CIN 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1684.4,
+        "profit": -1684.4,
+        "odds": "+135",
+        "actual_score": "WSN 7 - MIA 8"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1421.72,
+        "profit": -1421.72,
+        "odds": "-116",
+        "actual_score": "MIN 2 - CLE 1"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1376.03,
+        "profit": -1376.03,
+        "odds": "-138",
+        "actual_score": "CHC 0 - TEX 6"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1239.18,
+        "profit": -1239.18,
+        "odds": "+125",
+        "actual_score": "STL 2 - SDP 4"
+      }
+    ]
   }
 ]
