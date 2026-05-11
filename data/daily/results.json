@@ -2460,5 +2460,44 @@
         "actual_score": "STL 2 - SDP 4"
       }
     ]
+  },
+  {
+    "date": "2026-05-10",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -3694.25,
+    "bankroll": 26083.84,
+    "picks": [
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 976.44,
+        "profit": -976.44,
+        "odds": "-108",
+        "actual_score": "Athletics 1 - BAL 2"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1386.54,
+        "profit": -1386.54,
+        "odds": "-105",
+        "actual_score": "LAA 6 - TOR 1"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1331.27,
+        "profit": -1331.27,
+        "odds": "+110",
+        "actual_score": "CHC 0 - TEX 3"
+      }
+    ]
   }
 ]
