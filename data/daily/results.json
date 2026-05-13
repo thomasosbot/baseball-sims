@@ -2529,5 +2529,44 @@
         "actual_score": "TBR 8 - TOR 5"
       }
     ]
+  },
+  {
+    "date": "2026-05-12",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 3331.62,
+    "bankroll": 29420.02,
+    "picks": [
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 738.15,
+        "profit": -738.15,
+        "odds": "+124",
+        "actual_score": "PHI 2 - BOS 1"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 944.34,
+        "profit": 2360.85,
+        "odds": "+250",
+        "actual_score": "SFG 6 - LAD 2"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1436.07,
+        "profit": 1708.92,
+        "odds": "+119",
+        "actual_score": "SFG 6 - LAD 2"
+      }
+    ]
   }
 ]
