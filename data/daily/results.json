@@ -2568,5 +2568,80 @@
         "actual_score": "SFG 6 - LAD 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-13",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 2,
+    "losses": 5,
+    "pushes": 0,
+    "day_profit": -3549.83,
+    "bankroll": 25870.19,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1190.04,
+        "profit": 1666.06,
+        "odds": "+140",
+        "actual_score": "WSN 8 - CIN 7"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1639.97,
+        "profit": -1639.97,
+        "odds": "+142",
+        "actual_score": "TBR 3 - TOR 5"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1017.23,
+        "profit": 1241.02,
+        "odds": "+122",
+        "actual_score": "CHC 1 - ATL 4"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 804.53,
+        "profit": -804.53,
+        "odds": "+106",
+        "actual_score": "MIA 9 - MIN 5"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 909.23,
+        "profit": -909.23,
+        "odds": "+128",
+        "actual_score": "STL 2 - Athletics 6"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1320.53,
+        "profit": -1320.53,
+        "odds": "+205",
+        "actual_score": "SFG 0 - LAD 4"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1782.65,
+        "profit": -1782.65,
+        "odds": "+100",
+        "actual_score": "SFG 0 - LAD 4"
+      }
+    ]
   }
 ]
