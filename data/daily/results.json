@@ -2643,5 +2643,53 @@
         "actual_score": "SFG 0 - LAD 4"
       }
     ]
+  },
+  {
+    "date": "2026-05-14",
+    "games_played": 10,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -2641.14,
+    "bankroll": 23229.05,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1049.45,
+        "profit": -1049.45,
+        "odds": "+136",
+        "actual_score": "WSN 1 - CIN 15"
+      },
+      {
+        "pick": "DET ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1123.48,
+        "profit": -1123.48,
+        "odds": "+146",
+        "actual_score": "DET 4 - NYM 9"
+      },
+      {
+        "pick": "DET +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1614.87,
+        "profit": -1614.87,
+        "odds": "-145",
+        "actual_score": "DET 4 - NYM 9"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 971.75,
+        "profit": 1146.66,
+        "odds": "+118",
+        "actual_score": "KCR 2 - CWS 6"
+      }
+    ]
   }
 ]
