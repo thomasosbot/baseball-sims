@@ -2691,5 +2691,44 @@
         "actual_score": "KCR 2 - CWS 6"
       }
     ]
+  },
+  {
+    "date": "2026-05-15",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 2917.64,
+    "bankroll": 26146.69,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 793.88,
+        "profit": 992.35,
+        "odds": "+125",
+        "actual_score": "BAL 2 - WSN 3"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1223.74,
+        "profit": 1064.12,
+        "odds": "-115",
+        "actual_score": "MIA 2 - TBR 7"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 947.29,
+        "profit": 861.17,
+        "odds": "-110",
+        "actual_score": "KCR 4 - STL 5"
+      }
+    ]
   }
 ]
