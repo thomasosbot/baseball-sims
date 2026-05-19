@@ -2889,5 +2889,80 @@
         "actual_score": "SDP 8 - SEA 3"
       }
     ]
+  },
+  {
+    "date": "2026-05-18",
+    "games_played": 14,
+    "picks_count": 7,
+    "wins": 3,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -343.24,
+    "bankroll": 24372.23,
+    "picks": [
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 828.97,
+        "profit": 1061.08,
+        "odds": "+128",
+        "actual_score": "CLE 8 - DET 2"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1256.81,
+        "profit": 1030.17,
+        "odds": "-122",
+        "actual_score": "CIN 4 - PHI 5"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 779.85,
+        "profit": -779.85,
+        "odds": "-104",
+        "actual_score": "ATL 0 - MIA 12"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 890.89,
+        "profit": -890.89,
+        "odds": "+125",
+        "actual_score": "NYM 16 - WSN 7"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 684.26,
+        "profit": -684.26,
+        "odds": "+170",
+        "actual_score": "TOR 6 - NYY 7"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 741.49,
+        "profit": 963.94,
+        "odds": "+130",
+        "actual_score": "LAD 0 - SDP 1"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1043.43,
+        "profit": -1043.43,
+        "odds": "+150",
+        "actual_score": "CWS 1 - SEA 6"
+      }
+    ]
   }
 ]
