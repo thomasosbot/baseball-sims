@@ -2964,5 +2964,80 @@
         "actual_score": "CWS 1 - SEA 6"
       }
     ]
+  },
+  {
+    "date": "2026-05-19",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 5,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 2153.59,
+    "bankroll": 26525.82,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1243.22,
+        "profit": 1002.6,
+        "odds": "-124",
+        "actual_score": "BAL 1 - TBR 4"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1377.17,
+        "profit": -1377.17,
+        "odds": "-142",
+        "actual_score": "CIN 4 - PHI 1"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 717.69,
+        "profit": 933.0,
+        "odds": "+130",
+        "actual_score": "NYM 6 - WSN 9"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 941.34,
+        "profit": 871.61,
+        "odds": "-108",
+        "actual_score": "PIT 6 - STL 9"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 757.56,
+        "profit": 840.89,
+        "odds": "+111",
+        "actual_score": "Athletics 14 - LAA 6"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 897.59,
+        "profit": -897.59,
+        "odds": "+135",
+        "actual_score": "LAD 5 - SDP 4"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 609.57,
+        "profit": 780.25,
+        "odds": "+128",
+        "actual_score": "CWS 2 - SEA 1"
+      }
+    ]
   }
 ]
