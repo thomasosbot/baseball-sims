@@ -3039,5 +3039,80 @@
         "actual_score": "CWS 2 - SEA 1"
       }
     ]
+  },
+  {
+    "date": "2026-05-20",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 2,
+    "losses": 5,
+    "pushes": 0,
+    "day_profit": -3754.28,
+    "bankroll": 22771.54,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1619.36,
+        "profit": 1285.21,
+        "odds": "-126",
+        "actual_score": "BAL 3 - TBR 5"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 954.24,
+        "profit": -954.24,
+        "odds": "+130",
+        "actual_score": "CWS 4 - SEA 5"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 834.1,
+        "profit": -834.1,
+        "odds": "+170",
+        "actual_score": "ATL 9 - MIA 1"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1680.44,
+        "profit": -1680.44,
+        "odds": "-109",
+        "actual_score": "ATL 9 - MIA 1"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 713.88,
+        "profit": 713.88,
+        "odds": "+100",
+        "actual_score": "BOS 4 - KCR 3"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1212.61,
+        "profit": -1212.61,
+        "odds": "-116",
+        "actual_score": "PIT 7 - STL 0"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1071.98,
+        "profit": -1071.98,
+        "odds": "+150",
+        "actual_score": "LAD 4 - SDP 0"
+      }
+    ]
   }
 ]
