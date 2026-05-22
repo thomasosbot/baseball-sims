@@ -3114,5 +3114,26 @@
         "actual_score": "LAD 4 - SDP 0"
       }
     ]
+  },
+  {
+    "date": "2026-05-21",
+    "games_played": 7,
+    "picks_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 614.1,
+    "bankroll": 23385.64,
+    "picks": [
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 663.23,
+        "profit": 614.1,
+        "odds": "-108",
+        "actual_score": "Athletics 3 - LAA 2"
+      }
+    ]
   }
 ]
