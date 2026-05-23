@@ -3135,5 +3135,53 @@
         "actual_score": "Athletics 3 - LAA 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-22",
+    "games_played": 13,
+    "picks_count": 4,
+    "wins": 4,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 4717.24,
+    "bankroll": 28102.88,
+    "picks": [
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 774.09,
+        "profit": 1223.06,
+        "odds": "+158",
+        "actual_score": "CLE 1 - PHI 0"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 909.89,
+        "profit": 1237.45,
+        "odds": "+136",
+        "actual_score": "TBR 4 - NYY 2"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1366.42,
+        "profit": 1242.2,
+        "odds": "-110",
+        "actual_score": "WSN 4 - ATL 5"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1217.43,
+        "profit": 1014.53,
+        "odds": "-120",
+        "actual_score": "TEX 6 - LAA 9"
+      }
+    ]
   }
 ]
