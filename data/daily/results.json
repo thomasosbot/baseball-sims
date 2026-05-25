@@ -3231,5 +3231,62 @@
         "actual_score": "Athletics 0 - SDP 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-24",
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 1438.07,
+    "bankroll": 32436.64,
+    "picks": [
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1009.76,
+        "profit": 1373.27,
+        "odds": "+136",
+        "actual_score": "MIN 6 - BOS 5"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1011.36,
+        "profit": -1011.36,
+        "odds": "+116",
+        "actual_score": "TBR 0 - NYY 2"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1052.57,
+        "profit": 1073.62,
+        "odds": "+102",
+        "actual_score": "NYM 0 - MIA 4"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1541.03,
+        "profit": 1062.78,
+        "odds": "-145",
+        "actual_score": "Athletics 5 - SDP 2"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1060.24,
+        "profit": -1060.24,
+        "odds": "+108",
+        "actual_score": "TEX 1 - LAA 2"
+      }
+    ]
   }
 ]
