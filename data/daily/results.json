@@ -3288,5 +3288,71 @@
         "actual_score": "TEX 1 - LAA 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-25",
+    "games_played": 13,
+    "picks_count": 6,
+    "wins": 4,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 3237.53,
+    "bankroll": 35674.17,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1266.42,
+        "profit": 1722.33,
+        "odds": "+136",
+        "actual_score": "CIN 7 - NYM 2"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1632.6,
+        "profit": 1166.14,
+        "odds": "-140",
+        "actual_score": "WSN 10 - CLE 2"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1072.37,
+        "profit": -1072.37,
+        "odds": "+110",
+        "actual_score": "PHI 3 - SDP 0"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 969.18,
+        "profit": 1385.93,
+        "odds": "+143",
+        "actual_score": "MIA 8 - TOR 2"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1586.77,
+        "profit": 1057.85,
+        "odds": "-150",
+        "actual_score": "MIA 8 - TOR 2"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1022.35,
+        "profit": -1022.35,
+        "odds": "-101",
+        "actual_score": "SEA 9 - Athletics 2"
+      }
+    ]
   }
 ]
