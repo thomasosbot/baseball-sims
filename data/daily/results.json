@@ -3354,5 +3354,53 @@
         "actual_score": "SEA 9 - Athletics 2"
       }
     ]
+  },
+  {
+    "date": "2026-05-26",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -3579.32,
+    "bankroll": 32094.85,
+    "picks": [
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1252.47,
+        "profit": -1252.47,
+        "odds": "+170",
+        "actual_score": "NYY 15 - KCR 1"
+      },
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1835.83,
+        "profit": -1835.83,
+        "odds": "+100",
+        "actual_score": "NYY 15 - KCR 1"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1184.15,
+        "profit": -1184.15,
+        "odds": "+115",
+        "actual_score": "HOU 7 - TEX 10"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1594.21,
+        "profit": 693.13,
+        "odds": "-230",
+        "actual_score": "COL 6 - LAD 15"
+      }
+    ]
   }
 ]
