@@ -3402,5 +3402,53 @@
         "actual_score": "COL 6 - LAD 15"
       }
     ]
+  },
+  {
+    "date": "2026-05-27",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 113.51,
+    "bankroll": 32208.36,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1384.41,
+        "profit": -1384.41,
+        "odds": "+158",
+        "actual_score": "WSN 2 - CLE 3"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1590.7,
+        "profit": 1223.62,
+        "odds": "-130",
+        "actual_score": "WSN 2 - CLE 3"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1220.53,
+        "profit": -1220.53,
+        "odds": "+138",
+        "actual_score": "PHI 3 - SDP 0"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1083.21,
+        "profit": 1494.83,
+        "odds": "+138",
+        "actual_score": "HOU 4 - TEX 3"
+      }
+    ]
   }
 ]
