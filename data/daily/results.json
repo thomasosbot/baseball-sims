@@ -3450,5 +3450,53 @@
         "actual_score": "HOU 4 - TEX 3"
       }
     ]
+  },
+  {
+    "date": "2026-05-28",
+    "games_played": 6,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 3256.17,
+    "bankroll": 35464.53,
+    "picks": [
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 990.92,
+        "profit": -990.92,
+        "odds": "+128",
+        "actual_score": "MIN 2 - CWS 6"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 951.71,
+        "profit": 1389.5,
+        "odds": "+146",
+        "actual_score": "CHC 7 - PIT 2"
+      },
+      {
+        "pick": "CHC +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1691.39,
+        "profit": 1127.59,
+        "odds": "-150",
+        "actual_score": "CHC 7 - PIT 2"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1351.56,
+        "profit": 1730.0,
+        "odds": "+128",
+        "actual_score": "HOU 5 - TEX 1"
+      }
+    ]
   }
 ]
