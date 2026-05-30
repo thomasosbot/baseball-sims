@@ -3498,5 +3498,35 @@
         "actual_score": "HOU 5 - TEX 1"
       }
     ]
+  },
+  {
+    "date": "2026-05-29",
+    "games_played": 14,
+    "picks_count": 2,
+    "wins": 2,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 3860.25,
+    "bankroll": 39324.78,
+    "picks": [
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2087.34,
+        "profit": 2129.09,
+        "odds": "+102",
+        "actual_score": "DET 3 - CWS 4"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2008.15,
+        "profit": 1731.16,
+        "odds": "-116",
+        "actual_score": "PHI 2 - LAD 4"
+      }
+    ]
   }
 ]
