@@ -1,0 +1,88 @@
+name: Tweet Slot (Market Take / Spotlight / Lock-in)
+
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Which slot to fire'
+        required: true
+        type: choice
+        options:
+          - market_take
+          - spotlight
+          - lockin
+        default: market_take
+      date:
+        description: 'Date to use (YYYY-MM-DD, blank=today)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+# Different slot than the daily pipeline so they don't block each other.
+concurrency:
+  group: tweet-slot-${{ inputs.slot }}
+  cancel-in-progress: false
+
+jobs:
+  fire-slot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up environment
+        run: |
+          echo "TWITTER_API_KEY=${{ secrets.TWITTER_API_KEY }}" >> .env
+          echo "TWITTER_API_SECRET=${{ secrets.TWITTER_API_SECRET }}" >> .env
+          echo "TWITTER_ACCESS_TOKEN=${{ secrets.TWITTER_ACCESS_TOKEN }}" >> .env
+          echo "TWITTER_ACCESS_TOKEN_SECRET=${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+
+      - name: Pull latest before slot (avoid conflicts)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git stash --include-untracked || true
+          git pull --rebase || git reset --hard origin/main
+          git stash pop || true
+
+      - name: Fire slot
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          DATE_FLAG=""
+          if [ -n "${{ inputs.date }}" ]; then
+            DATE_FLAG="--date ${{ inputs.date }}"
+          fi
+          python3 -m src.twitter.${{ inputs.slot }} $DATE_FLAG --post
+
+      - name: Commit card image (receipts trail)
+        run: |
+          git add data/twitter/ data/processed/name_to_mlbam.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No new card to commit"
+          else
+            DATE=$(date +%Y-%m-%d)
+            git commit -m "Tweet slot (${{ inputs.slot }}): ${DATE}"
+            git pull --rebase --autostash || git reset --hard origin/main
+            git push || echo "Push failed — slot already fired successfully"
+          fi
