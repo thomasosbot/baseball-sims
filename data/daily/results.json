@@ -3837,5 +3837,53 @@
         "actual_score": "TBR 6 - MIA 0"
       }
     ]
+  },
+  {
+    "date": "2026-06-06",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 1446.57,
+    "bankroll": 52841.95,
+    "picks": [
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2380.17,
+        "profit": -2380.17,
+        "odds": "+135",
+        "actual_score": "SFG 2 - CHC 3"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2820.49,
+        "profit": -2820.49,
+        "odds": "-134",
+        "actual_score": "CWS 6 - PHI 3"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3450.39,
+        "profit": 3080.71,
+        "odds": "-112",
+        "actual_score": "PIT 3 - ATL 6"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2899.61,
+        "profit": 3566.52,
+        "odds": "+123",
+        "actual_score": "TBR 3 - MIA 4"
+      }
+    ]
   }
 ]
