@@ -3885,5 +3885,53 @@
         "actual_score": "TBR 3 - MIA 4"
       }
     ]
+  },
+  {
+    "date": "2026-06-07",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -4343.01,
+    "bankroll": 48498.94,
+    "picks": [
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2398.17,
+        "profit": -2398.17,
+        "odds": "+145",
+        "actual_score": "BOS 1 - NYY 6"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2556.21,
+        "profit": 2506.09,
+        "odds": "-102",
+        "actual_score": "TBR 1 - MIA 4"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2420.11,
+        "profit": -2420.11,
+        "odds": "-108",
+        "actual_score": "Athletics 5 - HOU 0"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2030.82,
+        "profit": -2030.82,
+        "odds": "+125",
+        "actual_score": "CLE 0 - TEX 10"
+      }
+    ]
   }
 ]
