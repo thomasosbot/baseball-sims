@@ -3936,13 +3936,13 @@
   },
   {
     "date": "2026-06-08",
-    "games_played": 7,
-    "picks_count": 2,
-    "wins": 1,
+    "games_played": 8,
+    "picks_count": 3,
+    "wins": 2,
     "losses": 1,
     "pushes": 0,
-    "day_profit": 1480.68,
-    "bankroll": 49979.62,
+    "day_profit": 5483.17,
+    "bankroll": 53982.11,
     "picks": [
       {
         "pick": "TOR ML",
@@ -3961,6 +3961,15 @@
         "profit": 3499.49,
         "odds": "+139",
         "actual_score": "WSN 4 - SFG 3"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 4402.74,
+        "profit": 4002.49,
+        "odds": "-110",
+        "actual_score": "MIL 15 - Athletics 14"
       }
     ]
   }
