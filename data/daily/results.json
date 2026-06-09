@@ -3933,5 +3933,35 @@
         "actual_score": "CLE 0 - TEX 10"
       }
     ]
+  },
+  {
+    "date": "2026-06-08",
+    "games_played": 7,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 1480.68,
+    "bankroll": 49979.62,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2018.81,
+        "profit": -2018.81,
+        "odds": "+158",
+        "actual_score": "PHI 5 - TOR 2"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2517.62,
+        "profit": 3499.49,
+        "odds": "+139",
+        "actual_score": "WSN 4 - SFG 3"
+      }
+    ]
   }
 ]
