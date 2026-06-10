@@ -3975,13 +3975,13 @@
   },
   {
     "date": "2026-06-09",
-    "games_played": 13,
-    "picks_count": 2,
+    "games_played": 15,
+    "picks_count": 3,
     "wins": 1,
-    "losses": 1,
+    "losses": 2,
     "pushes": 0,
-    "day_profit": -805.62,
-    "bankroll": 53176.49,
+    "day_profit": -3742.0,
+    "bankroll": 50240.11,
     "picks": [
       {
         "pick": "LAD ML",
@@ -3991,6 +3991,15 @@
         "profit": 2738.7,
         "odds": "-104",
         "actual_score": "LAD 12 - PIT 3"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2936.38,
+        "profit": -2936.38,
+        "odds": "+104",
+        "actual_score": "CIN 5 - SDP 3"
       },
       {
         "pick": "MIL ML",
