@@ -3972,5 +3972,35 @@
         "actual_score": "MIL 15 - Athletics 14"
       }
     ]
+  },
+  {
+    "date": "2026-06-09",
+    "games_played": 13,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -805.62,
+    "bankroll": 53176.49,
+    "picks": [
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2848.25,
+        "profit": 2738.7,
+        "odds": "-104",
+        "actual_score": "LAD 12 - PIT 3"
+      },
+      {
+        "pick": "MIL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3544.32,
+        "profit": -3544.32,
+        "odds": "-110",
+        "actual_score": "MIL 5 - Athletics 7"
+      }
+    ]
   }
 ]
