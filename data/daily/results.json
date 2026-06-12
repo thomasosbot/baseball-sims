@@ -4059,5 +4059,26 @@
         "actual_score": "CHC 2 - COL 3"
       }
     ]
+  },
+  {
+    "date": "2026-06-11",
+    "games_played": 7,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -2152.06,
+    "bankroll": 48900.16,
+    "picks": [
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2152.06,
+        "profit": -2152.06,
+        "odds": "+122",
+        "actual_score": "STL 4 - NYM 5"
+      }
+    ]
   }
 ]
