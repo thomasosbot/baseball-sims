@@ -4080,5 +4080,71 @@
         "actual_score": "STL 4 - NYM 5"
       }
     ]
+  },
+  {
+    "date": "2026-06-12",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 3,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 1553.92,
+    "bankroll": 50454.08,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2286.2,
+        "profit": 2789.16,
+        "odds": "+122",
+        "actual_score": "MIA 8 - PIT 3"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2233.17,
+        "profit": -2233.17,
+        "odds": "+125",
+        "actual_score": "SEA 10 - WSN 2"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2403.09,
+        "profit": -2403.09,
+        "odds": "+119",
+        "actual_score": "STL 8 - MIN 9"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2269.87,
+        "profit": 3268.61,
+        "odds": "+144",
+        "actual_score": "TBR 3 - LAA 4"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3970.91,
+        "profit": 3483.25,
+        "odds": "-114",
+        "actual_score": "TBR 3 - LAA 4"
+      },
+      {
+        "pick": "COL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3350.84,
+        "profit": -3350.84,
+        "odds": "-105",
+        "actual_score": "COL 4 - Athletics 6"
+      }
+    ]
   }
 ]
