@@ -4146,5 +4146,53 @@
         "actual_score": "COL 4 - Athletics 6"
       }
     ]
+  },
+  {
+    "date": "2026-06-13",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -6847.53,
+    "bankroll": 43606.55,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2481.51,
+        "profit": -2481.51,
+        "odds": "+112",
+        "actual_score": "MIA 2 - PIT 3"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2844.16,
+        "profit": 3697.41,
+        "odds": "+130",
+        "actual_score": "DET 1 - CLE 3"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3886.61,
+        "profit": -3886.61,
+        "odds": "+175",
+        "actual_score": "LAD 7 - CWS 1"
+      },
+      {
+        "pick": "COL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 4176.82,
+        "profit": -4176.82,
+        "odds": "-125",
+        "actual_score": "COL 5 - Athletics 7"
+      }
+    ]
   }
 ]
