@@ -4194,5 +4194,44 @@
         "actual_score": "COL 5 - Athletics 7"
       }
     ]
+  },
+  {
+    "date": "2026-06-14",
+    "games_played": 14,
+    "picks_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 8313.47,
+    "bankroll": 51920.02,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2084.32,
+        "profit": 2834.68,
+        "odds": "+136",
+        "actual_score": "MIA 4 - PIT 2"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1790.02,
+        "profit": 2148.02,
+        "odds": "+120",
+        "actual_score": "SEA 1 - WSN 10"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2030.96,
+        "profit": 3330.77,
+        "odds": "+164",
+        "actual_score": "LAD 4 - CWS 6"
+      }
+    ]
   }
 ]
