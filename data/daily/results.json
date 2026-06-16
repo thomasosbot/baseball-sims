@@ -4233,5 +4233,53 @@
         "actual_score": "LAD 4 - CWS 6"
       }
     ]
+  },
+  {
+    "date": "2026-06-15",
+    "games_played": 10,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -6228.12,
+    "bankroll": 45691.9,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2571.49,
+        "profit": -2571.49,
+        "odds": "+176",
+        "actual_score": "MIA 0 - PHI 7"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2823.68,
+        "profit": -2823.68,
+        "odds": "-120",
+        "actual_score": "MIA 0 - PHI 7"
+      },
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3190.61,
+        "profit": -3190.61,
+        "odds": "+120",
+        "actual_score": "NYM 0 - CIN 12"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3748.68,
+        "profit": 2357.66,
+        "odds": "-159",
+        "actual_score": "TBR 3 - LAD 4"
+      }
+    ]
   }
 ]
