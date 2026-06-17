@@ -4281,5 +4281,35 @@
         "actual_score": "TBR 3 - LAD 4"
       }
     ]
+  },
+  {
+    "date": "2026-06-16",
+    "games_played": 14,
+    "picks_count": 2,
+    "wins": 2,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 4595.47,
+    "bankroll": 50287.37,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2326.29,
+        "profit": 1789.45,
+        "odds": "-130",
+        "actual_score": "KCR 4 - WSN 6"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 4068.73,
+        "profit": 2806.02,
+        "odds": "-145",
+        "actual_score": "TBR 0 - LAD 1"
+      }
+    ]
   }
 ]
