@@ -4311,5 +4311,44 @@
         "actual_score": "TBR 0 - LAD 1"
       }
     ]
+  },
+  {
+    "date": "2026-06-17",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -8171.89,
+    "bankroll": 42115.48,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3116.55,
+        "profit": -3116.55,
+        "odds": "-130",
+        "actual_score": "KCR 6 - WSN 2"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2779.52,
+        "profit": -2779.52,
+        "odds": "-114",
+        "actual_score": "MIA 12 - PHI 4"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2275.82,
+        "profit": -2275.82,
+        "odds": "-125",
+        "actual_score": "SFG 7 - ATL 2"
+      }
+    ]
   }
 ]
