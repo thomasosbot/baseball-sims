@@ -4350,5 +4350,35 @@
         "actual_score": "SFG 7 - ATL 2"
       }
     ]
+  },
+  {
+    "date": "2026-06-18",
+    "games_played": 8,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -1393.25,
+    "bankroll": 40722.23,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1589.67,
+        "profit": 1685.05,
+        "odds": "+106",
+        "actual_score": "TOR 4 - BOS 3"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3078.3,
+        "profit": -3078.3,
+        "odds": "-122",
+        "actual_score": "NYM 6 - PHI 4"
+      }
+    ]
   }
 ]
