@@ -4524,5 +4524,44 @@
         "actual_score": "SDP 3 - TEX 4"
       }
     ]
+  },
+  {
+    "date": "2026-06-22",
+    "games_played": 12,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -1414.24,
+    "bankroll": 27345.53,
+    "picks": [
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 990.47,
+        "profit": 1584.75,
+        "odds": "+160",
+        "actual_score": "KCR 2 - TBR 1"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1899.72,
+        "profit": -1899.72,
+        "odds": "-124",
+        "actual_score": "TEX 4 - MIA 3"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1099.27,
+        "profit": -1099.27,
+        "odds": "+103",
+        "actual_score": "PHI 1 - WSN 4"
+      }
+    ]
   }
 ]
