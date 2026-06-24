@@ -4563,5 +4563,44 @@
         "actual_score": "PHI 1 - WSN 4"
       }
     ]
+  },
+  {
+    "date": "2026-06-23",
+    "games_played": 14,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 2370.57,
+    "bankroll": 29716.1,
+    "picks": [
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1439.2,
+        "profit": 2317.11,
+        "odds": "+161",
+        "actual_score": "KCR 12 - TBR 5"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 999.91,
+        "profit": -999.91,
+        "odds": "+145",
+        "actual_score": "PHI 14 - WSN 9"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1095.5,
+        "profit": 1053.37,
+        "odds": "-104",
+        "actual_score": "CLE 1 - CWS 2"
+      }
+    ]
   }
 ]
