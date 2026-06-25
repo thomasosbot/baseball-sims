@@ -4602,5 +4602,53 @@
         "actual_score": "CLE 1 - CWS 2"
       }
     ]
+  },
+  {
+    "date": "2026-06-24",
+    "games_played": 16,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 821.8,
+    "bankroll": 30537.9,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1994.43,
+        "profit": 2114.1,
+        "odds": "+106",
+        "actual_score": "TEX 2 - MIA 4"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1622.83,
+        "profit": -1622.83,
+        "odds": "-102",
+        "actual_score": "CLE 4 - CWS 3"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1018.9,
+        "profit": -1018.9,
+        "odds": "+125",
+        "actual_score": "KCR 3 - TBR 5"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1226.75,
+        "profit": 1349.43,
+        "odds": "+110",
+        "actual_score": "Athletics 1 - SFG 2"
+      }
+    ]
   }
 ]
