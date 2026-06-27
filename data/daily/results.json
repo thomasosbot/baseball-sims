@@ -4689,5 +4689,53 @@
         "actual_score": "NYY 3 - BOS 6"
       }
     ]
+  },
+  {
+    "date": "2026-06-26",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 4,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 7390.46,
+    "bankroll": 39514.1,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1149.38,
+        "profit": 2022.91,
+        "odds": "+176",
+        "actual_score": "CIN 6 - PIT 4"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2711.9,
+        "profit": 2169.52,
+        "odds": "-125",
+        "actual_score": "CIN 6 - PIT 4"
+      },
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1936.52,
+        "profit": 1613.77,
+        "odds": "-120",
+        "actual_score": "PHI 2 - NYM 1"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1615.95,
+        "profit": 1584.26,
+        "odds": "-102",
+        "actual_score": "MIA 4 - STL 0"
+      }
+    ]
   }
 ]
