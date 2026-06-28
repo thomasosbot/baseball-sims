@@ -4737,5 +4737,98 @@
         "actual_score": "MIA 4 - STL 0"
       }
     ]
+  },
+  {
+    "date": "2026-06-27",
+    "games_played": 15,
+    "picks_count": 9,
+    "wins": 5,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": 5330.01,
+    "bankroll": 44844.11,
+    "picks": [
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2925.88,
+        "profit": 4856.96,
+        "odds": "+166",
+        "actual_score": "TEX 7 - TOR 4"
+      },
+      {
+        "pick": "TEX +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2927.6,
+        "profit": 2287.19,
+        "odds": "-128",
+        "actual_score": "TEX 7 - TOR 4"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2885.73,
+        "profit": -2885.73,
+        "odds": "+116",
+        "actual_score": "PHI 2 - NYM 6"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1568.06,
+        "profit": -1568.06,
+        "odds": "+132",
+        "actual_score": "ARI 2 - TBR 4"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2841.18,
+        "profit": -2841.18,
+        "odds": "-160",
+        "actual_score": "ARI 2 - TBR 4"
+      },
+      {
+        "pick": "CLE ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1507.7,
+        "profit": 1960.01,
+        "odds": "+130",
+        "actual_score": "SEA 3 - CLE 4"
+      },
+      {
+        "pick": "CHC +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2960.14,
+        "profit": 1986.67,
+        "odds": "-149",
+        "actual_score": "CHC 8 - MIL 2"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2693.96,
+        "profit": 3286.63,
+        "odds": "+122",
+        "actual_score": "MIA 5 - STL 1"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1752.48,
+        "profit": -1752.48,
+        "odds": "+172",
+        "actual_score": "LAD 15 - SDP 3"
+      }
+    ]
   }
 ]
