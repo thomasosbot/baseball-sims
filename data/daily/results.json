@@ -4830,5 +4830,89 @@
         "actual_score": "LAD 15 - SDP 3"
       }
     ]
+  },
+  {
+    "date": "2026-06-28",
+    "games_played": 15,
+    "picks_count": 8,
+    "wins": 5,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 5071.97,
+    "bankroll": 49916.08,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2637.29,
+        "profit": 4430.65,
+        "odds": "+168",
+        "actual_score": "WSN 6 - BAL 4"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3454.71,
+        "profit": 2763.77,
+        "odds": "-125",
+        "actual_score": "WSN 6 - BAL 4"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1758.55,
+        "profit": 2004.75,
+        "odds": "+114",
+        "actual_score": "TEX 3 - TOR 2"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2471.14,
+        "profit": -2471.14,
+        "odds": "+162",
+        "actual_score": "ARI 1 - TBR 5"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3983.95,
+        "profit": -3983.95,
+        "odds": "-135",
+        "actual_score": "ARI 1 - TBR 5"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3279.34,
+        "profit": -3279.34,
+        "odds": "+114",
+        "actual_score": "MIA 1 - STL 2"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2491.42,
+        "profit": 3413.25,
+        "odds": "+137",
+        "actual_score": "ATL 2 - SFG 3"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2742.48,
+        "profit": 2193.98,
+        "odds": "-125",
+        "actual_score": "ATL 2 - SFG 3"
+      }
+    ]
   }
 ]
