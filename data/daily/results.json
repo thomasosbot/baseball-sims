@@ -4914,5 +4914,53 @@
         "actual_score": "ATL 2 - SFG 3"
       }
     ]
+  },
+  {
+    "date": "2026-06-29",
+    "games_played": 13,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 140.35,
+    "bankroll": 50056.43,
+    "picks": [
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4491.15,
+        "profit": -4491.15,
+        "odds": "-107",
+        "actual_score": "PIT 11 - PHI 7"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1812.04,
+        "profit": -1812.04,
+        "odds": "+144",
+        "actual_score": "WSN 3 - BOS 6"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1944.15,
+        "profit": 2469.07,
+        "odds": "+127",
+        "actual_score": "TEX 6 - CLE 3"
+      },
+      {
+        "pick": "LAD ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 4491.15,
+        "profit": 3974.47,
+        "odds": "-113",
+        "actual_score": "LAD 9 - Athletics 4"
+      }
+    ]
   }
 ]
