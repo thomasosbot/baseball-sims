@@ -5001,5 +5001,53 @@
         "actual_score": "PIT 0 - PHI 8"
       }
     ]
+  },
+  {
+    "date": "2026-07-01",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -1880.39,
+    "bankroll": 46006.92,
+    "picks": [
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2490.3,
+        "profit": -2490.3,
+        "odds": "+118",
+        "actual_score": "CWS 1 - BAL 6"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2744.2,
+        "profit": 2286.83,
+        "odds": "-120",
+        "actual_score": "SDP 3 - CHC 23"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2582.36,
+        "profit": 1912.86,
+        "odds": "-135",
+        "actual_score": "PIT 6 - PHI 10"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3589.78,
+        "profit": -3589.78,
+        "odds": "-144",
+        "actual_score": "CIN 2 - MIL 4"
+      }
+    ]
   }
 ]
