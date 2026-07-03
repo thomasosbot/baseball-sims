@@ -5049,5 +5049,26 @@
         "actual_score": "CIN 2 - MIL 4"
       }
     ]
+  },
+  {
+    "date": "2026-07-02",
+    "games_played": 8,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -3632.14,
+    "bankroll": 42374.78,
+    "picks": [
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3632.14,
+        "profit": -3632.14,
+        "odds": "-130",
+        "actual_score": "PIT 6 - PHI 1"
+      }
+    ]
   }
 ]
