@@ -5070,5 +5070,44 @@
         "actual_score": "PIT 6 - PHI 1"
       }
     ]
+  },
+  {
+    "date": "2026-07-03",
+    "games_played": 12,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -2572.94,
+    "bankroll": 39801.84,
+    "picks": [
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2274.79,
+        "profit": -2274.79,
+        "odds": "-128",
+        "actual_score": "STL 17 - CHC 1"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1828.8,
+        "profit": 1975.1,
+        "odds": "+108",
+        "actual_score": "MIA 12 - Athletics 5"
+      },
+      {
+        "pick": "SEA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2273.25,
+        "profit": -2273.25,
+        "odds": "+110",
+        "actual_score": "TOR 2 - SEA 0"
+      }
+    ]
   }
 ]
