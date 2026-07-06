@@ -5166,5 +5166,71 @@
         "actual_score": "SDP 0 - LAD 3"
       }
     ]
+  },
+  {
+    "date": "2026-07-05",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 4,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 2293.19,
+    "bankroll": 28634.19,
+    "picks": [
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 990.18,
+        "profit": -990.18,
+        "odds": "-118",
+        "actual_score": "NYM 10 - ATL 9"
+      },
+      {
+        "pick": "CWS +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1339.4,
+        "profit": 811.76,
+        "odds": "-165",
+        "actual_score": "CWS 7 - CLE 6"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1493.52,
+        "profit": -1493.52,
+        "odds": "-136",
+        "actual_score": "PHI 2 - KCR 5"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1848.35,
+        "profit": 1320.25,
+        "odds": "-140",
+        "actual_score": "MIL 3 - ARI 2"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1330.22,
+        "profit": 1410.03,
+        "odds": "+106",
+        "actual_score": "MIA 9 - Athletics 8"
+      },
+      {
+        "pick": "SDP +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1358.33,
+        "profit": 1234.85,
+        "odds": "-110",
+        "actual_score": "SDP 5 - LAD 2"
+      }
+    ]
   }
 ]
