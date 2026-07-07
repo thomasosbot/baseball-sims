@@ -5232,5 +5232,35 @@
         "actual_score": "SDP 5 - LAD 2"
       }
     ]
+  },
+  {
+    "date": "2026-07-06",
+    "games_played": 7,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 288.41,
+    "bankroll": 28922.6,
+    "picks": [
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1707.08,
+        "profit": 1911.93,
+        "odds": "+112",
+        "actual_score": "PHI 1 - KCR 15"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1623.52,
+        "profit": -1623.52,
+        "odds": "-115",
+        "actual_score": "NYY 5 - TBR 1"
+      }
+    ]
   }
 ]
