@@ -5262,5 +5262,62 @@
         "actual_score": "NYY 5 - TBR 1"
       }
     ]
+  },
+  {
+    "date": "2026-07-07",
+    "games_played": 16,
+    "picks_count": 5,
+    "wins": 1,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -4682.87,
+    "bankroll": 24239.73,
+    "picks": [
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1530.43,
+        "profit": -1530.43,
+        "odds": "-135",
+        "actual_score": "Athletics 2 - DET 6"
+      },
+      {
+        "pick": "ATL +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1546.09,
+        "profit": -1546.09,
+        "odds": "-150",
+        "actual_score": "ATL 4 - PIT 12"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1478.54,
+        "profit": 1274.6,
+        "odds": "-116",
+        "actual_score": "SEA 5 - MIA 6"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1694.46,
+        "profit": -1694.46,
+        "odds": "-110",
+        "actual_score": "PHI 4 - CIN 1"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1186.49,
+        "profit": -1186.49,
+        "odds": "+100",
+        "actual_score": "TOR 9 - SFG 3"
+      }
+    ]
   }
 ]
