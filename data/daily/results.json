@@ -5526,5 +5526,89 @@
         "actual_score": "ARI 9 - LAD 3"
       }
     ]
+  },
+  {
+    "date": "2026-07-11",
+    "games_played": 16,
+    "picks_count": 8,
+    "wins": 5,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 2597.74,
+    "bankroll": 25283.49,
+    "picks": [
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1610.59,
+        "profit": -1610.59,
+        "odds": "-130",
+        "actual_score": "LAA 3 - MIN 5"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1034.56,
+        "profit": 994.77,
+        "odds": "-104",
+        "actual_score": "Athletics 0 - CWS 1"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1205.91,
+        "profit": -1205.91,
+        "odds": "+165",
+        "actual_score": "NYY 4 - WSN 2"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 881.72,
+        "profit": -881.72,
+        "odds": "+100",
+        "actual_score": "NYY 4 - WSN 2"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1152.6,
+        "profit": 1475.33,
+        "odds": "+128",
+        "actual_score": "BOS 4 - NYM 0"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 786.03,
+        "profit": 809.61,
+        "odds": "+103",
+        "actual_score": "ATL 1 - STL 4"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 722.68,
+        "profit": 1662.16,
+        "odds": "+230",
+        "actual_score": "ARI 9 - LAD 2"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1289.61,
+        "profit": 1354.09,
+        "odds": "+105",
+        "actual_score": "ARI 9 - LAD 2"
+      }
+    ]
   }
 ]
