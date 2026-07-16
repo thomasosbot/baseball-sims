@@ -1,0 +1,221 @@
+{
+  "date": "2026-07-16",
+  "generated_at": "2026-07-16T13:02:35.454990",
+  "run_mode": "late",
+  "games": [
+    {
+      "away": "NYM",
+      "home": "PHI",
+      "away_pitcher": "Christian Scott",
+      "home_pitcher": "Aaron Nola",
+      "model_home_wp": 0.6463,
+      "model_away_wp": 0.3537,
+      "avg_total_runs": 11.24,
+      "elo_home_wp": 0.7521,
+      "sim_home_wp": 0.5405,
+      "lineup_status": "projected",
+      "home_lineup_names": [
+        "Trea Turner",
+        "Kyle Schwarber",
+        "Bryce Harper",
+        "Brandon Marsh",
+        "Alec Bohm",
+        "Bryson Stott",
+        "Gabriel Rincones Jr.",
+        "J.T. Realmuto",
+        "Justin Crawford"
+      ],
+      "away_lineup_names": [
+        "A.J. Ewing",
+        "Juan Soto",
+        "Bo Bichette",
+        "Francisco Lindor",
+        "Carson Benge",
+        "Jorge Polanco",
+        "Jared Young",
+        "Brett Baty",
+        "Francisco Alvarez"
+      ],
+      "sim_detail": {
+        "avg_home_runs": 5.57,
+        "avg_away_runs": 5.67,
+        "std_total_runs": 4.95,
+        "margin_distribution": {
+          "labels": [
+            -10,
+            -9,
+            -8,
+            -7,
+            -6,
+            -5,
+            -4,
+            -3,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "freq": [
+            0.9,
+            1.4,
+            1.9,
+            2.6,
+            3.6,
+            4.5,
+            5.6,
+            7.4,
+            8.9,
+            10.0,
+            0.0,
+            13.6,
+            10.1,
+            7.8,
+            5.5,
+            4.2,
+            3.2,
+            2.3,
+            1.7,
+            1.0,
+            0.8
+          ]
+        },
+        "run_distribution": {
+          "labels": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "home_freq": [
+            3.1,
+            6.1,
+            9.3,
+            11.2,
+            12.6,
+            12.2,
+            10.5,
+            9.3,
+            7.6,
+            5.3,
+            4.2,
+            2.9,
+            2.1,
+            1.5,
+            0.8,
+            0.5
+          ],
+          "away_freq": [
+            3.3,
+            6.6,
+            8.6,
+            10.7,
+            12.5,
+            11.9,
+            10.1,
+            9.2,
+            7.6,
+            5.9,
+            4.4,
+            3.3,
+            2.1,
+            1.4,
+            0.8,
+            0.8
+          ]
+        }
+      },
+      "weather": {
+        "temperature": 97.4,
+        "wind_speed": 11.7,
+        "wind_direction": "out",
+        "condition": "Forecast"
+      },
+      "park_factors": {
+        "runs": 1.05,
+        "lhb_ba": 1.0,
+        "rhb_ba": 1.0,
+        "lhb_hr": 1.29,
+        "rhb_hr": 1.1,
+        "bb": 1.0,
+        "k": 1.0,
+        "HR": 1.26,
+        "1B": 1.0,
+        "2B": 1.08,
+        "3B": 0.95
+      },
+      "elo_home_rating": 1581,
+      "elo_away_rating": 1413,
+      "market_home_wp": 0.5463,
+      "market_away_wp": 0.4537,
+      "books_home": {
+        "fanduel": -130,
+        "williamhill_us": -130,
+        "betmgm": -135,
+        "bovada": -135,
+        "draftkings": -135
+      },
+      "books_away": {
+        "fanduel": 110,
+        "williamhill_us": 110,
+        "betmgm": 110,
+        "bovada": 113,
+        "draftkings": 112
+      },
+      "confidence": 1.0,
+      "pick": "PHI ML",
+      "edge_pct": 9.0,
+      "odds": "-130",
+      "kelly_fraction": 0.0409,
+      "explanation": "The market is treating this like a coin flip because both starters have warts, but only one side actually has the lineup to bully a bandbox in 97-degree heat with the wind blowing out. Philadelphia runs Schwarber, Harper and Turner into a park that plays like a launching pad tonight, and Schwarber in particular has been detonating right-handed pitching to the tune of a .401 xwOBA. Nola is not the version of himself from three years ago, but he misses enough bats to keep Soto from single-handedly dragging the Mets across the finish line, and the gap in roster quality between these two clubs is wider than a two-hook price suggests. At -130 you are laying juice on the better team in a spot built for their swings."
+    }
+  ],
+  "picks": [
+    {
+      "pick": "PHI ML",
+      "side": "home",
+      "team": "PHI",
+      "opponent": "NYM",
+      "edge_pct": 9.0,
+      "model_prob": 0.646,
+      "confidence": 1.0,
+      "odds": "-130",
+      "kelly_fraction": 0.0409,
+      "wager": 1907.92,
+      "explanation": "The market is treating this like a coin flip because both starters have warts, but only one side actually has the lineup to bully a bandbox in 97-degree heat with the wind blowing out. Philadelphia runs Schwarber, Harper and Turner into a park that plays like a launching pad tonight, and Schwarber in particular has been detonating right-handed pitching to the tune of a .401 xwOBA. Nola is not the version of himself from three years ago, but he misses enough bats to keep Soto from single-handedly dragging the Mets across the finish line, and the gap in roster quality between these two clubs is wider than a two-hook price suggests. At -130 you are laying juice on the better team in a spot built for their swings.",
+      "type": "moneyline",
+      "sportsbook_odds": {
+        "fanduel": -130,
+        "williamhill_us": -130,
+        "betmgm": -135,
+        "bovada": -135,
+        "draftkings": -135
+      },
+      "lineup_status": "projected"
+    }
+  ],
+  "bankroll": {
+    "current": 46681.74,
+    "today_wagered": 1907.92
+  }
+}
