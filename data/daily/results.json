@@ -5667,5 +5667,26 @@
         "actual_score": "TOR 4 - SDP 5"
       }
     ]
+  },
+  {
+    "date": "2026-07-16",
+    "games_played": 1,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -1907.92,
+    "bankroll": 27744.28,
+    "picks": [
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1907.92,
+        "profit": -1907.92,
+        "odds": "-130",
+        "actual_score": "NYM 4 - PHI 1"
+      }
+    ]
   }
 ]
