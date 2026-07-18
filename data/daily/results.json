@@ -5688,5 +5688,44 @@
         "actual_score": "NYM 4 - PHI 1"
       }
     ]
+  },
+  {
+    "date": "2026-07-17",
+    "games_played": 13,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 1467.11,
+    "bankroll": 29211.39,
+    "picks": [
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1654.83,
+        "profit": 1402.4,
+        "odds": "-118",
+        "actual_score": "TBR 0 - BOS 10"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1147.27,
+        "profit": -1147.27,
+        "odds": "-110",
+        "actual_score": "STL 5 - ARI 4"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 897.76,
+        "profit": 1211.98,
+        "odds": "+135",
+        "actual_score": "SFG 7 - SEA 0"
+      }
+    ]
   }
 ]
