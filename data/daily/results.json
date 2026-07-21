@@ -5832,5 +5832,53 @@
         "actual_score": "SFG 3 - SEA 6"
       }
     ]
+  },
+  {
+    "date": "2026-07-20",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 2046.11,
+    "bankroll": 26233.26,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 838.54,
+        "profit": 1098.49,
+        "odds": "+131",
+        "actual_score": "TBR 7 - TOR 1"
+      },
+      {
+        "pick": "SDP +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1273.54,
+        "profit": 795.96,
+        "odds": "-160",
+        "actual_score": "SDP 2 - ATL 3"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 942.51,
+        "profit": 1366.64,
+        "odds": "+145",
+        "actual_score": "CWS 10 - TEX 3"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1214.98,
+        "profit": -1214.98,
+        "odds": "-160",
+        "actual_score": "Athletics 5 - ARI 2"
+      }
+    ]
   }
 ]
