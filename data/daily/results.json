@@ -5880,5 +5880,35 @@
         "actual_score": "Athletics 5 - ARI 2"
       }
     ]
+  },
+  {
+    "date": "2026-07-21",
+    "games_played": 12,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 25.0,
+    "bankroll": 26258.26,
+    "picks": [
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1579.69,
+        "profit": 1019.15,
+        "odds": "-155",
+        "actual_score": "NYM 4 - MIL 0"
+      },
+      {
+        "pick": "SEA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 994.15,
+        "profit": -994.15,
+        "odds": "-110",
+        "actual_score": "CIN 4 - SEA 2"
+      }
+    ]
   }
 ]
