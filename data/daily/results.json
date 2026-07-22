@@ -5883,13 +5883,13 @@
   },
   {
     "date": "2026-07-21",
-    "games_played": 12,
-    "picks_count": 2,
-    "wins": 1,
+    "games_played": 13,
+    "picks_count": 3,
+    "wins": 2,
     "losses": 1,
     "pushes": 0,
-    "day_profit": 25.0,
-    "bankroll": 26258.26,
+    "day_profit": 1130.34,
+    "bankroll": 27363.6,
     "picks": [
       {
         "pick": "NYM +1.5",
@@ -5899,6 +5899,15 @@
         "profit": 1019.15,
         "odds": "-155",
         "actual_score": "NYM 4 - MIL 0"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1481.16,
+        "profit": 1105.34,
+        "odds": "-134",
+        "actual_score": "Athletics 5 - ARI 6"
       },
       {
         "pick": "SEA ML",
