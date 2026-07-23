@@ -5919,5 +5919,44 @@
         "actual_score": "CIN 4 - SEA 2"
       }
     ]
+  },
+  {
+    "date": "2026-07-22",
+    "games_played": 17,
+    "picks_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 4484.06,
+    "bankroll": 31847.66,
+    "picks": [
+      {
+        "pick": "PIT ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1342.34,
+        "profit": 2013.51,
+        "odds": "+150",
+        "actual_score": "PIT 5 - NYY 3"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1493.45,
+        "profit": 1287.46,
+        "odds": "-116",
+        "actual_score": "Athletics 5 - ARI 15"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1892.95,
+        "profit": 1183.09,
+        "odds": "-160",
+        "actual_score": "CIN 5 - SEA 3"
+      }
+    ]
   }
 ]
