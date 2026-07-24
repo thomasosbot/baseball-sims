@@ -5958,5 +5958,44 @@
         "actual_score": "CIN 5 - SEA 3"
       }
     ]
+  },
+  {
+    "date": "2026-07-23",
+    "games_played": 5,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 840.15,
+    "bankroll": 32687.81,
+    "picks": [
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1988.83,
+        "profit": -1988.83,
+        "odds": "+222",
+        "actual_score": "SDP 5 - ATL 6"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1090.87,
+        "profit": 1145.41,
+        "odds": "+105",
+        "actual_score": "ARI 10 - STL 6"
+      },
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1936.1,
+        "profit": 1683.57,
+        "odds": "-115",
+        "actual_score": "KCR 3 - DET 4"
+      }
+    ]
   }
 ]
