@@ -5997,5 +5997,44 @@
         "actual_score": "KCR 3 - DET 4"
       }
     ]
+  },
+  {
+    "date": "2026-07-24",
+    "games_played": 14,
+    "picks_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 2495.91,
+    "bankroll": 35183.72,
+    "picks": [
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2582.38,
+        "profit": 2082.56,
+        "odds": "-124",
+        "actual_score": "TOR 4 - BOS 6"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1456.08,
+        "profit": -1456.08,
+        "odds": "-140",
+        "actual_score": "Athletics 2 - MIN 0"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1335.31,
+        "profit": 1869.43,
+        "odds": "+140",
+        "actual_score": "CIN 4 - STL 2"
+      }
+    ]
   }
 ]
