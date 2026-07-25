@@ -6000,13 +6000,13 @@
   },
   {
     "date": "2026-07-24",
-    "games_played": 14,
-    "picks_count": 3,
+    "games_played": 15,
+    "picks_count": 4,
     "wins": 2,
-    "losses": 1,
+    "losses": 2,
     "pushes": 0,
-    "day_profit": 2495.91,
-    "bankroll": 35183.72,
+    "day_profit": 1120.42,
+    "bankroll": 33808.23,
     "picks": [
       {
         "pick": "BOS ML",
@@ -6034,6 +6034,15 @@
         "profit": 1869.43,
         "odds": "+140",
         "actual_score": "CIN 4 - STL 2"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1375.49,
+        "profit": -1375.49,
+        "odds": "+146",
+        "actual_score": "LAA 6 - SFG 7"
       }
     ]
   }
