@@ -6045,5 +6045,35 @@
         "actual_score": "LAA 6 - SFG 7"
       }
     ]
+  },
+  {
+    "date": "2026-07-25",
+    "games_played": 15,
+    "picks_count": 2,
+    "wins": 0,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -4432.99,
+    "bankroll": 29375.24,
+    "picks": [
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1934.77,
+        "profit": -1934.77,
+        "odds": "+130",
+        "actual_score": "ARI 3 - WSN 5"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2498.22,
+        "profit": -2498.22,
+        "odds": "-140",
+        "actual_score": "Athletics 0 - MIN 2"
+      }
+    ]
   }
 ]
