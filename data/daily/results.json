@@ -6075,5 +6075,53 @@
         "actual_score": "Athletics 0 - MIN 2"
       }
     ]
+  },
+  {
+    "date": "2026-07-26",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -2338.1,
+    "bankroll": 27037.14,
+    "picks": [
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2110.97,
+        "profit": 1563.68,
+        "odds": "-135",
+        "actual_score": "TOR 1 - BOS 6"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1355.15,
+        "profit": -1355.15,
+        "odds": "-110",
+        "actual_score": "SEA 6 - TEX 4"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1164.28,
+        "profit": -1164.28,
+        "odds": "-106",
+        "actual_score": "LAA 4 - SFG 3"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1382.35,
+        "profit": -1382.35,
+        "odds": "+158",
+        "actual_score": "NYY 4 - PHI 11"
+      }
+    ]
   }
 ]
