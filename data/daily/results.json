@@ -6123,5 +6123,53 @@
         "actual_score": "NYY 4 - PHI 11"
       }
     ]
+  },
+  {
+    "date": "2026-07-27",
+    "games_played": 10,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -249.65,
+    "bankroll": 26787.49,
+    "picks": [
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1179.5,
+        "profit": 1368.22,
+        "odds": "+116",
+        "actual_score": "SEA 3 - TEX 7"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1232.98,
+        "profit": 1081.56,
+        "odds": "-114",
+        "actual_score": "PHI 7 - MIA 8"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1021.03,
+        "profit": -1021.03,
+        "odds": "+126",
+        "actual_score": "NYY 9 - CWS 5"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 1678.4,
+        "profit": -1678.4,
+        "odds": "-110",
+        "actual_score": "BOS 4 - Athletics 2"
+      }
+    ]
   }
 ]
