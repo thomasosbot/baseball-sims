@@ -6219,5 +6219,62 @@
         "actual_score": "BOS 3 - Athletics 4"
       }
     ]
+  },
+  {
+    "date": "2026-07-29",
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 2,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -920.74,
+    "bankroll": 28011.66,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1355.72,
+        "profit": 1965.79,
+        "odds": "+145",
+        "actual_score": "PHI 6 - MIA 8"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1060.26,
+        "profit": -1060.26,
+        "odds": "+100",
+        "actual_score": "TOR 5 - WSN 2"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1083.58,
+        "profit": -1083.58,
+        "odds": "+116",
+        "actual_score": "CLE 6 - CIN 1"
+      },
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1424.93,
+        "profit": 1040.09,
+        "odds": "-137",
+        "actual_score": "KCR 4 - MIN 0"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1782.78,
+        "profit": -1782.78,
+        "odds": "-116",
+        "actual_score": "CHC 2 - STL 3"
+      }
+    ]
   }
 ]
