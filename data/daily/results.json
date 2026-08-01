@@ -6315,5 +6315,53 @@
         "actual_score": "BOS 5 - Athletics 4"
       }
     ]
+  },
+  {
+    "date": "2026-07-31",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 2453.07,
+    "bankroll": 31380.61,
+    "picks": [
+      {
+        "pick": "BAL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1359.9,
+        "profit": 1192.89,
+        "odds": "-114",
+        "actual_score": "PHI 4 - BAL 6"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1061.27,
+        "profit": 1220.46,
+        "odds": "+115",
+        "actual_score": "ARI 4 - CLE 1"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2338.39,
+        "profit": -2338.39,
+        "odds": "-115",
+        "actual_score": "DET 13 - Athletics 1"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1505.13,
+        "profit": 2378.11,
+        "odds": "+158",
+        "actual_score": "MIN 5 - SEA 3"
+      }
+    ]
   }
 ]
