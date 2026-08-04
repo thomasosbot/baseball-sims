@@ -6540,5 +6540,26 @@
         "actual_score": "BOS 8 - LAD 4"
       }
     ]
+  },
+  {
+    "date": "2026-08-03",
+    "games_played": 8,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -1609.13,
+    "bankroll": 29306.95,
+    "picks": [
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1609.13,
+        "profit": -1609.13,
+        "odds": "-124",
+        "actual_score": "TOR 3 - HOU 1"
+      }
+    ]
   }
 ]
