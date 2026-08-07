@@ -6711,5 +6711,62 @@
         "actual_score": "DET 2 - SEA 4"
       }
     ]
+  },
+  {
+    "date": "2026-08-06",
+    "games_played": 11,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 2072.98,
+    "bankroll": 41330.56,
+    "picks": [
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3407.82,
+        "profit": 2963.32,
+        "odds": "-115",
+        "actual_score": "LAA 4 - BAL 1"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2521.65,
+        "profit": 1801.18,
+        "odds": "-140",
+        "actual_score": "Athletics 5 - CIN 6"
+      },
+      {
+        "pick": "CHC ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2635.46,
+        "profit": 2793.59,
+        "odds": "+106",
+        "actual_score": "TOR 2 - CHC 3"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3407.82,
+        "profit": -3407.82,
+        "odds": "+135",
+        "actual_score": "WSN 3 - PHI 7"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2077.29,
+        "profit": -2077.29,
+        "odds": "-105",
+        "actual_score": "SDP 5 - ARI 1"
+      }
+    ]
   }
 ]
