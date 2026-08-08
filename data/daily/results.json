@@ -6768,5 +6768,71 @@
         "actual_score": "SDP 5 - ARI 1"
       }
     ]
+  },
+  {
+    "date": "2026-08-07",
+    "games_played": 15,
+    "picks_count": 6,
+    "wins": 2,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": 818.03,
+    "bankroll": 42148.59,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2905.78,
+        "profit": 5608.16,
+        "odds": "+193",
+        "actual_score": "TOR 5 - PHI 4"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2409.71,
+        "profit": -2409.71,
+        "odds": "+110",
+        "actual_score": "CIN 3 - WSN 5"
+      },
+      {
+        "pick": "ATL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2385.74,
+        "profit": -2385.74,
+        "odds": "+137",
+        "actual_score": "ATL 2 - NYY 3"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2895.44,
+        "profit": -2895.44,
+        "odds": "+130",
+        "actual_score": "CLE 8 - CWS 2"
+      },
+      {
+        "pick": "BAL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1885.09,
+        "profit": -1885.09,
+        "odds": "+137",
+        "actual_score": "BAL 1 - TEX 2"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2954.23,
+        "profit": 4785.85,
+        "odds": "+162",
+        "actual_score": "LAD 3 - ARI 4"
+      }
+    ]
   }
 ]
