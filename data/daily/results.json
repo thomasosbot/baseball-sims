@@ -6834,5 +6834,62 @@
         "actual_score": "LAD 3 - ARI 4"
       }
     ]
+  },
+  {
+    "date": "2026-08-08",
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 3601.19,
+    "bankroll": 45749.78,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2525.71,
+        "profit": 3763.31,
+        "odds": "+149",
+        "actual_score": "TOR 7 - PHI 5"
+      },
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1903.48,
+        "profit": -1903.48,
+        "odds": "+125",
+        "actual_score": "NYM 0 - PIT 9"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2462.94,
+        "profit": 2955.53,
+        "odds": "+120",
+        "actual_score": "CLE 3 - CWS 6"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3146.9,
+        "profit": -3146.9,
+        "odds": "+162",
+        "actual_score": "LAD 2 - ARI 1"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 1840.7,
+        "profit": 1932.73,
+        "odds": "+105",
+        "actual_score": "TBR 3 - SEA 2"
+      }
+    ]
   }
 ]
