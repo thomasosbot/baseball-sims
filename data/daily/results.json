@@ -6966,5 +6966,44 @@
         "actual_score": "TBR 4 - SEA 1"
       }
     ]
+  },
+  {
+    "date": "2026-08-10",
+    "games_played": 8,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -5946.65,
+    "bankroll": 49757.52,
+    "picks": [
+      {
+        "pick": "TOR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3005.9,
+        "profit": 2504.92,
+        "odds": "-120",
+        "actual_score": "BOS 1 - TOR 2"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 5052.48,
+        "profit": -5052.48,
+        "odds": "-115",
+        "actual_score": "TBR 10 - Athletics 6"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3399.09,
+        "profit": -3399.09,
+        "odds": "-125",
+        "actual_score": "HOU 6 - SFG 3"
+      }
+    ]
   }
 ]
