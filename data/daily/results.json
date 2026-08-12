@@ -7026,13 +7026,13 @@
   },
   {
     "date": "2026-08-11",
-    "games_played": 14,
-    "picks_count": 8,
-    "wins": 5,
-    "losses": 3,
+    "games_played": 15,
+    "picks_count": 10,
+    "wins": 6,
+    "losses": 4,
     "pushes": 0,
-    "day_profit": 5588.74,
-    "bankroll": 56517.68,
+    "day_profit": 5970.82,
+    "bankroll": 56899.76,
     "picks": [
       {
         "pick": "DET ML",
@@ -7105,6 +7105,24 @@
         "profit": 4183.3,
         "odds": "-105",
         "actual_score": "HOU 1 - SFG 4"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2669.8,
+        "profit": -2669.8,
+        "odds": "+230",
+        "actual_score": "KCR 4 - LAD 5"
+      },
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 2906.55,
+        "profit": 3051.88,
+        "odds": "+105",
+        "actual_score": "KCR 4 - LAD 5"
       }
     ]
   }
