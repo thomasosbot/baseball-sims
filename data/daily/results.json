@@ -7023,5 +7023,89 @@
         "actual_score": "KCR 5 - LAD 6"
       }
     ]
+  },
+  {
+    "date": "2026-08-11",
+    "games_played": 14,
+    "picks_count": 8,
+    "wins": 5,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 5588.74,
+    "bankroll": 56517.68,
+    "picks": [
+      {
+        "pick": "DET ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3599.05,
+        "profit": 2999.21,
+        "odds": "-120",
+        "actual_score": "CLE 4 - DET 6"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2480.82,
+        "profit": 2629.67,
+        "odds": "+106",
+        "actual_score": "PIT 0 - MIA 2"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2444.33,
+        "profit": -2444.33,
+        "odds": "-115",
+        "actual_score": "CHC 8 - WSN 6"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2986.53,
+        "profit": 2370.26,
+        "odds": "-126",
+        "actual_score": "SEA 1 - NYY 4"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3088.09,
+        "profit": -3088.09,
+        "odds": "+137",
+        "actual_score": "BOS 3 - TOR 5"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 2273.09,
+        "profit": 3455.1,
+        "odds": "+152",
+        "actual_score": "PHI 0 - STL 2"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 4516.38,
+        "profit": -4516.38,
+        "odds": "-115",
+        "actual_score": "TBR 12 - Athletics 4"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 4392.47,
+        "profit": 4183.3,
+        "odds": "-105",
+        "actual_score": "HOU 1 - SFG 4"
+      }
+    ]
   }
 ]
