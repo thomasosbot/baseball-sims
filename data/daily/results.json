@@ -7125,5 +7125,53 @@
         "actual_score": "KCR 4 - LAD 5"
       }
     ]
+  },
+  {
+    "date": "2026-08-12",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 8602.31,
+    "bankroll": 65502.07,
+    "picks": [
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3341.77,
+        "profit": 4912.4,
+        "odds": "+147",
+        "actual_score": "PHI 1 - STL 7"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3389.42,
+        "profit": 3558.89,
+        "odds": "+105",
+        "actual_score": "MIL 3 - SDP 4"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 2859.34,
+        "profit": -2859.34,
+        "odds": "-115",
+        "actual_score": "CHC 12 - WSN 6"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3708.05,
+        "profit": 2990.36,
+        "odds": "-124",
+        "actual_score": "SEA 5 - NYY 10"
+      }
+    ]
   }
 ]
