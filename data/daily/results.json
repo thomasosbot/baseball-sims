@@ -7176,13 +7176,13 @@
   },
   {
     "date": "2026-08-13",
-    "games_played": 7,
-    "picks_count": 3,
-    "wins": 0,
+    "games_played": 9,
+    "picks_count": 4,
+    "wins": 1,
     "losses": 3,
     "pushes": 0,
-    "day_profit": -12742.13,
-    "bankroll": 52759.94,
+    "day_profit": -8004.14,
+    "bankroll": 57497.93,
     "picks": [
       {
         "pick": "MIA ML",
@@ -7210,6 +7210,15 @@
         "profit": -3745.15,
         "odds": "+143",
         "actual_score": "BOS 7 - TOR 0"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3313.28,
+        "profit": 4737.99,
+        "odds": "+143",
+        "actual_score": "TEX 0 - LAA 7"
       }
     ]
   }
