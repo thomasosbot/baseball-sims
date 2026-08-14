@@ -7173,5 +7173,44 @@
         "actual_score": "SEA 5 - NYY 10"
       }
     ]
+  },
+  {
+    "date": "2026-08-13",
+    "games_played": 7,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -12742.13,
+    "bankroll": 52759.94,
+    "picks": [
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4374.47,
+        "profit": -4374.47,
+        "odds": "+110",
+        "actual_score": "PIT 13 - MIA 1"
+      },
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4622.51,
+        "profit": -4622.51,
+        "odds": "-135",
+        "actual_score": "SEA 1 - NYY 0"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3745.15,
+        "profit": -3745.15,
+        "odds": "+143",
+        "actual_score": "BOS 7 - TOR 0"
+      }
+    ]
   }
 ]
