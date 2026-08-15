@@ -7221,5 +7221,35 @@
         "actual_score": "TEX 0 - LAA 7"
       }
     ]
+  },
+  {
+    "date": "2026-08-14",
+    "games_played": 14,
+    "picks_count": 2,
+    "wins": 2,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 9421.31,
+    "bankroll": 66919.24,
+    "picks": [
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 4112.81,
+        "profit": 4894.24,
+        "odds": "+119",
+        "actual_score": "SDP 7 - CLE 5"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3304.43,
+        "profit": 4527.07,
+        "odds": "+137",
+        "actual_score": "NYY 1 - TOR 3"
+      }
+    ]
   }
 ]
