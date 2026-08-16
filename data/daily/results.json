@@ -7251,5 +7251,53 @@
         "actual_score": "NYY 1 - TOR 3"
       }
     ]
+  },
+  {
+    "date": "2026-08-15",
+    "games_played": 15,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -5760.74,
+    "bankroll": 61158.5,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 4752.8,
+        "profit": 7509.42,
+        "odds": "+158",
+        "actual_score": "NYY 1 - TOR 4"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4964.58,
+        "profit": -4964.58,
+        "odds": "+111",
+        "actual_score": "SDP 1 - CLE 6"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4000.56,
+        "profit": -4000.56,
+        "odds": "-116",
+        "actual_score": "SEA 10 - HOU 5"
+      },
+      {
+        "pick": "MIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 4305.02,
+        "profit": -4305.02,
+        "odds": "+143",
+        "actual_score": "PHI 9 - MIN 1"
+      }
+    ]
   }
 ]
