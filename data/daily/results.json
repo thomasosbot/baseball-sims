@@ -7299,5 +7299,35 @@
         "actual_score": "PHI 9 - MIN 1"
       }
     ]
+  },
+  {
+    "date": "2026-08-16",
+    "games_played": 15,
+    "picks_count": 2,
+    "wins": 2,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 4986.25,
+    "bankroll": 66144.75,
+    "picks": [
+      {
+        "pick": "BAL +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3707.58,
+        "profit": 2180.93,
+        "odds": "-170",
+        "actual_score": "BAL 10 - TBR 2"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 3029.75,
+        "profit": 2805.32,
+        "odds": "-108",
+        "actual_score": "SDP 5 - CLE 0"
+      }
+    ]
   }
 ]
