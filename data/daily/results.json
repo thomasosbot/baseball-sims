@@ -7329,5 +7329,62 @@
         "actual_score": "SDP 5 - CLE 0"
       }
     ]
+  },
+  {
+    "date": "2026-08-17",
+    "games_played": 11,
+    "picks_count": 5,
+    "wins": 1,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -13325.64,
+    "bankroll": 52819.11,
+    "picks": [
+      {
+        "pick": "BAL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2824.61,
+        "profit": -2824.61,
+        "odds": "+147",
+        "actual_score": "BAL 6 - TBR 7"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 5105.14,
+        "profit": -5105.14,
+        "odds": "+227",
+        "actual_score": "MIA 5 - PHI 6"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3915.33,
+        "profit": 3915.33,
+        "odds": "+100",
+        "actual_score": "MIA 5 - PHI 6"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3529.26,
+        "profit": -3529.26,
+        "odds": "+173",
+        "actual_score": "Athletics 5 - KCR 9"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 5781.96,
+        "profit": -5781.96,
+        "odds": "-120",
+        "actual_score": "Athletics 5 - KCR 9"
+      }
+    ]
   }
 ]
