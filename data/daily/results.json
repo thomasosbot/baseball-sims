@@ -7386,5 +7386,89 @@
         "actual_score": "Athletics 5 - KCR 9"
       }
     ]
+  },
+  {
+    "date": "2026-08-18",
+    "games_played": 15,
+    "picks_count": 8,
+    "wins": 1,
+    "losses": 7,
+    "pushes": 0,
+    "day_profit": -18609.91,
+    "bankroll": 34209.2,
+    "picks": [
+      {
+        "pick": "DET ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2291.09,
+        "profit": -2291.09,
+        "odds": "+131",
+        "actual_score": "DET 1 - PIT 4"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2544.68,
+        "profit": -2544.68,
+        "odds": "+175",
+        "actual_score": "SFG 1 - CLE 8"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3534.99,
+        "profit": -3534.99,
+        "odds": "-135",
+        "actual_score": "SFG 1 - CLE 8"
+      },
+      {
+        "pick": "MIA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 3307.88,
+        "profit": -3307.88,
+        "odds": "+212",
+        "actual_score": "MIA 4 - PHI 6"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 4008.97,
+        "profit": -4008.97,
+        "odds": "-105",
+        "actual_score": "MIA 4 - PHI 6"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3210.69,
+        "profit": -3210.69,
+        "odds": "-140",
+        "actual_score": "ARI 4 - BOS 9"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3897.78,
+        "profit": 2784.13,
+        "odds": "-140",
+        "actual_score": "LAA 3 - HOU 1"
+      },
+      {
+        "pick": "COL ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2495.74,
+        "profit": -2495.74,
+        "odds": "+173",
+        "actual_score": "LAD 7 - COL 6"
+      }
+    ]
   }
 ]
