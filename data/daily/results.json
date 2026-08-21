@@ -7536,5 +7536,53 @@
         "actual_score": "LAA 2 - HOU 3"
       }
     ]
+  },
+  {
+    "date": "2026-08-20",
+    "games_played": 9,
+    "picks_count": 4,
+    "wins": 1,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -4405.84,
+    "bankroll": 34806.25,
+    "picks": [
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2269.53,
+        "profit": -2269.53,
+        "odds": "+176",
+        "actual_score": "SFG 2 - CLE 5"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 3043.82,
+        "profit": -3043.82,
+        "odds": "-130",
+        "actual_score": "SFG 2 - CLE 5"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1468.41,
+        "profit": -1468.41,
+        "odds": "+152",
+        "actual_score": "WSN 0 - TEX 2"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 3088.69,
+        "profit": 2375.92,
+        "odds": "-130",
+        "actual_score": "LAA 18 - HOU 3"
+      }
+    ]
   }
 ]
