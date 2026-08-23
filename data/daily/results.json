@@ -7650,5 +7650,62 @@
         "actual_score": "PIT 4 - LAD 5"
       }
     ]
+  },
+  {
+    "date": "2026-08-22",
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 2004.53,
+    "bankroll": 29310.77,
+    "picks": [
+      {
+        "pick": "NYY ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1136.21,
+        "profit": -1136.21,
+        "odds": "-104",
+        "actual_score": "TOR 4 - NYY 3"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1886.66,
+        "profit": 1746.91,
+        "odds": "-108",
+        "actual_score": "Athletics 4 - HOU 3"
+      },
+      {
+        "pick": "PIT ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1338.81,
+        "profit": -1338.81,
+        "odds": "+233",
+        "actual_score": "PIT 3 - LAD 4"
+      },
+      {
+        "pick": "PIT +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1373.37,
+        "profit": 1346.44,
+        "odds": "-102",
+        "actual_score": "PIT 3 - LAD 4"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 1718.89,
+        "profit": 1386.2,
+        "odds": "-124",
+        "actual_score": "SFG 2 - BOS 3"
+      }
+    ]
   }
 ]
