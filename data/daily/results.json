@@ -7767,13 +7767,13 @@
   },
   {
     "date": "2026-08-24",
-    "games_played": 9,
-    "picks_count": 4,
+    "games_played": 10,
+    "picks_count": 5,
     "wins": 0,
-    "losses": 4,
+    "losses": 5,
     "pushes": 0,
-    "day_profit": -5664.57,
-    "bankroll": 23330.93,
+    "day_profit": -7720.15,
+    "bankroll": 21275.35,
     "picks": [
       {
         "pick": "COL ML",
@@ -7801,6 +7801,15 @@
         "profit": -941.62,
         "odds": "+150",
         "actual_score": "CLE 4 - LAA 2"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 2055.58,
+        "profit": -2055.58,
+        "odds": "-105",
+        "actual_score": "PIT 3 - SDP 2"
       },
       {
         "pick": "Athletics +1.5",
