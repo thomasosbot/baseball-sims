@@ -7917,5 +7917,44 @@
         "actual_score": "HOU 3 - NYY 9"
       }
     ]
+  },
+  {
+    "date": "2026-08-27",
+    "games_played": 7,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -3030.14,
+    "bankroll": 18950.87,
+    "picks": [
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 1124.59,
+        "profit": -1124.59,
+        "odds": "+200",
+        "actual_score": "MIL 8 - NYM 2"
+      },
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 971.64,
+        "profit": -971.64,
+        "odds": "+104",
+        "actual_score": "MIL 8 - NYM 2"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 933.91,
+        "profit": -933.91,
+        "odds": "-110",
+        "actual_score": "ARI 1 - SFG 6"
+      }
+    ]
   }
 ]
