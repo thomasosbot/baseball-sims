@@ -8031,5 +8031,44 @@
         "actual_score": "BAL 4 - Athletics 3"
       }
     ]
+  },
+  {
+    "date": "2026-08-29",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -671.23,
+    "bankroll": 15679.39,
+    "picks": [
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 544.49,
+        "profit": 588.05,
+        "odds": "+108",
+        "actual_score": "CWS 3 - MIN 2"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 738.93,
+        "profit": -738.93,
+        "odds": "-125",
+        "actual_score": "CIN 5 - CHC 17"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 520.35,
+        "profit": -520.35,
+        "odds": "-127",
+        "actual_score": "BAL 5 - Athletics 3"
+      }
+    ]
   }
 ]
