@@ -8070,5 +8070,71 @@
         "actual_score": "BAL 5 - Athletics 3"
       }
     ]
+  },
+  {
+    "date": "2026-08-30",
+    "games_played": 14,
+    "picks_count": 6,
+    "wins": 2,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -1030.91,
+    "bankroll": 14648.48,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 666.85,
+        "profit": 833.56,
+        "odds": "+125",
+        "actual_score": "SEA 0 - TOR 7"
+      },
+      {
+        "pick": "SDP ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 497.45,
+        "profit": -497.45,
+        "odds": "+152",
+        "actual_score": "SDP 4 - TBR 5"
+      },
+      {
+        "pick": "SDP +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 826.75,
+        "profit": 551.17,
+        "odds": "-150",
+        "actual_score": "SDP 4 - TBR 5"
+      },
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 661.9,
+        "profit": -661.9,
+        "odds": "+110",
+        "actual_score": "CWS 1 - MIN 5"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 522.39,
+        "profit": -522.39,
+        "odds": "-124",
+        "actual_score": "BAL 8 - Athletics 5"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 733.9,
+        "profit": -733.9,
+        "odds": "-105",
+        "actual_score": "PHI 5 - LAA 2"
+      }
+    ]
   }
 ]
