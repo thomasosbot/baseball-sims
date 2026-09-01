@@ -8136,5 +8136,35 @@
         "actual_score": "PHI 5 - LAA 2"
       }
     ]
+  },
+  {
+    "date": "2026-08-31",
+    "games_played": 11,
+    "picks_count": 2,
+    "wins": 1,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -95.27,
+    "bankroll": 14553.21,
+    "picks": [
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 721.97,
+        "profit": 515.69,
+        "odds": "-140",
+        "actual_score": "NYM 3 - TBR 2"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 610.96,
+        "profit": -610.96,
+        "odds": "-115",
+        "actual_score": "Athletics 1 - TEX 8"
+      }
+    ]
   }
 ]
