@@ -8166,5 +8166,44 @@
         "actual_score": "Athletics 1 - TEX 8"
       }
     ]
+  },
+  {
+    "date": "2026-09-01",
+    "games_played": 14,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -1552.2,
+    "bankroll": 13001.01,
+    "picks": [
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 522.34,
+        "profit": -522.34,
+        "odds": "+163",
+        "actual_score": "TOR 1 - CLE 6"
+      },
+      {
+        "pick": "BOS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 523.2,
+        "profit": -523.2,
+        "odds": "-119",
+        "actual_score": "SEA 9 - BOS 6"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 506.66,
+        "profit": -506.66,
+        "odds": "-114",
+        "actual_score": "MIA 6 - KCR 3"
+      }
+    ]
   }
 ]
