@@ -8205,5 +8205,53 @@
         "actual_score": "MIA 6 - KCR 3"
       }
     ]
+  },
+  {
+    "date": "2026-09-02",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": 747.44,
+    "bankroll": 13748.45,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 330.16,
+        "profit": 462.22,
+        "odds": "+140",
+        "actual_score": "SDP 3 - CIN 7"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 356.4,
+        "profit": 285.12,
+        "odds": "-125",
+        "actual_score": "SDP 3 - CIN 7"
+      },
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 468.06,
+        "profit": 312.04,
+        "odds": "-150",
+        "actual_score": "NYM 10 - TBR 4"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 311.94,
+        "profit": -311.94,
+        "odds": "-105",
+        "actual_score": "MIA 9 - KCR 6"
+      }
+    ]
   }
 ]
