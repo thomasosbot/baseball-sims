@@ -8208,13 +8208,13 @@
   },
   {
     "date": "2026-09-02",
-    "games_played": 14,
-    "picks_count": 4,
-    "wins": 3,
+    "games_played": 15,
+    "picks_count": 5,
+    "wins": 4,
     "losses": 1,
     "pushes": 0,
-    "day_profit": 747.44,
-    "bankroll": 13748.45,
+    "day_profit": 1388.74,
+    "bankroll": 14389.75,
     "picks": [
       {
         "pick": "CIN ML",
@@ -8251,6 +8251,15 @@
         "profit": -311.94,
         "odds": "-105",
         "actual_score": "MIA 9 - KCR 6"
+      },
+      {
+        "pick": "STL ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 298.28,
+        "profit": 641.3,
+        "odds": "+215",
+        "actual_score": "STL 8 - LAD 6"
       }
     ]
   }
