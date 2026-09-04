@@ -8262,5 +8262,26 @@
         "actual_score": "STL 8 - LAD 6"
       }
     ]
+  },
+  {
+    "date": "2026-09-03",
+    "games_played": 7,
+    "picks_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "pushes": 0,
+    "day_profit": -331.94,
+    "bankroll": 14057.81,
+    "picks": [
+      {
+        "pick": "CWS ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 331.94,
+        "profit": -331.94,
+        "odds": "+143",
+        "actual_score": "CWS 2 - HOU 6"
+      }
+    ]
   }
 ]
