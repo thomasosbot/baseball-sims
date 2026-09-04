@@ -8265,13 +8265,13 @@
   },
   {
     "date": "2026-09-03",
-    "games_played": 7,
-    "picks_count": 1,
-    "wins": 0,
+    "games_played": 9,
+    "picks_count": 2,
+    "wins": 1,
     "losses": 1,
     "pushes": 0,
-    "day_profit": -331.94,
-    "bankroll": 14057.81,
+    "day_profit": 60.66,
+    "bankroll": 14450.41,
     "picks": [
       {
         "pick": "CWS ML",
@@ -8281,6 +8281,15 @@
         "profit": -331.94,
         "odds": "+143",
         "actual_score": "CWS 2 - HOU 6"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 490.75,
+        "profit": 392.6,
+        "odds": "-125",
+        "actual_score": "Athletics 7 - SEA 4"
       }
     ]
   }
