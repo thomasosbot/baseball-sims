@@ -8292,5 +8292,44 @@
         "actual_score": "Athletics 7 - SEA 4"
       }
     ]
+  },
+  {
+    "date": "2026-09-04",
+    "games_played": 15,
+    "picks_count": 3,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -738.88,
+    "bankroll": 13711.53,
+    "picks": [
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 497.2,
+        "profit": 382.46,
+        "odds": "-130",
+        "actual_score": "LAA 0 - PIT 1"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 469.18,
+        "profit": -469.18,
+        "odds": "+270",
+        "actual_score": "WSN 3 - LAD 5"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 652.16,
+        "profit": -652.16,
+        "odds": "+120",
+        "actual_score": "WSN 3 - LAD 5"
+      }
+    ]
   }
 ]
