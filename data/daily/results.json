@@ -8295,13 +8295,13 @@
   },
   {
     "date": "2026-09-04",
-    "games_played": 15,
-    "picks_count": 3,
-    "wins": 1,
+    "games_played": 16,
+    "picks_count": 4,
+    "wins": 2,
     "losses": 2,
     "pushes": 0,
-    "day_profit": -738.88,
-    "bankroll": 13711.53,
+    "day_profit": -209.63,
+    "bankroll": 14240.78,
     "picks": [
       {
         "pick": "LAA +1.5",
@@ -8329,6 +8329,15 @@
         "profit": -652.16,
         "odds": "+120",
         "actual_score": "WSN 3 - LAD 5"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 624.51,
+        "profit": 529.25,
+        "odds": "-118",
+        "actual_score": "Athletics 7 - SEA 6"
       }
     ]
   }
