@@ -8388,5 +8388,53 @@
         "actual_score": "Athletics 6 - SEA 2"
       }
     ]
+  },
+  {
+    "date": "2026-09-06",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -422.06,
+    "bankroll": 14290.39,
+    "picks": [
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 447.42,
+        "profit": 331.42,
+        "odds": "-135",
+        "actual_score": "LAA 0 - PIT 1"
+      },
+      {
+        "pick": "DET +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 429.2,
+        "profit": 276.9,
+        "odds": "-155",
+        "actual_score": "DET 2 - CLE 3"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 378.48,
+        "profit": -378.48,
+        "odds": "+175",
+        "actual_score": "Athletics 0 - SEA 2"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 651.9,
+        "profit": -651.9,
+        "odds": "-125",
+        "actual_score": "Athletics 0 - SEA 2"
+      }
+    ]
   }
 ]
