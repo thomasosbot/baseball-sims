@@ -8439,13 +8439,13 @@
   },
   {
     "date": "2026-09-07",
-    "games_played": 10,
-    "picks_count": 1,
-    "wins": 1,
+    "games_played": 11,
+    "picks_count": 2,
+    "wins": 2,
     "losses": 0,
     "pushes": 0,
-    "day_profit": 344.1,
-    "bankroll": 14634.49,
+    "day_profit": 926.81,
+    "bankroll": 15217.2,
     "picks": [
       {
         "pick": "WSN +1.5",
@@ -8455,6 +8455,15 @@
         "profit": 344.1,
         "odds": "-125",
         "actual_score": "WSN 2 - SDP 3"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 576.94,
+        "profit": 582.71,
+        "odds": "+101",
+        "actual_score": "TOR 5 - Athletics 6"
       }
     ]
   }
