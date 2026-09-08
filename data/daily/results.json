@@ -8436,5 +8436,26 @@
         "actual_score": "Athletics 0 - SEA 2"
       }
     ]
+  },
+  {
+    "date": "2026-09-07",
+    "games_played": 10,
+    "picks_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 344.1,
+    "bankroll": 14634.49,
+    "picks": [
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 430.12,
+        "profit": 344.1,
+        "odds": "-125",
+        "actual_score": "WSN 2 - SDP 3"
+      }
+    ]
   }
 ]
