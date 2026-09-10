@@ -8532,5 +8532,80 @@
         "actual_score": "CIN 2 - LAD 3"
       }
     ]
+  },
+  {
+    "date": "2026-09-09",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 4,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 583.88,
+    "bankroll": 14612.96,
+    "picks": [
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 490.27,
+        "profit": 480.66,
+        "odds": "-102",
+        "actual_score": "TOR 0 - Athletics 2"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 250.3,
+        "profit": -250.3,
+        "odds": "+132",
+        "actual_score": "TEX 2 - SEA 3"
+      },
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 304.11,
+        "profit": 322.36,
+        "odds": "+106",
+        "actual_score": "NYM 15 - MIA 14"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 430.34,
+        "profit": 391.22,
+        "odds": "-110",
+        "actual_score": "LAA 6 - BOS 4"
+      },
+      {
+        "pick": "PIT ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 262.59,
+        "profit": 341.37,
+        "odds": "+130",
+        "actual_score": "PIT 4 - CWS 2"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 291.46,
+        "profit": -291.46,
+        "odds": "+240",
+        "actual_score": "CIN 1 - LAD 14"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 409.97,
+        "profit": -409.97,
+        "odds": "+112",
+        "actual_score": "CIN 1 - LAD 14"
+      }
+    ]
   }
 ]
