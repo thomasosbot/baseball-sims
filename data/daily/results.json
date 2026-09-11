@@ -8607,5 +8607,16 @@
         "actual_score": "CIN 1 - LAD 14"
       }
     ]
+  },
+  {
+    "date": "2026-09-10",
+    "games_played": 5,
+    "picks_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "day_profit": 0,
+    "bankroll": 14612.96,
+    "picks": []
   }
 ]
