@@ -8618,5 +8618,116 @@
     "day_profit": 0,
     "bankroll": 14612.96,
     "picks": []
+  },
+  {
+    "date": "2026-09-11",
+    "games_played": 14,
+    "picks_count": 11,
+    "wins": 4,
+    "losses": 7,
+    "pushes": 0,
+    "day_profit": -753.74,
+    "bankroll": 13859.22,
+    "picks": [
+      {
+        "pick": "PIT ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 416.57,
+        "profit": -416.57,
+        "odds": "+168",
+        "actual_score": "PIT 2 - CHC 12"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 348.3,
+        "profit": -348.3,
+        "odds": "+132",
+        "actual_score": "LAA 3 - WSN 4"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 341.19,
+        "profit": -341.19,
+        "odds": "-125",
+        "actual_score": "BAL 7 - TOR 4"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 348.96,
+        "profit": 593.23,
+        "odds": "+170",
+        "actual_score": "KCR 3 - BOS 2"
+      },
+      {
+        "pick": "KCR +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 448.88,
+        "profit": 359.1,
+        "odds": "-125",
+        "actual_score": "KCR 3 - BOS 2"
+      },
+      {
+        "pick": "HOU ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 237.3,
+        "profit": -237.3,
+        "odds": "+146",
+        "actual_score": "HOU 1 - TBR 3"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 343.21,
+        "profit": -343.21,
+        "odds": "+100",
+        "actual_score": "LAD 6 - MIA 2"
+      },
+      {
+        "pick": "PHI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 420.16,
+        "profit": -420.16,
+        "odds": "+160",
+        "actual_score": "PHI 5 - ATL 6"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 481.17,
+        "profit": -481.17,
+        "odds": "-140",
+        "actual_score": "CIN 0 - MIL 20"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 327.65,
+        "profit": 465.26,
+        "odds": "+142",
+        "actual_score": "SEA 5 - Athletics 6"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 470.72,
+        "profit": 416.57,
+        "odds": "-113",
+        "actual_score": "SEA 5 - Athletics 6"
+      }
+    ]
   }
 ]
