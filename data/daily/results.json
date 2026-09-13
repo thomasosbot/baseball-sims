@@ -8729,5 +8729,80 @@
         "actual_score": "SEA 5 - Athletics 6"
       }
     ]
+  },
+  {
+    "date": "2026-09-12",
+    "games_played": 15,
+    "picks_count": 7,
+    "wins": 4,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 325.3,
+    "bankroll": 14184.52,
+    "picks": [
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 252.89,
+        "profit": 399.57,
+        "odds": "+158",
+        "actual_score": "NYM 12 - NYY 2"
+      },
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 479.01,
+        "profit": 357.47,
+        "odds": "-134",
+        "actual_score": "NYM 12 - NYY 2"
+      },
+      {
+        "pick": "TOR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 261.78,
+        "profit": 237.98,
+        "odds": "-110",
+        "actual_score": "BAL 3 - TOR 7"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 391.43,
+        "profit": 362.44,
+        "odds": "-108",
+        "actual_score": "LAD 3 - MIA 4"
+      },
+      {
+        "pick": "ARI ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 332.5,
+        "profit": -332.5,
+        "odds": "-140",
+        "actual_score": "TEX 6 - ARI 2"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 327.9,
+        "profit": -327.9,
+        "odds": "+150",
+        "actual_score": "SEA 19 - Athletics 1"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 371.76,
+        "profit": -371.76,
+        "odds": "-104",
+        "actual_score": "SEA 19 - Athletics 1"
+      }
+    ]
   }
 ]
