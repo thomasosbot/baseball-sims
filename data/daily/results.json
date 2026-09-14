@@ -8804,5 +8804,35 @@
         "actual_score": "SEA 19 - Athletics 1"
       }
     ]
+  },
+  {
+    "date": "2026-09-13",
+    "games_played": 15,
+    "picks_count": 2,
+    "wins": 0,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": -708.28,
+    "bankroll": 13476.24,
+    "picks": [
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 350.63,
+        "profit": -350.63,
+        "odds": "+158",
+        "actual_score": "NYM 0 - NYY 2"
+      },
+      {
+        "pick": "NYM +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 357.65,
+        "profit": -357.65,
+        "odds": "-140",
+        "actual_score": "NYM 0 - NYY 2"
+      }
+    ]
   }
 ]
