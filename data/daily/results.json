@@ -8834,5 +8834,44 @@
         "actual_score": "NYM 0 - NYY 2"
       }
     ]
+  },
+  {
+    "date": "2026-09-14",
+    "games_played": 10,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -1295.88,
+    "bankroll": 12180.36,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 448.51,
+        "profit": -448.51,
+        "odds": "+192",
+        "actual_score": "LAD 4 - CIN 1"
+      },
+      {
+        "pick": "CIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 499.14,
+        "profit": -499.14,
+        "odds": "+114",
+        "actual_score": "LAD 4 - CIN 1"
+      },
+      {
+        "pick": "NYM ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 348.23,
+        "profit": -348.23,
+        "odds": "-120",
+        "actual_score": "BAL 2 - NYM 1"
+      }
+    ]
   }
 ]
