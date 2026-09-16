@@ -8873,5 +8873,89 @@
         "actual_score": "BAL 2 - NYM 1"
       }
     ]
+  },
+  {
+    "date": "2026-09-15",
+    "games_played": 14,
+    "picks_count": 8,
+    "wins": 5,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": 917.54,
+    "bankroll": 13097.9,
+    "picks": [
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 285.09,
+        "profit": -285.09,
+        "odds": "+205",
+        "actual_score": "LAD 4 - CIN 0"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 361.96,
+        "profit": 317.51,
+        "odds": "-114",
+        "actual_score": "Athletics 1 - TBR 2"
+      },
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 197.52,
+        "profit": 359.49,
+        "odds": "+182",
+        "actual_score": "PHI 3 - WSN 6"
+      },
+      {
+        "pick": "WSN +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 369.56,
+        "profit": 388.04,
+        "odds": "+105",
+        "actual_score": "PHI 3 - WSN 6"
+      },
+      {
+        "pick": "MIN +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 272.21,
+        "profit": -272.21,
+        "odds": "-111",
+        "actual_score": "NYY 8 - MIN 1"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 175.99,
+        "profit": -175.99,
+        "odds": "+140",
+        "actual_score": "KCR 2 - HOU 4"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 214.89,
+        "profit": 318.04,
+        "odds": "+148",
+        "actual_score": "SEA 1 - LAA 2"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 294.53,
+        "profit": 267.75,
+        "odds": "-110",
+        "actual_score": "SEA 1 - LAA 2"
+      }
+    ]
   }
 ]
