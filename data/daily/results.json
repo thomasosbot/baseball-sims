@@ -9023,5 +9023,44 @@
         "actual_score": "KCR 5 - HOU 2"
       }
     ]
+  },
+  {
+    "date": "2026-09-17",
+    "games_played": 9,
+    "picks_count": 3,
+    "wins": 0,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -723.47,
+    "bankroll": 12991.42,
+    "picks": [
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 209.31,
+        "profit": -209.31,
+        "odds": "+230",
+        "actual_score": "Athletics 1 - TBR 10"
+      },
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 229.49,
+        "profit": -229.49,
+        "odds": "+130",
+        "actual_score": "KCR 2 - HOU 6"
+      },
+      {
+        "pick": "TEX ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 284.67,
+        "profit": -284.67,
+        "odds": "+120",
+        "actual_score": "BOS 4 - TEX 3"
+      }
+    ]
   }
 ]
