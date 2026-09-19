@@ -9062,5 +9062,53 @@
         "actual_score": "BOS 4 - TEX 3"
       }
     ]
+  },
+  {
+    "date": "2026-09-18",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 0,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -1282.69,
+    "bankroll": 11708.73,
+    "picks": [
+      {
+        "pick": "KCR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 170.7,
+        "profit": -170.7,
+        "odds": "+160",
+        "actual_score": "KCR 5 - PIT 8"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 415.95,
+        "profit": -415.95,
+        "odds": "-130",
+        "actual_score": "Athletics 3 - CLE 5"
+      },
+      {
+        "pick": "MIA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 399.22,
+        "profit": -399.22,
+        "odds": "-132",
+        "actual_score": "MIA 2 - SDP 8"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 296.82,
+        "profit": -296.82,
+        "odds": "-154",
+        "actual_score": "NYY 9 - ARI 2"
+      }
+    ]
   }
 ]
