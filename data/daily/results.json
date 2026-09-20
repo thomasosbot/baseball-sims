@@ -9128,5 +9128,62 @@
         "actual_score": "SFG 2 - LAD 8"
       }
     ]
+  },
+  {
+    "date": "2026-09-19",
+    "games_played": 14,
+    "picks_count": 5,
+    "wins": 2,
+    "losses": 3,
+    "pushes": 0,
+    "day_profit": -385.28,
+    "bankroll": 10603.11,
+    "picks": [
+      {
+        "pick": "DET ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 146.53,
+        "profit": -146.53,
+        "odds": "+126",
+        "actual_score": "DET 1 - CWS 3"
+      },
+      {
+        "pick": "BOS +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 242.47,
+        "profit": 131.06,
+        "odds": "-185",
+        "actual_score": "BOS 1 - TBR 2"
+      },
+      {
+        "pick": "ARI +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 222.77,
+        "profit": 155.78,
+        "odds": "-143",
+        "actual_score": "NYY 3 - ARI 5"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 239.21,
+        "profit": -239.21,
+        "odds": "+320",
+        "actual_score": "SFG 4 - LAD 10"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 286.38,
+        "profit": -286.38,
+        "odds": "+136",
+        "actual_score": "SFG 4 - LAD 10"
+      }
+    ]
   }
 ]
