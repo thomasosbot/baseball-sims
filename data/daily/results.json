@@ -9300,5 +9300,53 @@
     "day_profit": 0,
     "bankroll": 10428.81,
     "picks": []
+  },
+  {
+    "date": "2026-09-23",
+    "games_played": 14,
+    "picks_count": 4,
+    "wins": 2,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 148.81,
+    "bankroll": 10577.62,
+    "picks": [
+      {
+        "pick": "WSN ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 140.69,
+        "profit": 216.66,
+        "odds": "+154",
+        "actual_score": "WSN 4 - DET 2"
+      },
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 125.37,
+        "profit": -125.37,
+        "odds": "+133",
+        "actual_score": "TBR 2 - NYY 9"
+      },
+      {
+        "pick": "CIN ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 93.83,
+        "profit": -93.83,
+        "odds": "+220",
+        "actual_score": "CIN 2 - ATL 3"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 130.47,
+        "profit": 151.35,
+        "odds": "+116",
+        "actual_score": "LAA 3 - Athletics 7"
+      }
+    ]
   }
 ]
