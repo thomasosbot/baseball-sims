@@ -9450,5 +9450,62 @@
         "actual_score": "LAA 6 - SEA 4"
       }
     ]
+  },
+  {
+    "date": "2026-09-25",
+    "games_played": 17,
+    "picks_count": 5,
+    "wins": 3,
+    "losses": 2,
+    "pushes": 0,
+    "day_profit": 210.91,
+    "bankroll": 10985.28,
+    "picks": [
+      {
+        "pick": "TBR ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 144.3,
+        "profit": 209.24,
+        "odds": "+145",
+        "actual_score": "TBR 2 - PHI 0"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": true,
+        "wager": 143.85,
+        "profit": 214.34,
+        "odds": "+149",
+        "actual_score": "HOU 5 - Athletics 6"
+      },
+      {
+        "pick": "Athletics +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 250.94,
+        "profit": 228.13,
+        "odds": "-110",
+        "actual_score": "HOU 5 - Athletics 6"
+      },
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 189.86,
+        "profit": -189.86,
+        "odds": "+305",
+        "actual_score": "LAD 2 - SFG 0"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 250.94,
+        "profit": -250.94,
+        "odds": "+164",
+        "actual_score": "LAD 2 - SFG 0"
+      }
+    ]
   }
 ]
