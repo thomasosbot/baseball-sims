@@ -9507,5 +9507,62 @@
         "actual_score": "LAD 2 - SFG 0"
       }
     ]
+  },
+  {
+    "date": "2026-09-26",
+    "games_played": 13,
+    "picks_count": 5,
+    "wins": 1,
+    "losses": 4,
+    "pushes": 0,
+    "day_profit": -247.16,
+    "bankroll": 10738.12,
+    "picks": [
+      {
+        "pick": "SFG ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 150.25,
+        "profit": -150.25,
+        "odds": "+270",
+        "actual_score": "LAD 4 - SFG 3"
+      },
+      {
+        "pick": "SFG +1.5",
+        "type": "run_line",
+        "won": true,
+        "wager": 272.04,
+        "profit": 408.06,
+        "odds": "+150",
+        "actual_score": "LAD 4 - SFG 3"
+      },
+      {
+        "pick": "Athletics ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 129.34,
+        "profit": -129.34,
+        "odds": "+135",
+        "actual_score": "HOU 13 - Athletics 2"
+      },
+      {
+        "pick": "LAA ML",
+        "type": "moneyline",
+        "won": false,
+        "wager": 185.96,
+        "profit": -185.96,
+        "odds": "+166",
+        "actual_score": "LAA 4 - SEA 8"
+      },
+      {
+        "pick": "LAA +1.5",
+        "type": "run_line",
+        "won": false,
+        "wager": 189.67,
+        "profit": -189.67,
+        "odds": "-135",
+        "actual_score": "LAA 4 - SEA 8"
+      }
+    ]
   }
 ]
